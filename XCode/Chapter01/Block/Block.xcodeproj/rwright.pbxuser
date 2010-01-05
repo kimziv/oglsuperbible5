@@ -57,17 +57,26 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 283842749;
-			PBXWorkspaceStateSaveDate = 283842749;
+			PBXPerProjectTemplateStateSaveDate = 284363103;
+			PBXWorkspaceStateSaveDate = 284363103;
 		};
 		perUserProjectItems = {
-			39844FD810EB16DA00959F93 /* PBXTextBookmark */ = 39844FD810EB16DA00959F93 /* PBXTextBookmark */;
-			3984501F10EB194200959F93 /* PBXTextBookmark */ = 3984501F10EB194200959F93 /* PBXTextBookmark */;
+			3970E15510F309CB00CD948A /* PBXTextBookmark */ = 3970E15510F309CB00CD948A /* PBXTextBookmark */;
 			3984502010EB194200959F93 /* PBXTextBookmark */ = 3984502010EB194200959F93 /* PBXTextBookmark */;
 		};
 		sourceControlManager = 39844FB410EB131B00959F93 /* Source Control */;
 		userBuildSettings = {
 		};
+	};
+	3970E15510F309CB00CD948A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 39844FB710EB15D600959F93 /* Block.cpp */;
+		name = "Block.cpp: 638";
+		rLen = 0;
+		rLoc = 19301;
+		rType = 0;
+		vrLen = 1294;
+		vrLoc = 18197;
 	};
 	39844FA510EB131700959F93 /* Block */ = {
 		isa = PBXExecutable;
@@ -115,42 +124,10 @@
 	};
 	39844FB710EB15D600959F93 /* Block.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {929, 8554}}";
-			sepNavSelRange = "{18931, 0}";
-			sepNavVisRange = "{17863, 1425}";
+			sepNavIntBoundsRect = "{{0, 0}, {835, 8658}}";
+			sepNavSelRange = "{19301, 0}";
+			sepNavVisRange = "{18197, 1294}";
 		};
-	};
-	39844FD810EB16DA00959F93 /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = 39844FB710EB15D600959F93 /* Block.cpp */;
-		name = "Block.cpp: 1";
-		rLen = 0;
-		rLoc = 0;
-		rType = 0;
-		vrLen = 654;
-		vrLoc = 0;
-	};
-	39844FF610EB177800959F93 /* GLGeometryTransform.h */ = {
-		isa = PBXFileReference;
-		lastKnownFileType = sourcecode.c.h;
-		name = GLGeometryTransform.h;
-		path = /Users/rwright/SuperBible5/Code/XCode/Chapter01/Block/../../../Src/GLTools/include/GLGeometryTransform.h;
-		sourceTree = "<absolute>";
-		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {768, 975}}";
-			sepNavSelRange = "{1694, 0}";
-			sepNavVisRange = "{1207, 881}";
-		};
-	};
-	3984501F10EB194200959F93 /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = 39844FF610EB177800959F93 /* GLGeometryTransform.h */;
-		name = "GLGeometryTransform.h: 40";
-		rLen = 0;
-		rLoc = 1694;
-		rType = 0;
-		vrLen = 881;
-		vrLoc = 1207;
 	};
 	3984502010EB194200959F93 /* PBXTextBookmark */ = {
 		isa = PBXTextBookmark;

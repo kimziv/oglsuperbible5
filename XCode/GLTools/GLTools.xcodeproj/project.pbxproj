@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3970E0E610F306D800CD948A /* glew.c in Sources */ = {isa = PBXBuildFile; fileRef = 3970E0E510F306D800CD948A /* glew.c */; };
 		39844F9610EB11FF00959F93 /* GLBatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 39844F9110EB11FF00959F93 /* GLBatch.cpp */; };
 		39844F9710EB11FF00959F93 /* GLShaderManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 39844F9210EB11FF00959F93 /* GLShaderManager.cpp */; };
 		39844F9810EB11FF00959F93 /* GLTools.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 39844F9310EB11FF00959F93 /* GLTools.cpp */; };
@@ -15,6 +16,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		3970E0E510F306D800CD948A /* glew.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = glew.c; path = ../../Src/GLTools/src/glew.c; sourceTree = SOURCE_ROOT; };
 		39844F9110EB11FF00959F93 /* GLBatch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GLBatch.cpp; path = ../../Src/GLTools/src/GLBatch.cpp; sourceTree = SOURCE_ROOT; };
 		39844F9210EB11FF00959F93 /* GLShaderManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GLShaderManager.cpp; path = ../../Src/GLTools/src/GLShaderManager.cpp; sourceTree = SOURCE_ROOT; };
 		39844F9310EB11FF00959F93 /* GLTools.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GLTools.cpp; path = ../../Src/GLTools/src/GLTools.cpp; sourceTree = SOURCE_ROOT; };
@@ -47,6 +49,7 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				3970E0E510F306D800CD948A /* glew.c */,
 				39844F9110EB11FF00959F93 /* GLBatch.cpp */,
 				39844F9210EB11FF00959F93 /* GLShaderManager.cpp */,
 				39844F9310EB11FF00959F93 /* GLTools.cpp */,
@@ -128,6 +131,7 @@
 				39844F9810EB11FF00959F93 /* GLTools.cpp in Sources */,
 				39844F9910EB11FF00959F93 /* GLTriangleBatch.cpp in Sources */,
 				39844F9A10EB11FF00959F93 /* math3d.cpp in Sources */,
+				3970E0E610F306D800CD948A /* glew.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
