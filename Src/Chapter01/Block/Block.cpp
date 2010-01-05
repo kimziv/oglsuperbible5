@@ -629,6 +629,15 @@ int main(int argc, char* argv[])
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH | GLUT_STENCIL);
 	glutInitWindowSize(800, 600);
 	glutCreateWindow("3D Effects Demo");
+	
+	GLenum err = glewInit();
+	if (GLEW_OK != err)
+		{
+		/* Problem: glewInit failed, something is seriously wrong. */
+		fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
+		return 1;
+		}
+	
 	glutReshapeFunc(ChangeSize);
 	glutKeyboardFunc(KeyPressFunc);
 	glutDisplayFunc(RenderScene);
