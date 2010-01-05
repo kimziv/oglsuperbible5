@@ -45,24 +45,7 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 #ifndef __TRIANGLE_BATCH
 #define __TRIANGLE_BATCH 
 
-#ifdef WIN32
-#include <glee.h>
-#endif
-
-// Mac OS X
-#ifdef __APPLE__
-#include <TargetConditionals.h>
-#if TARGET_OS_IPHONE | TARGET_IPHONE_SIMULATOR
-#include <OpenGLES/ES2/gl.h>
-#include <OpenGLES/ES2/glext.h>
-#else
-#include <OpenGL/gl.h>		// Apple OpenGL haders (version depends on OS X SDK version)
-#endif
-#endif
-
-class GLTriangleBatch;
-
-
+#include <GLTools.h>
 #include <math3d.h>
 #include <GLBatchBase.h>
 #include <GLShaderManager.h>

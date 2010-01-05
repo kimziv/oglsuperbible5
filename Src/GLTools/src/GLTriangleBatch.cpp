@@ -43,7 +43,7 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
  *
  */
 
-#include "GLTriangleBatch.h"
+#include <GLTriangleBatch.h>
 #include <GLShaderManager.h>
 
 

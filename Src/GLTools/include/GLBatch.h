@@ -32,22 +32,7 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 #ifndef __GL_BATCH__
 #define __GL_BATCH__
 
-#ifdef WIN32
-#include <glee.h>
-#endif
-
-// Mac OS X
-#ifdef __APPLE__
-#include <TargetConditionals.h>
-#if TARGET_OS_IPHONE | TARGET_IPHONE_SIMULATOR
-#include <OpenGLES/ES2/gl.h>
-#include <OpenGLES/ES2/glext.h>
-#else
-#include <OpenGL/gl.h>		// Apple OpenGL haders (version depends on OS X SDK version)
-#endif
-#endif
-
-
+#include <GLTools.h>
 #include <math3d.h>
 #include <GLBatchBase.h>
 
