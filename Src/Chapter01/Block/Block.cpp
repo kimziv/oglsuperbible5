@@ -3,7 +3,7 @@
 // Demonstrates an assortment of basic 3D concepts
 // Program by Richard S. Wright Jr.
 
-#include <gltools.h>	// OpenGL toolkit
+#include <GLTools.h>	// OpenGL toolkit
 #include <GLMatrixStack.h>
 #include <GLFrame.h>
 #include <GLFrustum.h>
