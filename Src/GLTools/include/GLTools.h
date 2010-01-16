@@ -58,7 +58,8 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 #endif
 #endif
 
-//////////////////////// TEMPORARY TEMPORARY TEMPORARY
+//////////////////////// TEMPORARY TEMPORARY TEMPORARY - On SnowLeopard this is suppored, but GLEW doens't hook up properly
+//////////////////////// Fixed probably in 10.6.3
 #ifdef __APPLE__
 #define glGenVertexArrays glGenVertexArraysAPPLE
 #define glDeleteVertexArrays  glDeleteVertexArraysAPPLE
@@ -69,11 +70,8 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 // Universal includes
 #include <math.h>
 #include <math3d.h>
+#include <GLBatch.h>
 #include <GLTriangleBatch.h>
-
-
-// Forward declaration
-class GLTriangleBatch;
 
    
 ///////////////////////////////////////////////////////
@@ -158,7 +156,7 @@ void gltMakeTorus(GLTriangleBatch& torusBatch, GLfloat majorRadius, GLfloat mino
 void gltMakeSphere(GLTriangleBatch& sphereBatch, GLfloat fRadius, GLint iSlices, GLint iStacks);
 void gltMakeDisk(GLTriangleBatch& diskBatch, GLfloat innerRadius, GLfloat outerRadius, GLint nSlices, GLint nStacks);
 void gltMakeCylinder(GLTriangleBatch& cylinderBatch, GLfloat baseRadius, GLfloat topRadius, GLfloat fLength, GLint numSlices, GLint numStacks);
-
+void gltMakeCube(GLBatch& cubeBatch, GLfloat fRadius);
 
 // Shader loading support
 void	gltLoadShaderSrc(const char *szShaderSrc, GLuint shader);

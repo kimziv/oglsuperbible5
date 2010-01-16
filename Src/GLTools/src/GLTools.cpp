@@ -556,6 +556,172 @@ void gltMakeCylinder(GLTriangleBatch& cylinderBatch, GLfloat baseRadius, GLfloat
         }
 	cylinderBatch.End();
 	}
+	
+	
+///////////////////////////////////////////////////////////////////////////////////////
+// Make a cube, centered at the origin, and with a specified "radius"
+void gltMakeCube(GLBatch& cubeBatch, GLfloat fRadius)
+{
+	cubeBatch.Begin(GL_TRIANGLES, 36, 1);
+	
+	/////////////////////////////////////////////
+	// Top of cube
+	cubeBatch.Normal3f(0.0f, 1.0f, 0.0f);
+	cubeBatch.MultiTexCoord2f(0, 1.0f, 1.0f);
+	cubeBatch.Vertex3f(fRadius, fRadius, fRadius);
+	
+	cubeBatch.Normal3f(0.0f, 1.0f, 0.0f);
+	cubeBatch.MultiTexCoord2f(0, 1.0f, 0.0f);
+	cubeBatch.Vertex3f(fRadius, fRadius, -fRadius);
+	
+	cubeBatch.Normal3f(0.0f, 1.0f, 0.0f);
+	cubeBatch.MultiTexCoord2f(0, 0.0f, 0.0f);
+	cubeBatch.Vertex3f(-fRadius, fRadius, -fRadius);
+	
+	cubeBatch.Normal3f(0.0f, 1.0f, 0.0f);
+	cubeBatch.MultiTexCoord2f(0, 1.0f, 1.0f);
+	cubeBatch.Vertex3f(fRadius, fRadius, fRadius);
+	
+	cubeBatch.Normal3f(0.0f, 1.0f, 0.0f);
+	cubeBatch.MultiTexCoord2f(0, 0.0f, 0.0f);
+	cubeBatch.Vertex3f(-fRadius, fRadius, -fRadius);
+	
+	cubeBatch.Normal3f(0.0f, 1.0f, 0.0f);
+	cubeBatch.MultiTexCoord2f(0, 0.0f, 1.0f);
+	cubeBatch.Vertex3f(-fRadius, fRadius, fRadius);
+	
+	
+	////////////////////////////////////////////
+	// Bottom of cube
+	cubeBatch.Normal3f(0.0f, -1.0f, 0.0f);
+	cubeBatch.MultiTexCoord2f(0, 0.0f, 0.0f);
+	cubeBatch.Vertex3f(-fRadius, -fRadius, -fRadius);
+	
+	cubeBatch.Normal3f(0.0f, -1.0f, 0.0f);
+	cubeBatch.MultiTexCoord2f(0, 1.0f, 0.0f);
+	cubeBatch.Vertex3f(fRadius, -fRadius, -fRadius);
+	
+	cubeBatch.Normal3f(0.0f, -1.0f, 0.0f);
+	cubeBatch.MultiTexCoord2f(0, 1.0f, 1.0f);
+	cubeBatch.Vertex3f(fRadius, -fRadius, fRadius);
+	
+	cubeBatch.Normal3f(0.0f, -1.0f, 0.0f);
+	cubeBatch.MultiTexCoord2f(0, 0.0f, 1.0f);
+	cubeBatch.Vertex3f(-fRadius, -fRadius, fRadius);
+	
+	cubeBatch.Normal3f(0.0f, -1.0f, 0.0f);
+	cubeBatch.MultiTexCoord2f(0, 0.0f, 0.0f);
+	cubeBatch.Vertex3f(-fRadius, -fRadius, -fRadius);
+	
+	cubeBatch.Normal3f(0.0f, -1.0f, 0.0f);
+	cubeBatch.MultiTexCoord2f(0, 1.0f, 1.0f);
+	cubeBatch.Vertex3f(fRadius, -fRadius, fRadius);
+	
+	///////////////////////////////////////////
+	// Left side of cube
+	cubeBatch.Normal3f(-1.0f, 0.0f, 0.0f);
+	cubeBatch.MultiTexCoord2f(0, 1.0f, 1.0f);
+	cubeBatch.Vertex3f(-fRadius, fRadius, fRadius);
+	
+	cubeBatch.Normal3f(-1.0f, 0.0f, 0.0f);
+	cubeBatch.MultiTexCoord2f(0, 1.0f, 0.0f);
+	cubeBatch.Vertex3f(-fRadius, fRadius, -fRadius);
+	
+	cubeBatch.Normal3f(-1.0f, 0.0f, 0.0f);
+	cubeBatch.MultiTexCoord2f(0, 0.0f, 0.0f);
+	cubeBatch.Vertex3f(-fRadius, -fRadius, -fRadius);
+	
+	cubeBatch.Normal3f(-1.0f, 0.0f, 0.0f);
+	cubeBatch.MultiTexCoord2f(0, 1.0f, 1.0f);
+	cubeBatch.Vertex3f(-fRadius, fRadius, fRadius);
+	
+	cubeBatch.Normal3f(-1.0f, 0.0f, 0.0f);
+	cubeBatch.MultiTexCoord2f(0, 0.0f, 0.0f);
+	cubeBatch.Vertex3f(-fRadius, -fRadius, -fRadius);
+	
+	cubeBatch.Normal3f(-1.0f, 0.0f, 0.0f);
+	cubeBatch.MultiTexCoord2f(0, 0.0f, 1.0f);
+	cubeBatch.Vertex3f(-fRadius, -fRadius, fRadius);
+	
+	// Right side of cube
+	cubeBatch.Normal3f(1.0f, 0.0f, 0.0f);
+	cubeBatch.MultiTexCoord2f(0, 0.0f, 0.0f);
+	cubeBatch.Vertex3f(fRadius, -fRadius, -fRadius);
+	
+	cubeBatch.Normal3f(1.0f, 0.0f, 0.0f);
+	cubeBatch.MultiTexCoord2f(0, 1.0f, 0.0f);
+	cubeBatch.Vertex3f(fRadius, fRadius, -fRadius);
+	
+	cubeBatch.Normal3f(1.0f, 0.0f, 0.0f);
+	cubeBatch.MultiTexCoord2f(0, 1.0f, 1.0f);
+	cubeBatch.Vertex3f(fRadius, fRadius, fRadius);
+	
+	cubeBatch.Normal3f(1.0f, 0.0f, 0.0f);
+	cubeBatch.MultiTexCoord2f(0, 1.0f, 1.0f);
+	cubeBatch.Vertex3f(fRadius, fRadius, fRadius);
+	
+	cubeBatch.Normal3f(1.0f, 0.0f, 0.0f);
+	cubeBatch.MultiTexCoord2f(0, 0.0f, 1.0f);
+	cubeBatch.Vertex3f(fRadius, -fRadius, fRadius);
+	
+	cubeBatch.Normal3f(1.0f, 0.0f, 0.0f);
+	cubeBatch.MultiTexCoord2f(0, 0.0f, 0.0f);
+	cubeBatch.Vertex3f(fRadius, -fRadius, -fRadius);
+	
+	// Front and Back
+	// Front
+	cubeBatch.Normal3f(0.0f, 0.0f, 1.0f);
+	cubeBatch.MultiTexCoord2f(0, 1.0f, 0.0f);
+	cubeBatch.Vertex3f(fRadius, -fRadius, fRadius);
+	
+	cubeBatch.Normal3f(0.0f, 0.0f, 1.0f);
+	cubeBatch.MultiTexCoord2f(0, 1.0f, 1.0f);
+	cubeBatch.Vertex3f(fRadius, fRadius, fRadius);
+	
+	cubeBatch.Normal3f(0.0f, 0.0f, 1.0f);
+	cubeBatch.MultiTexCoord2f(0, 0.0f, 1.0f);
+	cubeBatch.Vertex3f(-fRadius, fRadius, fRadius);
+	
+	cubeBatch.Normal3f(0.0f, 0.0f, 1.0f);
+	cubeBatch.MultiTexCoord2f(0, 0.0f, 1.0f);
+	cubeBatch.Vertex3f(-fRadius, fRadius, fRadius);
+	
+	cubeBatch.Normal3f(0.0f, 0.0f, 1.0f);
+	cubeBatch.MultiTexCoord2f(0, 0.0f, 0.0f);
+	cubeBatch.Vertex3f(-fRadius, -fRadius, fRadius);
+	
+	cubeBatch.Normal3f(0.0f, 0.0f, 1.0f);
+	cubeBatch.MultiTexCoord2f(0, 1.0f, 0.0f);
+	cubeBatch.Vertex3f(fRadius, -fRadius, fRadius);
+	
+	// Back
+	cubeBatch.Normal3f(0.0f, 0.0f, -1.0f);
+	cubeBatch.MultiTexCoord2f(0, 1.0f, 0.0f);
+	cubeBatch.Vertex3f(fRadius, -fRadius, -fRadius);
+	
+	cubeBatch.Normal3f(0.0f, 0.0f, -1.0f);
+	cubeBatch.MultiTexCoord2f(0, 0.0f, 0.0f);
+	cubeBatch.Vertex3f(-fRadius, -fRadius, -fRadius);
+	
+	cubeBatch.Normal3f(0.0f, 0.0f, -1.0f);
+	cubeBatch.MultiTexCoord2f(0, 0.0f, 1.0f);
+	cubeBatch.Vertex3f(-fRadius, fRadius, -fRadius);
+	
+	cubeBatch.Normal3f(0.0f, 0.0f, -1.0f);
+	cubeBatch.MultiTexCoord2f(0, 0.0f, 1.0f);
+	cubeBatch.Vertex3f(-fRadius, fRadius, -fRadius);
+	
+	cubeBatch.Normal3f(0.0f, 0.0f, -1.0f);
+	cubeBatch.MultiTexCoord2f(0, 1.0f, 1.0f);
+	cubeBatch.Vertex3f(fRadius, fRadius, -fRadius);
+
+	cubeBatch.Normal3f(0.0f, 0.0f, -1.0f);
+	cubeBatch.MultiTexCoord2f(0, 1.0f, 0.0f);
+	cubeBatch.Vertex3f(fRadius, -fRadius, -fRadius);
+
+	cubeBatch.End();
+	}	
+
 
 
 // Define targa header. This is only used locally.
