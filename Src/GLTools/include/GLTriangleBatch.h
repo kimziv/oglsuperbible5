@@ -72,7 +72,7 @@ class GLTriangleBatch : public GLBatchBase
 
         
         // Draw - make sure you call glEnableClientState for these arrays
-        virtual void Draw(bool bEnable = true);
+        virtual void Draw(void);
         
     protected:
         GLushort  *pIndexes;        // Array of indexes
@@ -85,6 +85,7 @@ class GLTriangleBatch : public GLBatchBase
         GLuint nNumVerts;           // Number of vertices actually used
         
         GLuint bufferObjects[4];
+		GLuint vertexArrayBufferObject;
     };
 
 

@@ -33,52 +33,220 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 #include <GLBatch.h>
 #include <GLShaderManager.h>
 
-GLBatch::GLBatch(void): pVerts(NULL), pNorms(NULL), pColors(NULL), ppTexCoords(NULL), nVertsBuilding(0),
-	nMaxVerts(0), nNumTextureUnits(0), bBatchDone(false)
+GLBatch::GLBatch(void): nNumTextureUnits(0), nNumVerts(0), pVerts(NULL), pNormals(NULL), pColors(NULL), pTexCoords(NULL), uiVertexArray(0),
+	uiNormalArray(0), uiColorArray(0), vertexArrayObject(0), bBatchDone(false), nVertsBuilding(0)
 	{
-	
 	}
 
 GLBatch::~GLBatch(void)
 	{
-	delete [] pVerts;
-	delete [] pNorms;
-	delete [] pColors;
-	for(GLuint i = 0; i < nNumTextureUnits; i++)
-		delete [] ppTexCoords[i];
-	delete [] ppTexCoords;
+	// Vertex buffer objects
+	if(uiVertexArray != 0)
+		glDeleteBuffers(1, &uiVertexArray);
+	
+	if(uiNormalArray != 0)
+		glDeleteBuffers(1, &uiNormalArray);
+	
+	if(uiColorArray != 0)
+		glDeleteBuffers(1, &uiColorArray);
+	
+	for(int i = 0; i < nNumTextureUnits; i++)
+		glDeleteBuffers(1, &uiTextureCoordArray[i]);
+
+	glDeleteVertexArrays(1, &vertexArrayObject);
+
+	delete [] uiTextureCoordArray;
+	delete [] pTexCoords;
 	}
 
 
 // Just start over. No reallocations, etc.
 void GLBatch::Reset(void)
 	{
+	bBatchDone = false;
 	nVertsBuilding = 0;
 	}
 	
 void GLBatch::Begin(GLenum primitive, GLuint nVerts, GLuint nTextureUnits)
 	{
 	primitiveType = primitive;
-	pVerts = new M3DVector3f[nVerts];
-	nMaxVerts = nVerts;
+	nNumVerts = nVerts;
 	nNumTextureUnits = nTextureUnits;
+	
+	if(nNumTextureUnits != 0) {
+		uiTextureCoordArray = new GLuint[nNumTextureUnits];
 
-	ppTexCoords = new M3DVector2f*[nNumTextureUnits];
-	for(GLuint i = 0; i < nNumTextureUnits; i++)
-		ppTexCoords[i] = new M3DVector2f[nMaxVerts];
-
+		// An array of pointers to texture coordinate arrays
+		pTexCoords = new M3DVector2f*[nNumTextureUnits];
+		for(int i = 0; i < nNumTextureUnits; i++) {
+			uiTextureCoordArray[i] = 0;
+			pTexCoords[i] = NULL;
+			}
+		}
+		
+	// Vertex Array object for this Array
+	glGenVertexArrays(1, &vertexArrayObject);
+	glBindVertexArray(vertexArrayObject);
 	}
 	
 	
+// Block Copy in vertex data
+void GLBatch::CopyVertexData3f(M3DVector3f *vVerts) 
+	{
+	// First time, create the buffer object, allocate the space
+	if(uiVertexArray == 0) {
+			glGenBuffers(1, &uiVertexArray);
+			glBindBuffer(GL_ARRAY_BUFFER, uiVertexArray);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * nNumVerts, NULL, GL_DYNAMIC_DRAW);
+			}
+		else	// Just bind to existing object
+			glBindBuffer(GL_ARRAY_BUFFER, uiVertexArray);
+
+	// Get a pointer, copy the data in
+	pVerts = (M3DVector3f *)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+	memcpy(pVerts, vVerts, sizeof(GLfloat) * 3 * nNumVerts);
+	glUnmapBuffer(GL_ARRAY_BUFFER);
+	pVerts = NULL;
+	}
+
+// Block copy in normal data
+void GLBatch::CopyNormalDataf(M3DVector3f *vNorms) 
+	{
+	// First time, create the buffer object, allocate the space
+	if(uiNormalArray == 0) {
+		glGenBuffers(1, &uiNormalArray);
+		glBindBuffer(GL_ARRAY_BUFFER, uiNormalArray);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * nNumVerts, NULL, GL_DYNAMIC_DRAW);
+	}
+	else	// Just bind to existing object
+		glBindBuffer(GL_ARRAY_BUFFER, uiNormalArray);
+	
+	// Get a pointer, copy the data in
+	pNormals = (M3DVector3f *)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+	memcpy(pNormals, vNorms, sizeof(GLfloat) * 3 * nNumVerts);
+	glUnmapBuffer(GL_ARRAY_BUFFER);
+	pNormals = NULL;
+		
+	}
+
+void GLBatch::CopyColorData4f(M3DVector4f *vColors) 
+	{
+	// First time, create the buffer object, allocate the space
+	if(uiColorArray == 0) {
+		glGenBuffers(1, &uiColorArray);
+		glBindBuffer(GL_ARRAY_BUFFER, uiColorArray);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 4 * nNumVerts, NULL, GL_DYNAMIC_DRAW);
+	}
+	else	// Just bind to existing object
+		glBindBuffer(GL_ARRAY_BUFFER, uiColorArray);
+	
+	// Get a pointer, copy the data in
+	pColors = (M3DVector4f *)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+	memcpy(pColors, vColors, sizeof(GLfloat) * 4 * nNumVerts);
+	glUnmapBuffer(GL_ARRAY_BUFFER);
+	pColors = NULL;
+	}
+
+
+void GLBatch::CopyTexCoorData2f(M3DVector2f *vTexCoords, GLuint uiTextureLayer) 
+	{
+	// First time, create the buffer object, allocate the space
+	if(uiTextureCoordArray[uiTextureLayer] == 0) {
+		glGenBuffers(1, &uiTextureCoordArray[uiTextureLayer]);
+		glBindBuffer(GL_ARRAY_BUFFER, uiTextureCoordArray[uiTextureLayer]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 2 * nNumVerts, NULL, GL_DYNAMIC_DRAW);
+	}
+	else	// Just bind to existing object
+		glBindBuffer(GL_ARRAY_BUFFER, uiTextureCoordArray[uiTextureLayer]);
+	
+	// Get a pointer, copy the data in
+	pTexCoords[uiTextureLayer] = (M3DVector2f *)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+	memcpy(pTexCoords[uiTextureLayer], vTexCoords, sizeof(GLfloat) * 2 * nNumVerts);
+	glUnmapBuffer(GL_ARRAY_BUFFER);
+	pTexCoords[uiTextureLayer] = NULL;
+	}
+
+	
+// Bind everything up in a little package
 void GLBatch::End(void)
 	{
+	// Check to see if items have been added one at a time
+	if(pVerts != NULL) {
+		glBindBuffer(GL_ARRAY_BUFFER, uiVertexArray);
+		glUnmapBuffer(GL_ARRAY_BUFFER);
+		pVerts = NULL;
+		}
+		
+	if(pColors != NULL) {
+		glBindBuffer(GL_ARRAY_BUFFER, uiColorArray);
+		glUnmapBuffer(GL_ARRAY_BUFFER);
+		pColors = NULL; 
+		}
+		
+	if(pNormals != NULL) {
+		glBindBuffer(GL_ARRAY_BUFFER, uiNormalArray);
+		glUnmapBuffer(GL_ARRAY_BUFFER);
+		pNormals = NULL;
+		}
+		
+	for(int i = 0; i < nNumTextureUnits; i++)
+		if(pTexCoords[i] != NULL) {
+			glBindBuffer(GL_ARRAY_BUFFER, uiTextureCoordArray[i]);
+			glUnmapBuffer(GL_ARRAY_BUFFER);
+			pTexCoords[i] = NULL;
+			}
+	
+	// Set up the vertex array object
+	glBindVertexArray(vertexArrayObject);
+	
+	if(uiVertexArray !=0) {
+		glEnableVertexAttribArray(GLT_ATTRIBUTE_VERTEX);
+		glBindBuffer(GL_ARRAY_BUFFER, uiVertexArray);
+		glVertexAttribPointer(GLT_ATTRIBUTE_VERTEX, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		}
+		
+	if(uiColorArray != 0) {
+		glEnableVertexAttribArray(GLT_ATTRIBUTE_COLOR);
+		glBindBuffer(GL_ARRAY_BUFFER, uiColorArray);
+		glVertexAttribPointer(GLT_ATTRIBUTE_COLOR, 4, GL_FLOAT, GL_FALSE, 0, 0);
+		}
+		
+	if(uiNormalArray != 0) {
+		glEnableVertexAttribArray(GLT_ATTRIBUTE_NORMAL);
+		glBindBuffer(GL_ARRAY_BUFFER, uiNormalArray);
+		glVertexAttribPointer(GLT_ATTRIBUTE_NORMAL, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		}
+		
+	// How many texture units
+	for(int i = 0; i < nNumTextureUnits; i++)
+		if(uiTextureCoordArray[i] != 0) {
+			glEnableVertexAttribArray(GLT_ATTRIBUTE_TEXTURE0 + i),
+			glBindBuffer(GL_ARRAY_BUFFER, uiTextureCoordArray[i]);
+			glVertexAttribPointer(GLT_ATTRIBUTE_TEXTURE0 + i, 2, GL_FLOAT, GL_FALSE, 0, 0);
+			}
+	
 	bBatchDone = true;
+	glBindVertexArray(0);
 	}
         
+// Add a single vertex to the end of the array
 void GLBatch::Vertex3f(GLfloat x, GLfloat y, GLfloat z)
 	{
-	// Ignore if we go past the end
-	if(nVertsBuilding >= nMaxVerts)
+	// First see if the vertex array buffer has been created...
+	if(uiVertexArray == 0) {	// Nope, we need to create it
+		glGenBuffers(1, &uiVertexArray);
+		glBindBuffer(GL_ARRAY_BUFFER, uiVertexArray);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * nNumVerts, NULL, GL_DYNAMIC_DRAW);
+		}
+		
+	// Now see if it's already mapped, if not, map it
+	if(pVerts == NULL) {
+		glBindBuffer(GL_ARRAY_BUFFER, uiVertexArray);
+		pVerts = (M3DVector3f *)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+		}
+		
+	// Ignore if we go past the end, keeps things from blowing up
+	if(nVertsBuilding >= nNumVerts)
 		return;
 	
 	// Copy it in...
@@ -90,139 +258,190 @@ void GLBatch::Vertex3f(GLfloat x, GLfloat y, GLfloat z)
         
 void GLBatch::Vertex3fv(M3DVector3f vVertex)
 	{
-	// Ignore if we go past the end
-	if(nVertsBuilding >= nMaxVerts)
+	// First see if the vertex array buffer has been created...
+	if(uiVertexArray == 0) {	// Nope, we need to create it
+		glGenBuffers(1, &uiVertexArray);
+		glBindBuffer(GL_ARRAY_BUFFER, uiVertexArray);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * nNumVerts, NULL, GL_DYNAMIC_DRAW);
+	}
+	
+	// Now see if it's already mapped, if not, map it
+	if(pVerts == NULL) {
+		glBindBuffer(GL_ARRAY_BUFFER, uiVertexArray);
+		pVerts = (M3DVector3f *)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+	}
+	
+	// Ignore if we go past the end, keeps things from blowing up
+	if(nVertsBuilding >= nNumVerts)
 		return;
 	
 	// Copy it in...
 	memcpy(pVerts[nVertsBuilding], vVertex, sizeof(M3DVector3f));
-	nVertsBuilding++;	
+	nVertsBuilding++;
 	}
         
 // Unlike normal OpenGL immediate mode, you must specify a normal per vertex
 // or you will get junk...
 void GLBatch::Normal3f(GLfloat x, GLfloat y, GLfloat z)
 	{
-	if(pNorms == NULL)
-		pNorms = new M3DVector3f[nMaxVerts];
+	// First see if the vertex array buffer has been created...
+	if(uiNormalArray == 0) {	// Nope, we need to create it
+		glGenBuffers(1, &uiNormalArray);
+		glBindBuffer(GL_ARRAY_BUFFER, uiNormalArray);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * nNumVerts, NULL, GL_DYNAMIC_DRAW);
+	}
 	
-	// Ignore if we go past the end
-	if(nVertsBuilding >= nMaxVerts)
+	// Now see if it's already mapped, if not, map it
+	if(pNormals == NULL) {
+		glBindBuffer(GL_ARRAY_BUFFER, uiNormalArray);
+		pNormals = (M3DVector3f *)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+	}
+	
+	// Ignore if we go past the end, keeps things from blowing up
+	if(nVertsBuilding >= nNumVerts)
 		return;
-
-	pNorms[nVertsBuilding][0] = x;
-	pNorms[nVertsBuilding][1] = y;
-	pNorms[nVertsBuilding][2] = z;
+	
+	// Copy it in...
+	pNormals[nVertsBuilding][0] = x;
+	pNormals[nVertsBuilding][1] = y;
+	pNormals[nVertsBuilding][2] = z;
 	}
         
 // Ditto above
 void GLBatch::Normal3fv(M3DVector3f vNormal)
 	{
-	if(pNorms == NULL)
-		pNorms = new M3DVector3f[nMaxVerts];
+	// First see if the vertex array buffer has been created...
+	if(uiNormalArray == 0) {	// Nope, we need to create it
+		glGenBuffers(1, &uiNormalArray);
+		glBindBuffer(GL_ARRAY_BUFFER, uiNormalArray);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * nNumVerts, NULL, GL_DYNAMIC_DRAW);
+		}
 	
-	// Ignore if we go past the end
-	if(nVertsBuilding >= nMaxVerts)
+	// Now see if it's already mapped, if not, map it
+	if(pNormals == NULL) {
+		glBindBuffer(GL_ARRAY_BUFFER, uiNormalArray);
+		pNormals = (M3DVector3f *)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+		}
+	
+	// Ignore if we go past the end, keeps things from blowing up
+	if(nVertsBuilding >= nNumVerts)
 		return;
-
-	memcpy(pNorms[nVertsBuilding], vNormal, sizeof(M3DVector3f));
+	
+	// Copy it in...
+	memcpy(pNormals[nVertsBuilding], vNormal, sizeof(M3DVector3f));
 	}
 	
 
 void GLBatch::Color4f(GLfloat r, GLfloat g, GLfloat b, GLfloat a)
 	{
-	if(pColors == NULL)
-		pColors = new M3DVector4f[nMaxVerts];
+	// First see if the vertex array buffer has been created...
+	if(uiColorArray == 0) {	// Nope, we need to create it
+		glGenBuffers(1, &uiColorArray);
+		glBindBuffer(GL_ARRAY_BUFFER, uiColorArray);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 4 * nNumVerts, NULL, GL_DYNAMIC_DRAW);
+		}
 	
-	// Ignore if we go past the end
-	if(nVertsBuilding >= nMaxVerts)
+	// Now see if it's already mapped, if not, map it
+	if(pColors == NULL) {
+		glBindBuffer(GL_ARRAY_BUFFER, uiColorArray);
+		pColors = (M3DVector4f *)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+		}
+	
+	// Ignore if we go past the end, keeps things from blowing up
+	if(nVertsBuilding >= nNumVerts)
 		return;
-
+	
+	// Copy it in...
 	pColors[nVertsBuilding][0] = r;
 	pColors[nVertsBuilding][1] = g;
 	pColors[nVertsBuilding][2] = b;
-	pColors[nVertsBuilding][3] = a;	
+	pColors[nVertsBuilding][3] = a;
 	}
 	
 void GLBatch::Color4fv(M3DVector4f vColor)
 	{
-	if(pColors == NULL)
-		pColors = new M3DVector4f[nMaxVerts];
+	// First see if the vertex array buffer has been created...
+	if(uiColorArray == 0) {	// Nope, we need to create it
+		glGenBuffers(1, &uiColorArray);
+		glBindBuffer(GL_ARRAY_BUFFER, uiColorArray);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 4 * nNumVerts, NULL, GL_DYNAMIC_DRAW);
+	}
 	
-	// Ignore if we go past the end
-	if(nVertsBuilding >= nMaxVerts)
+	// Now see if it's already mapped, if not, map it
+	if(pColors == NULL) {
+		glBindBuffer(GL_ARRAY_BUFFER, uiColorArray);
+		pColors = (M3DVector4f *)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+	}
+	
+	// Ignore if we go past the end, keeps things from blowing up
+	if(nVertsBuilding >= nNumVerts)
 		return;
-
-	memcpy(pColors[nVertsBuilding], vColor, sizeof(M3DVector4f));
+	
+	// Copy it in...
+	memcpy(pColors, vColor, sizeof(M3DVector4f));
 	}
         
 // Unlike normal OpenGL immediate mode, you must specify a texture coord
 // per vertex or you will get junk...
 void GLBatch::MultiTexCoord2f(GLuint texture, GLfloat s, GLfloat t)
 	{
-	// Ignore if we go past the end
-	if(nVertsBuilding >= nMaxVerts)
+	// First see if the vertex array buffer has been created...
+	if(uiTextureCoordArray[texture] == 0) {	// Nope, we need to create it
+		glGenBuffers(1, &uiTextureCoordArray[texture]);
+		glBindBuffer(GL_ARRAY_BUFFER, uiTextureCoordArray[texture]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 2 * nNumVerts, NULL, GL_DYNAMIC_DRAW);
+	}
+	
+	// Now see if it's already mapped, if not, map it
+	if(pTexCoords[texture] == NULL) {
+		glBindBuffer(GL_ARRAY_BUFFER, uiTextureCoordArray[texture]);
+		pTexCoords[texture] = (M3DVector2f *)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+	}
+	
+	// Ignore if we go past the end, keeps things from blowing up
+	if(nVertsBuilding >= nNumVerts)
 		return;
-
-	ppTexCoords[texture][nVertsBuilding][0] = s;
-	ppTexCoords[texture][nVertsBuilding][1] = t;
+	
+	// Copy it in...
+	pTexCoords[texture][nVertsBuilding][0] = s;
+	pTexCoords[texture][nVertsBuilding][1] = t;
 	}
    
 // Ditto above  
 void GLBatch::MultiTexCoord2fv(GLuint texture, M3DVector2f vTexCoord)
 	{	
-	// Ignore if we go past the end
-	if(nVertsBuilding >= nMaxVerts)
+	// First see if the vertex array buffer has been created...
+	if(uiTextureCoordArray[texture] == 0) {	// Nope, we need to create it
+		glGenBuffers(1, &uiTextureCoordArray[texture]);
+		glBindBuffer(GL_ARRAY_BUFFER, uiTextureCoordArray[texture]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 2 * nNumVerts, NULL, GL_DYNAMIC_DRAW);
+	}
+	
+	// Now see if it's already mapped, if not, map it
+	if(pTexCoords[texture] == NULL) {
+		glBindBuffer(GL_ARRAY_BUFFER, uiTextureCoordArray[texture]);
+		pTexCoords[texture] = (M3DVector2f *)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+	}
+	
+	// Ignore if we go past the end, keeps things from blowing up
+	if(nVertsBuilding >= nNumVerts)
 		return;
-
-	memcpy(ppTexCoords[texture][nVertsBuilding], vTexCoord, sizeof(M3DVector2f));
+	
+	// Copy it in...
+	memcpy(pTexCoords[texture], vTexCoord, sizeof(M3DVector2f));
 	}
 
 
-void GLBatch::Draw(bool bEnable)
+void GLBatch::Draw(void)
 	{
 	if(!bBatchDone)
 		return;
 		
-	// Where are the vertexes
-	if(bEnable) glEnableVertexAttribArray(GLT_ATTRIBUTE_VERTEX);
-	glVertexAttribPointer(GLT_ATTRIBUTE_VERTEX, 3, GL_FLOAT, GL_FALSE, 0, pVerts);
-	// Where are the Normals
-	if(pNorms) {
-		if(bEnable) glEnableVertexAttribArray(GLT_ATTRIBUTE_NORMAL);
-		glVertexAttribPointer(GLT_ATTRIBUTE_NORMAL, 3, GL_FLOAT, GL_FALSE, 0, pNorms);
-		}
-		
-	// Where are the colors
-	if(pColors) {
-		if(bEnable) glEnableVertexAttribArray(GLT_ATTRIBUTE_COLOR);
-		glVertexAttribPointer(GLT_ATTRIBUTE_COLOR, 4, GL_FLOAT, GL_FALSE, 0, pColors);
-		}
-	
-	// Where are the texture coordinates
-	for(GLuint i = 0; i < nNumTextureUnits; i++)
-		{
-		if(bEnable) glEnableVertexAttribArray(GLT_ATTRIBUTE_TEXTURE0+i);
-		glVertexAttribPointer(GLT_ATTRIBUTE_TEXTURE0+i, 2, GL_FLOAT, GL_FALSE, 0, ppTexCoords[i]);
-		}
+	// Set up the vertex array object
+	glBindVertexArray(vertexArrayObject);
 
-	glDrawArrays(primitiveType, 0, nVertsBuilding);
+	glDrawArrays(primitiveType, 0, nNumVerts);
 	
-	if(bEnable) {
-		glDisableVertexAttribArray(GLT_ATTRIBUTE_VERTEX);
-		glDisableVertexAttribArray(GLT_ATTRIBUTE_NORMAL);
-		glDisableVertexAttribArray(GLT_ATTRIBUTE_COLOR);
-		for(GLuint i = 0; i < nNumTextureUnits; i++)
-			{
-			glDisableVertexAttribArray(GLT_ATTRIBUTE_TEXTURE0+i);
-			}
-		}
+	glBindVertexArray(0);
 	}
         
-M3DVector2f* GLBatch::GetTextureCoords(GLuint iTextureUnit)
-	{
-	if(iTextureUnit > nNumTextureUnits)
-		return NULL;
-	
-	return ppTexCoords[iTextureUnit];
-	}

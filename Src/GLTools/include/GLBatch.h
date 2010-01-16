@@ -43,9 +43,22 @@ class GLBatch : public GLBatchBase
         GLBatch(void);
         virtual ~GLBatch(void);
         
+		// Start populating the array
         void Begin(GLenum primitive, GLuint nVerts, GLuint nTextureUnits = 0);
-        void End(void);
         
+		// Tell the batch you are done
+		void End(void);
+     
+		// Block Copy in vertex data
+		void CopyVertexData3f(M3DVector3f *vVerts);
+		void CopyNormalDataf(M3DVector3f *vNorms);
+		void CopyColorData4f(M3DVector4f *vColors);
+		void CopyTexCoorData2f(M3DVector2f *vTexCoords, GLuint uiTextureLayer);
+	 
+		virtual void Draw(void);
+ 		
+		// Immediate mode emulation
+		// Slowest way to build an array on purpose... Use the above if you can instead
         void Reset(void);
         
         void Vertex3f(GLfloat x, GLfloat y, GLfloat z);
@@ -60,39 +73,29 @@ class GLBatch : public GLBatchBase
         void MultiTexCoord2f(GLuint texture, GLfloat s, GLfloat t);
         void MultiTexCoord2fv(GLuint texture, M3DVector2f vTexCoord);
                
-        // Draw - make sure you call glEnableClientState for these
-        // arrays yourself if bEnable is false.
-        virtual void Draw(bool bEnable = true);
-        
-        // Query functions
-        inline bool IsStatic(void) { return pVerts == NULL; }
-        inline bool HasTexture(void) { return ppTexCoords == NULL; }
-        inline bool HasNormals(void) { return pNorms == NULL; }
-        inline bool IsComplete(void) { return bBatchDone; }
-        inline GLuint GetTextureUnitCount(void) { return nNumTextureUnits; }
-        inline GLuint GetVertexCount(void) { return nVertsBuilding; }
-        inline GLenum GetPrimitive(void) { return primitiveType; }
-       
-        // These return NULL if the batch is marked as static
-        inline M3DVector3f* GetVertexArray(void) { return pVerts; }
-        inline M3DVector3f* GetNormalArray(void) { return pNorms; }
-        inline M3DVector4f* GetColorArray(void) { return pColors; }
-        M3DVector2f* GetTextureCoords(GLuint iTextureUnit);
-        
-        
+               
         
     protected:
 		GLenum		primitiveType;		// What am I drawing....
-        M3DVector3f *pVerts;			// Array of vertices
-        M3DVector3f *pNorms;			// Array of normals
-        M3DVector4f *pColors;			// Array of colors
-        M3DVector2f **ppTexCoords;		// Multiple Arrays of texture coordinates
         
-        GLuint nVertsBuilding;			// Building up vertexes
-        GLuint nMaxVerts;				// Amount of vertex data initially allocated
+		GLuint		uiVertexArray;
+		GLuint      uiNormalArray;
+		GLuint		uiColorArray;
+		GLuint		*uiTextureCoordArray;
+		GLuint		vertexArrayObject;
+        
+        GLuint nVertsBuilding;			// Building up vertexes counter (immediate mode emulator)
+        GLuint nNumVerts;				// Number of verticies in this batch
         GLuint nNumTextureUnits;		// Number of texture coordinate sets
-        
+		
         bool	bBatchDone;				// Batch has been built
-    };
+ 
+	
+		M3DVector3f *pVerts;
+		M3DVector3f *pNormals;
+		M3DVector4f *pColors;
+		M3DVector2f **pTexCoords;
+	
+		};
 
 #endif // __GL_BATCH__

@@ -38,7 +38,7 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 class GLBatchBase
 	{
 	public:
-		virtual void Draw(bool bEnable = true) = 0;
+		virtual void Draw(void) = 0;
 	};
 
 
