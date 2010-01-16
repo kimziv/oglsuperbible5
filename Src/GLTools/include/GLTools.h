@@ -40,7 +40,6 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 // Bring in OpenGL 
 // Windows
 #ifdef WIN32
-#define GLEW_STATIC
 #include <windows.h>		// Must have for Windows platform builds
 #include <gl\glew.h>			// OpenGL Extension "autoloader"
 #include <gl\gl.h>			// Microsoft OpenGL headers (version 1.1 by themselves)

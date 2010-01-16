@@ -50,7 +50,7 @@ GLBatch::~GLBatch(void)
 	if(uiColorArray != 0)
 		glDeleteBuffers(1, &uiColorArray);
 	
-	for(int i = 0; i < nNumTextureUnits; i++)
+	for(unsigned int i = 0; i < nNumTextureUnits; i++)
 		glDeleteBuffers(1, &uiTextureCoordArray[i]);
 
 	glDeleteVertexArrays(1, &vertexArrayObject);
@@ -78,7 +78,7 @@ void GLBatch::Begin(GLenum primitive, GLuint nVerts, GLuint nTextureUnits)
 
 		// An array of pointers to texture coordinate arrays
 		pTexCoords = new M3DVector2f*[nNumTextureUnits];
-		for(int i = 0; i < nNumTextureUnits; i++) {
+		for(unsigned int i = 0; i < nNumTextureUnits; i++) {
 			uiTextureCoordArray[i] = 0;
 			pTexCoords[i] = NULL;
 			}
@@ -189,7 +189,7 @@ void GLBatch::End(void)
 		pNormals = NULL;
 		}
 		
-	for(int i = 0; i < nNumTextureUnits; i++)
+	for(unsigned int i = 0; i < nNumTextureUnits; i++)
 		if(pTexCoords[i] != NULL) {
 			glBindBuffer(GL_ARRAY_BUFFER, uiTextureCoordArray[i]);
 			glUnmapBuffer(GL_ARRAY_BUFFER);
@@ -218,7 +218,7 @@ void GLBatch::End(void)
 		}
 		
 	// How many texture units
-	for(int i = 0; i < nNumTextureUnits; i++)
+	for(unsigned int i = 0; i < nNumTextureUnits; i++)
 		if(uiTextureCoordArray[i] != 0) {
 			glEnableVertexAttribArray(GLT_ATTRIBUTE_TEXTURE0 + i),
 			glBindBuffer(GL_ARRAY_BUFFER, uiTextureCoordArray[i]);
