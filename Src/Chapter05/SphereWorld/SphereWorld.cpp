@@ -293,28 +293,7 @@ void ChangeSize(int nWidth, int nHeight)
 
 int main(int argc, char* argv[])
     {
-#ifdef __APPLE__
-		static char szParentDirectory[255];   	
-		
-		///////////////////////////////////////////////////////////////////////////   
-		// Get the directory where the .exe resides
-		char *c;
-		strncpy( szParentDirectory, argv[0], sizeof(szParentDirectory) );
-		c = (char*) szParentDirectory;
-		
-		while (*c != '\0')     // go to end 
-			c++;
-		
-		while (*c != '/')      // back up to parent 
-			c--;
-		
-		*c++ = '\0';             // cut off last part (binary name) 
-		
-		///////////////////////////////////////////////////////////////////////////   
-		// Change to Resources directory. Any data files need to be placed there 
-		chdir(szParentDirectory);
-		chdir("../Resources");
-#endif
+	gltSetWorkingDirectory(argv[0]);
 		
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);

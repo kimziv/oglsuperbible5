@@ -130,6 +130,9 @@ bool gltGetOpenGLVersion(int &nMajor, int &nMinor);
 // Check to see if an exension is supported
 int gltIsExtSupported(const char *szExtension);
 
+// Set working directoyr to /Resources on the Mac
+void gltSetWorkingDirectory(const char *szArgv);
+
 ///////////////////////////////////////////////////////////////////////////////
 // Win32 Only
 #ifdef WIN32

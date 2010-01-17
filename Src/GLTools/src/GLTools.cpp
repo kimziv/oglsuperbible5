@@ -98,9 +98,36 @@ int gltIsExtSupported(const char *extension)
 	return 0;
 	}
 
+/////////////////////////////////////////////////////////////////////////////////
+// No-op on anything other than the Mac, sets the working directory to 
+// the /Resources folder
+void gltSetWorkingDirectory(const char *szArgv)
+	{
+	#ifdef __APPLE__
+	static char szParentDirectory[255];   	
 
+	///////////////////////////////////////////////////////////////////////////   
+	// Get the directory where the .exe resides
+	char *c;
+	strncpy( szParentDirectory, szArgv, sizeof(szParentDirectory) );
+	szParentDirectory[254] = '\0'; // Make sure we are NULL terminated
+	
+	c = (char*) szParentDirectory;
 
+	while (*c != '\0')     // go to end 
+	c++;
 
+	while (*c != '/')      // back up to parent 
+	c--;
+
+	*c++ = '\0';           // cut off last part (binary name) 
+
+	///////////////////////////////////////////////////////////////////////////   
+	// Change to Resources directory. Any data files need to be placed there 
+	chdir(szParentDirectory);
+	chdir("../Resources");
+	#endif
+	}
 
 
 // Draw a torus (doughnut)  at z = fZVal... torus is in xy plane
