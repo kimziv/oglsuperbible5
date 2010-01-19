@@ -60,7 +60,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="opengl32.lib gltoolsd.lib freeglut_static.lib"
+				AdditionalDependencies="opengl32.lib"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -133,7 +133,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="opengl32.lib gltools.lib freeglut_static.lib"
+				AdditionalDependencies="opengl32.lib"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -189,6 +189,14 @@
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
 		</Filter>
+		<File
+			RelativePath="..\..\..\freeglut-2.6.0\VisualStudio2008Static\Release\freeglut_static.lib"
+			>
+		</File>
+		<File
+			RelativePath="..\..\GLTools\Release\gltools.lib"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>
