@@ -42,7 +42,7 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 // Richard S. Wright Jr.
 
 // Most functions are in-lined... and are defined here
-#include "math3d.h"
+#include <math3d.h>
 
 
 ////////////////////////////////////////////////////////////
