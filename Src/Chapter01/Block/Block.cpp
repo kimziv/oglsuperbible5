@@ -15,7 +15,7 @@
 #include <glut/glut.h>
 #else
 #define FREEGLUT_STATIC
-#include "../../../freeglut-2.6.0/include/gl/glut.h"
+#include <GL/glut.h>
 #endif
 
 /////////////////////////////////////////////////////////////////////////////////
