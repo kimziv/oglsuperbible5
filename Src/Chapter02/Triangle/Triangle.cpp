@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH | GLUT_STENCIL);
 	glutInitWindowSize(800, 600);
-	glutCreateWindow("3D Effects Demo");
+	glutCreateWindow("Triangle");
 	
 	GLenum err = glewInit();
 	if (GLEW_OK != err)
