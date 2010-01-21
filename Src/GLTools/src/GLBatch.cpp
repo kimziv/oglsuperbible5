@@ -159,7 +159,7 @@ void GLBatch::CopyColorData4f(M3DVector4f *vColors)
 	}
 
 
-void GLBatch::CopyTexCoorData2f(M3DVector2f *vTexCoords, GLuint uiTextureLayer) 
+void GLBatch::CopyTexCoordData2f(M3DVector2f *vTexCoords, GLuint uiTextureLayer) 
 	{
 	// First time, create the buffer object, allocate the space
 	if(uiTextureCoordArray[uiTextureLayer] == 0) {

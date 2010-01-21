@@ -75,8 +75,14 @@ class GLBatch : public GLBatchBase
 		void CopyVertexData3f(M3DVector3f *vVerts);
 		void CopyNormalDataf(M3DVector3f *vNorms);
 		void CopyColorData4f(M3DVector4f *vColors);
-		void CopyTexCoorData2f(M3DVector2f *vTexCoords, GLuint uiTextureLayer);
-	 
+		void CopyTexCoordData2f(M3DVector2f *vTexCoords, GLuint uiTextureLayer);
+
+		// Just to make life easier...
+		inline void CopyVertexData3f(GLfloat *vVerts) { CopyVertexData3f((M3DVector3f *)(vVerts)); }
+		inline void CopyNormalDataf(GLfloat *vNorms) { CopyNormalDataf((M3DVector3f *)(vNorms)); }
+		inline void CopyColorData4f(GLfloat *vColors) { CopyColorData4f((M3DVector4f *)(vColors)); }
+		inline void CopyTexCoordData2f(GLfloat *vTex, GLuint uiTextureLayer) { CopyTexCoordData2f((M3DVector2f *)(vTex), uiTextureLayer); }
+
 		virtual void Draw(void);
  		
 		// Immediate mode emulation

@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="Triangle"
-	ProjectGUID="{2A026077-AF62-4C7D-BE9C-8AAE3F11F290}"
-	RootNamespace="Triangle"
+	Name="Bounce"
+	ProjectGUID="{CC58A832-53EC-4503-B65D-B79F482C9EF5}"
+	RootNamespace="Bounce"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
@@ -21,7 +21,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
-			CharacterSet="2"
+			CharacterSet="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -92,7 +92,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
-			CharacterSet="2"
+			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
 			<Tool
@@ -171,7 +171,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\..\Src\Chapter02\Triangle\Triangle.cpp"
+				RelativePath="..\..\..\Src\Chapter02\Bounce\Bounce.cpp"
 				>
 			</File>
 		</Filter>

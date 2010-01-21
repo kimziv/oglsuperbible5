@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="Triangle"
-	ProjectGUID="{2A026077-AF62-4C7D-BE9C-8AAE3F11F290}"
-	RootNamespace="Triangle"
+	Name="Move"
+	ProjectGUID="{6A76E09D-1A9B-4A06-A7F6-6448E5A8D4F2}"
+	RootNamespace="Move"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
@@ -171,7 +171,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\..\Src\Chapter02\Triangle\Triangle.cpp"
+				RelativePath="..\..\..\Src\Chapter02\Move\Move.cpp"
 				>
 			</File>
 		</Filter>

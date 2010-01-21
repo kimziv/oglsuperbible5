@@ -17,6 +17,7 @@
 #ifdef __APPLE__
 #include <glut/glut.h>
 #else
+#define FREEGLUT_STATIC
 #include <gl/glut.h>
 #endif
 
@@ -249,7 +250,6 @@ void RenderScene(void)
         
     // Do the buffer Swap
     glutSwapBuffers();
-    
         
     // Do it again
     glutPostRedisplay();
@@ -260,12 +260,8 @@ void RenderScene(void)
 // Respond to arrow keys by moving the camera frame of reference
 void SpecialKeys(int key, int x, int y)
     {
-	static CStopWatch cameraTimer;
-	float fTime = cameraTimer.GetElapsedSeconds();
-	cameraTimer.Reset();
-	
-	float linear = 3.0f * fTime;
-	float angular = float(m3dDegToRad(60.0f)) * fTime;
+	float linear = 0.1f;
+	float angular = float(m3dDegToRad(5.0f));
 	
 	if(key == GLUT_KEY_UP)
 		cameraFrame.MoveForward(linear);
