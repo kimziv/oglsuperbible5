@@ -39,8 +39,7 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 #include <stdio.h>
 #include <assert.h>
 #include <stdarg.h>
-
-
+#include <iostream>
 
 ///////////////////////////////////////////////////////////////////////////////
 // Get the OpenGL version number
@@ -1143,6 +1142,7 @@ GLuint gltLoadShaderPairWithAttributes(const char *szVertexProg, const char *szF
 		{
         glDeleteShader(hVertexShader);
         glDeleteShader(hFragmentShader);
+		cout << "The shader at " << szVertexProg << "could not be found.\n";
         return NULL;
 		}
 	
@@ -1150,6 +1150,7 @@ GLuint gltLoadShaderPairWithAttributes(const char *szVertexProg, const char *szF
 		{
         glDeleteShader(hVertexShader);
         glDeleteShader(hFragmentShader);
+		cout << "The shader at " << szFragmentProg << "could not be found.\n";
         return NULL;
 		}
     
@@ -1161,6 +1162,9 @@ GLuint gltLoadShaderPairWithAttributes(const char *szVertexProg, const char *szF
     glGetShaderiv(hVertexShader, GL_COMPILE_STATUS, &testVal);
     if(testVal == GL_FALSE)
 		{
+		char infoLog[1024];
+		glGetShaderInfoLog(hVertexShader, 1024, NULL, infoLog);
+		cout << "The shader at " << szVertexProg << " failed to compile with the following error:\n" << "\n";
         glDeleteShader(hVertexShader);
         glDeleteShader(hFragmentShader);
         return NULL;
@@ -1169,6 +1173,9 @@ GLuint gltLoadShaderPairWithAttributes(const char *szVertexProg, const char *szF
     glGetShaderiv(hFragmentShader, GL_COMPILE_STATUS, &testVal);
     if(testVal == GL_FALSE)
 		{
+		char infoLog[1024];
+		glGetShaderInfoLog(hFragmentShader, 1024, NULL, infoLog);
+		cout << "The shader at " << hFragmentShader << " failed to compile with the following error:\n" << "\n";
         glDeleteShader(hVertexShader);
         glDeleteShader(hFragmentShader);
         return NULL;
@@ -1205,6 +1212,9 @@ GLuint gltLoadShaderPairWithAttributes(const char *szVertexProg, const char *szF
     glGetProgramiv(hReturn, GL_LINK_STATUS, &testVal);
     if(testVal == GL_FALSE)
 		{
+		char infoLog[1024];
+		glGetProgramInfoLog(hReturn, 1024, NULL, infoLog);
+		cout << "The program " << hReturn << " failed to link with the following error:\n" << "\n";
 		glDeleteProgram(hReturn);
 		return NULL;
 		}
