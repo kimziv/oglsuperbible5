@@ -61,7 +61,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="opengl32.lib freeglut_static.lib"
+				AdditionalDependencies="opengl32.lib "
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\GLTools\Release;..\..\OpenEXR\lib"
 				GenerateDebugInformation="true"
@@ -173,11 +173,11 @@
 			Name="Source Files"
 			>
 			<File
-				RelativePath="..\..\..\Src\Chapter10\hdr_bloom\GLMain.cpp"
+				RelativePath="..\..\..\Src\Chapter09\hdr_bloom\GLMain.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\Src\Chapter10\hdr_bloom\hdr_bloom.cpp"
+				RelativePath="..\..\..\Src\Chapter09\hdr_bloom\hdr_bloom.cpp"
 				>
 			</File>
 			<Filter
@@ -211,7 +211,7 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\..\Src\Chapter10\hdr_bloom\hdr_bloom.h"
+				RelativePath="..\..\..\Src\Chapter09\hdr_bloom\hdr_bloom.h"
 				>
 			</File>
 		</Filter>

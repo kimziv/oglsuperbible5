@@ -13,7 +13,7 @@ void main(void)
 {
 	const float bloomLimit = 1.0;
  
-    oColor =  vColor*texture2D(textureUnit0, vTex, 0);
+    oColor =  vColor*texture2D(textureUnit0, vTex);
     oColor.a = 1.0;
     
     vec3 brightColor = max(vColor.rgb - vec3(bloomLimit), vec3(0.0));

@@ -61,7 +61,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="opengl32.lib freeglut_static.lib"
+				AdditionalDependencies="opengl32.lib"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\GLTools\Release;..\..\OpenEXR\lib"
 				GenerateDebugInformation="true"
@@ -170,16 +170,52 @@
 	</References>
 	<Files>
 		<Filter
+			Name="Header Files"
+			Filter="h;hpp;hxx;hm;inl;inc;xsd"
+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
+			>
+			<File
+				RelativePath="..\..\..\Src\Chapter09\hdr_msaa\hdr_msaa.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Resource Files"
+			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
+			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
+			>
+		</Filter>
+		<Filter
+			Name="Shaders"
+			>
+			<File
+				RelativePath=".\basic.vs"
+				>
+			</File>
+			<File
+				RelativePath=".\color.fs"
+				>
+			</File>
+			<File
+				RelativePath=".\hdr_exposure.fs"
+				>
+			</File>
+			<File
+				RelativePath=".\tex_replace.fs"
+				>
+			</File>
+		</Filter>
+		<Filter
 			Name="Source Files"
 			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\..\Src\Chapter10\hdr_msaa\GLMain.cpp"
+				RelativePath="..\..\..\Src\Chapter09\hdr_msaa\GLMain.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\Src\Chapter10\hdr_msaa\hdr_msaa.cpp"
+				RelativePath="..\..\..\Src\Chapter09\hdr_msaa\hdr_msaa.cpp"
 				>
 			</File>
 			<Filter
@@ -206,50 +242,6 @@
 					>
 				</File>
 			</Filter>
-		</Filter>
-		<Filter
-			Name="Header Files"
-			Filter="h;hpp;hxx;hm;inl;inc;xsd"
-			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
-			>
-			<File
-				RelativePath="..\..\..\Src\Chapter10\hdr_msaa\hdr_msaa.h"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="Resource Files"
-			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
-			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
-			>
-		</Filter>
-		<Filter
-			Name="Shaders"
-			>
-			<File
-				RelativePath=".\basic.vs"
-				>
-			</File>
-			<File
-				RelativePath=".\blur.fs"
-				>
-			</File>
-			<File
-				RelativePath=".\color.fs"
-				>
-			</File>
-			<File
-				RelativePath=".\hdr_bloom.vs"
-				>
-			</File>
-			<File
-				RelativePath=".\hdr_exposure.fs"
-				>
-			</File>
-			<File
-				RelativePath=".\tex_replace.fs"
-				>
-			</File>
 		</Filter>
 	</Files>
 	<Globals>
