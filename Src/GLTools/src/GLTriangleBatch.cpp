@@ -81,6 +81,10 @@ GLTriangleBatch::~GLTriangleBatch(void)
     
     // Delete buffer objects
     glDeleteBuffers(4, bufferObjects);
+    
+    #ifndef OPENGL_ES
+    glDeleteVertexArrays(1, &vertexArrayBufferObject);
+    #endif
     }
     
 ////////////////////////////////////////////////////////////
@@ -172,10 +176,12 @@ void GLTriangleBatch::AddTriangle(M3DVector3f verts[3], M3DVector3f vNorms[3], M
 // is static (doesn't change).
 void GLTriangleBatch::End(void)
     {
+    #ifndef OPENGL_ES
 	// Create the master vertex array object
 	glGenVertexArrays(1, &vertexArrayBufferObject);
 	glBindVertexArray(vertexArrayBufferObject);
-	
+	#endif
+    
     // Create the buffer objects
     glGenBuffers(4, bufferObjects);
     
@@ -203,8 +209,11 @@ void GLTriangleBatch::End(void)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferObjects[INDEX_DATA]);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort)*nNumIndexes, pIndexes, GL_STATIC_DRAW);
 	
+
 	// Done
+#ifndef OPENGL_ES
 	glBindVertexArray(0);
+#endif
     
     // Free older, larger arrays
     delete [] pIndexes;
@@ -219,19 +228,47 @@ void GLTriangleBatch::End(void)
     pTexCoords = NULL;
     
     // Unbind to anybody
+    #ifndef OPENGL_ES
  	glBindVertexArray(0);
+    #endif
     }
 
 //////////////////////////////////////////////////////////////////////////
 // Draw - make sure you call glEnableClientState for these arrays
 void GLTriangleBatch::Draw(void) 
 	{
+    #ifndef OPENGL_ES
 	glBindVertexArray(vertexArrayBufferObject);
+    #else
+    glBindBuffer(GL_ARRAY_BUFFER, bufferObjects[VERTEX_DATA]);
+    glEnableVertexAttribArray(GLT_ATTRIBUTE_VERTEX);
+    glVertexAttribPointer(GLT_ATTRIBUTE_VERTEX, 3, GL_FLOAT, GL_FALSE, 0, 0);
+        
+    // Normal data
+    glBindBuffer(GL_ARRAY_BUFFER, bufferObjects[NORMAL_DATA]);
+    glEnableVertexAttribArray(GLT_ATTRIBUTE_NORMAL);
+    glVertexAttribPointer(GLT_ATTRIBUTE_NORMAL, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    
+    // Texture coordinates
+    glBindBuffer(GL_ARRAY_BUFFER, bufferObjects[TEXTURE_DATA]);
+    glEnableVertexAttribArray(GLT_ATTRIBUTE_TEXTURE0);
+    glVertexAttribPointer(GLT_ATTRIBUTE_TEXTURE0, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    
+    // Indexes
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferObjects[INDEX_DATA]);
+    #endif
+
 
     glDrawElements(GL_TRIANGLES, nNumIndexes, GL_UNSIGNED_SHORT, 0);
     
+    #ifndef OPENGL_ES
     // Unbind to anybody
 	glBindVertexArray(vertexArrayBufferObject);
+    #else
+    glDisableVertexAttribArray(GLT_ATTRIBUTE_VERTEX);
+    glDisableVertexAttribArray(GLT_ATTRIBUTE_NORMAL);
+    glDisableVertexAttribArray(GLT_ATTRIBUTE_TEXTURE0);
+    #endif
 	}    
 
 

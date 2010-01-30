@@ -84,7 +84,7 @@ class GLBatch : public GLBatchBase
 		inline void CopyTexCoordData2f(GLfloat *vTex, GLuint uiTextureLayer) { CopyTexCoordData2f((M3DVector2f *)(vTex), uiTextureLayer); }
 
 		virtual void Draw(void);
- 		
+ 
 		// Immediate mode emulation
 		// Slowest way to build an array on purpose... Use the above if you can instead
         void Reset(void);
@@ -99,9 +99,7 @@ class GLBatch : public GLBatchBase
         void Color4fv(M3DVector4f vColor);
         
         void MultiTexCoord2f(GLuint texture, GLfloat s, GLfloat t);
-        void MultiTexCoord2fv(GLuint texture, M3DVector2f vTexCoord);
-               
-               
+        void MultiTexCoord2fv(GLuint texture, M3DVector2f vTexCoord);               
         
     protected:
 		GLenum		primitiveType;		// What am I drawing....
