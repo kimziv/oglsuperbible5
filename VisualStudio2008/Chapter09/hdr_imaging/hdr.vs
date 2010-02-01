@@ -6,10 +6,10 @@
 uniform mat4 mvpMatrix;
 attribute vec3 vVertex;
 attribute vec2 vTexCoord0;
-varying vec2 vTex;
+varying vec2 vTexCoord;
 
 void main(void) 
 { 
-	vTex = vTexCoord0;
+	vTexCoord = vTexCoord0;
 	gl_Position = mvpMatrix * vec4(vVertex, 1.0); 
 }

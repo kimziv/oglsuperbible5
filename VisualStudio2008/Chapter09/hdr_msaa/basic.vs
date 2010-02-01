@@ -14,7 +14,7 @@ attribute vec3 vNormal;
 attribute vec2 vTexCoord0;
 
 varying vec4 vFragColor;
-varying vec2 vTex;
+varying vec2 vTexCoord;
 
 void main(void) 
 { 
@@ -33,7 +33,7 @@ void main(void)
 	float fDot = max(0.0, dot(vNorm, vLightDir)); 
 	vFragColor.rgb = vColor.rgb * fDot;
 	vFragColor.a = vColor.a;
-	vTex = vTexCoord0;
+	vTexCoord = vTexCoord0;
 	mat4 mvpMatrix;
 	mvpMatrix = pMatrix * mvMatrix;
 	gl_Position = mvpMatrix * vec4(vVertex, 1.0); 

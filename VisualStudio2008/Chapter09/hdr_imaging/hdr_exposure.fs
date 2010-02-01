@@ -3,7 +3,7 @@
 // on the specified exposure
 // 
 #version 150 
-varying vec2 vTex;
+varying vec2 vTexCoord;
 uniform sampler2D textureUnit0;
 uniform float exposure;
 out vec4 oColor;
@@ -11,7 +11,7 @@ out vec4 oColor;
 void main(void) 
 { 
 	// fetch from HDR texture
-	vec4 vColor = texture2D(textureUnit0, vTex); 
+	vec4 vColor = texture2D(textureUnit0, vTexCoord); 
 	
 	// Apply the exposure to this texel
 	oColor = 1.0 - exp2(-vColor * exposure);

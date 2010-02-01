@@ -4,7 +4,7 @@
 #version 150 
 
 varying vec4 vFragColor; 
-varying vec2 vTex; 
+varying vec2 vTexCoord; 
 uniform sampler2D textureUnit0; 
 uniform vec4 vColor;
 out vec4 oColor;

@@ -61,7 +61,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="opengl32.lib freeglut_static.lib"
+				AdditionalDependencies="opengl32.lib "
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\GLTools\Release;..\..\OpenEXR\lib"
 				GenerateDebugInformation="true"
@@ -177,11 +177,11 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\..\Src\Chapter10\hdr_imaging\GLMain.cpp"
+				RelativePath="..\..\..\Src\Chapter09\hdr_imaging\GLMain.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\Src\Chapter10\hdr_imaging\hdr_imaging.cpp"
+				RelativePath="..\..\..\Src\Chapter09\hdr_imaging\hdr_imaging.cpp"
 				>
 			</File>
 			<Filter
@@ -215,7 +215,7 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\..\Src\Chapter10\hdr_imaging\hdr_imaging.h"
+				RelativePath="..\..\..\Src\Chapter09\hdr_imaging\hdr_imaging.h"
 				>
 			</File>
 		</Filter>

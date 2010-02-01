@@ -1,10 +1,10 @@
 // blur.fs
-// outputs 1 color interpolated from VS
+// outputs 1 color using a gaussian blur of the input texture
 // 
 #version 150 
 
 varying vec4 vFragColor; 
-varying vec2 vTex; 
+varying vec2 vTexCoord; 
 
 uniform sampler2D textureUnit0;
 uniform vec2 tc_offset[25];
@@ -16,7 +16,7 @@ void main(void)
 	vec4 sample[25];
     for (int i = 0; i < 25; i++)
     {
-        sample[i] = texture2D(textureUnit0, vTex.st + tc_offset[i]);
+        sample[i] = texture2D(textureUnit0, vTexCoord.st + tc_offset[i]);
     }
 
 //   1  4  7  4 1

@@ -4,7 +4,7 @@
 // on the specified exposure
 // 
 
-varying vec2 vTex;
+varying vec2 vTexCoord;
 
 uniform sampler2DMS origImage;
 uniform samplerBuffer sampleWeightSampler; 
@@ -31,7 +31,7 @@ vec4 toneMap(vec4 vHdrColor)
 void main(void) 
 { 
     // Calculate un-normalized texture coordinates
-	vec2 tmp = floor(textureSize2DMS(origImage) * vTex); 
+	vec2 tmp = floor(textureSize2DMS(origImage) * vTexCoord); 
 
     // Find both the weighted and unweighted colors
 	vec4 vColor = vec4(0.0, 0.0, 0.0, 1.0);

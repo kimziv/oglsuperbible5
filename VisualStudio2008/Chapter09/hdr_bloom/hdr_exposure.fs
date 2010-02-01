@@ -3,7 +3,7 @@
 // on the specified exposure
 // 
 #version 150 
-varying vec2 vTex;
+varying vec2 vTexCoord;
 uniform sampler2D origImage;
 uniform sampler2D brightImage;
 uniform sampler2D blur1;
@@ -20,12 +20,12 @@ out vec4 oBright;
 void main(void) 
 { 
 	// fetch from HDR & blur textures
-	vec4 vBaseImage = texture2D(origImage, vTex); 
-	vec4 vBrightPass = texture2D(brightImage, vTex); 
-	vec4 vBlurColor1 = texture2D(blur1, vTex); 
-	vec4 vBlurColor2 = texture2D(blur2, vTex); 
-	vec4 vBlurColor3 = texture2D(blur3, vTex); 
-	vec4 vBlurColor4 = texture2D(blur4, vTex); 
+	vec4 vBaseImage = texture2D(origImage, vTexCoord); 
+	vec4 vBrightPass = texture2D(brightImage, vTexCoord); 
+	vec4 vBlurColor1 = texture2D(blur1, vTexCoord); 
+	vec4 vBlurColor2 = texture2D(blur2, vTexCoord); 
+	vec4 vBlurColor3 = texture2D(blur3, vTexCoord); 
+	vec4 vBlurColor4 = texture2D(blur4, vTexCoord); 
 	
 	vec4 vBloom = vBrightPass + 
 				  vBlurColor1 + 

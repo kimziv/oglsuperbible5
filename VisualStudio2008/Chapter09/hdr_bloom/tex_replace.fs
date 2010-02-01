@@ -3,7 +3,7 @@
 // 
 #version 150 
 
-varying vec2 vTex; 
+varying vec2 vTexCoord; 
 uniform sampler2D textureUnit0; 
 uniform vec4 vColor;
 out vec4 oColor;
@@ -13,7 +13,7 @@ void main(void)
 {
 	const float bloomLimit = 1.0;
  
-    oColor =  vColor*texture2D(textureUnit0, vTex);
+    oColor =  vColor*texture2D(textureUnit0, vTexCoord);
     oColor.a = 1.0;
     
     vec3 brightColor = max(vColor.rgb - vec3(bloomLimit), vec3(0.0));
