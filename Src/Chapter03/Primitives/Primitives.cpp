@@ -393,7 +393,7 @@ int main(int argc, char* argv[])
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH | GLUT_STENCIL);
 	glutInitWindowSize(800, 600);
-	glutCreateWindow("OpenGL Primitive Sampler");
+	glutCreateWindow("GL_POINTS");
     glutReshapeFunc(ChangeSize);
     glutKeyboardFunc(KeyPressFunc);
     glutSpecialFunc(SpecialKeys);
