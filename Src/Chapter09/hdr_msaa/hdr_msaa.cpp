@@ -346,9 +346,18 @@ void HDRMsaa::Initialize(void)
     floorBatch.Draw();
 
     // Get the location of each multisample sample
-    float positions[16];
-    for(int i =0; i < 8; i++)
+    int sampleCount = 0;
+    glGetIntegerv(GL_SAMPLES, &sampleCount);
+
+    float positions[64]; // Enough for at least 32 samples
+    for(int i =0; i < sampleCount; i++)
+    {
         glGetMultisamplefv(GL_SAMPLE_POSITION, i, &positions[i*2]);
+    }
+
+    // Limit sample count to 8x
+    //assert(sampleCount >= 8);
+    sampleCount = 8;
 
     float invertedSampleDistances[8];
     // The maxDist is used for doing the distance inversion
@@ -383,17 +392,12 @@ void HDRMsaa::Initialize(void)
     {
         float totalWeight = 0.0f;
         for(int j=0; j<=i; j++)
-        {
             totalWeight += invertedSampleDistances[j];
-        }
 
-        // Invert to get the factor used for each sample,
-        // The sum of all sample weights is always 1.0
+        // Invert to get the factor used for each sample, the sum of all sample weights is always 1.0
         float perSampleFactor = 1 / totalWeight;
         for(int j=0; j<=i; j++)
-        {
             sampleWeights[i][j] = invertedSampleDistances[j] * perSampleFactor;
-        }
     }
     
     // Setup a texture buffer object for holding the sample weights

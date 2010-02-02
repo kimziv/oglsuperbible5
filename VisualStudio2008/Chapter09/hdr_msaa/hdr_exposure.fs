@@ -2,6 +2,7 @@
 // hdr_exposure.fs
 // Scale floating point texture to 0.0 - 1.0 based 
 // on the specified exposure
+// Resolve multisample buffer based on input sample count
 // 
 
 varying vec2 vTexCoord;
