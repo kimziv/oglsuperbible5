@@ -1,8 +1,10 @@
-// hdr_adaptive.fs
-// 
-// 
 #version 150 
-varying vec2 vTexCoord;
+// hdr_adaptive.fs
+// perform adaptive tone mapping based on relative pixel locations
+// 
+
+in vec2 vTexCoord;
+
 uniform sampler2D textureUnit0;
 uniform sampler1D textureUnit1;
 uniform vec2 tc_offset[25];
@@ -14,7 +16,7 @@ void main(void)
     vec4 hdrSample[25];
     for (int i = 0; i < 25; i++)
     {   // Perform 25 lookups around the current texel 
-		hdrSample[i] = texture2D(textureUnit0, vTexCoord.st + tc_offset[i]); 
+		hdrSample[i] = texture(textureUnit0, vTexCoord.st + tc_offset[i]); 
 	}
 	
 	// Calculate weighted color of region

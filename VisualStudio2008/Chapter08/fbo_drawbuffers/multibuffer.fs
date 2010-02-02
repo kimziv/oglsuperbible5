@@ -1,10 +1,11 @@
+#version 150 
 // multibuffer.fs
 // outputs to 3 buffers: normal color, greyscale, 
 // and luminance adjusted color
-#version 150 
 
-varying vec4 vFragColor; 
-varying vec2 vTexCoord; 
+in vec4 vFragColor; 
+in vec2 vTexCoord; 
+
 uniform sampler2D textureUnit0; 
 uniform int bUseTexture;
 uniform samplerBuffer lumCurveSampler; 
@@ -14,7 +15,7 @@ void main(void) {
     vec4 lumFactor; 
     
     if (bUseTexture != 0) 
-	     vColor =  texture2D(textureUnit0, vTexCoord);
+	     vColor =  texture(textureUnit0, vTexCoord);
     else 
 	     vColor = vFragColor;
 	     
@@ -29,13 +30,13 @@ void main(void) {
 	vColor = clamp(vColor, 0.0f, 1.0f);
 	 
     int offset = int(vColor.r * 1024); 
-    lumFactor.r = texelFetchBuffer(lumCurveSampler, offset ).r;
+    lumFactor.r = texelFetch(lumCurveSampler, offset ).r;
     
     offset = int(vColor.g * 1024); 
-    lumFactor.g = texelFetchBuffer(lumCurveSampler, offset ).r;
+    lumFactor.g = texelFetch(lumCurveSampler, offset ).r;
     
     offset = int(vColor.b * 1024); 
-    lumFactor.b = texelFetchBuffer(lumCurveSampler, offset ).r;
+    lumFactor.b = texelFetch(lumCurveSampler, offset ).r;
     
     lumFactor.a = 1.0f;
     gl_FragData[2] = lumFactor; 

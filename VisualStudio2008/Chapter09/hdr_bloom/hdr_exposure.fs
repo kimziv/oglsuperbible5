@@ -1,9 +1,11 @@
+#version 150 
 // hdr_exposure.fs
 // Scale floating point texture to 0.0 - 1.0 based 
 // on the specified exposure
 // 
-#version 150 
-varying vec2 vTexCoord;
+
+in vec2 vTexCoord;
+
 uniform sampler2D origImage;
 uniform sampler2D brightImage;
 uniform sampler2D blur1;
@@ -20,7 +22,7 @@ out vec4 oBright;
 void main(void) 
 { 
 	// fetch from HDR & blur textures
-	vec4 vBaseImage = texture2D(origImage, vTexCoord); 
+	vec4 vBaseImage  = texture2D(origImage, vTexCoord); 
 	vec4 vBrightPass = texture2D(brightImage, vTexCoord); 
 	vec4 vBlurColor1 = texture2D(blur1, vTexCoord); 
 	vec4 vBlurColor2 = texture2D(blur2, vTexCoord); 

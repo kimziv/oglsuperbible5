@@ -1,12 +1,13 @@
+#version 150 
 // multibuffer_frag_location.fs
 // outputs to 3 buffers: normal color, greyscale, 
 // and luminance adjusted color
-#version 150 
 
-varying vec4 vFragColor; 
-varying vec2 vTexCoord; 
-uniform sampler2D textureUnit0; 
+in vec4 vFragColor; 
+in vec2 vTexCoord; 
+
 uniform int bUseTexture;
+uniform sampler2D textureUnit0; 
 uniform samplerBuffer lumCurveSampler; 
 
 out vec4 oStraightColor;
@@ -18,7 +19,7 @@ void main(void) {
     vec4 lumFactor; 
     
     if (bUseTexture != 0) 
-         vColor =  texture2D(textureUnit0, vTexCoord);
+         vColor =  texture(textureUnit0, vTexCoord);
     else 
          vColor = vFragColor;
          

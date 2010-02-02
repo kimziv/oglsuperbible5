@@ -1,12 +1,15 @@
+#version 150 
 // color.fs
 // outputs 1 color interpolated from VS
 // 
-#version 150 
 
-varying vec4 vFragColor; 
-varying vec2 vTexCoord; 
+
+in vec4 vFragColor; 
+in vec2 vTexCoord; 
+
 uniform sampler2D textureUnit0; 
 uniform vec4 vColor;
+
 out vec4 oColor;
 out vec4 oBright;
 

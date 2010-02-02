@@ -5,17 +5,12 @@
 // Resolve multisample buffer based on input sample count
 // 
 
-varying vec2 vTexCoord;
+in vec2 vTexCoord;
 
 uniform sampler2DMS origImage;
 uniform samplerBuffer sampleWeightSampler; 
-
-// 0-based, 0=1sample, 1=2samples, etc
-uniform int sampleCount;
-
-// 0-false, 1-true
-uniform int useWeightedResolve;
-
+uniform int sampleCount; // 0-based, 0=1sample, 1=2samples, etc
+uniform int useWeightedResolve; // 0-false, 1-true
 uniform float exposure;
 
 out vec4 oColor;
@@ -42,10 +37,10 @@ void main(void)
 	{
 	    // Get the weight for this sample from the texBo, this changes
 	    // based on the number of samples
-	    float weight = texelFetchBuffer(sampleWeightSampler, i).r;
+	    float weight = texelFetch(sampleWeightSampler, i).r;
 	    
 	    // tone-map the HDR texel before it is weighted
-	    vec4 sample = toneMap(texelFetch2DMS(origImage, ivec2(tmp), i));
+	    vec4 sample = toneMap(texelFetch(origImage, ivec2(tmp), i));
 	    
 		vWeightedColor += sample * weight;
 		vColor += sample;

@@ -1,14 +1,20 @@
 #version 150 
+// multibuffer.vs
+// transform incoming verticies, 
+// output vertex color and tex coords
+
+
+in vec3 vVertex;
+in vec3 vNormal;
+in vec2 texCoord0;
 
 uniform mat4 mvMatrix;
 uniform mat4 pMatrix;
 uniform vec3 vLightPos;
 uniform vec4 vColor;
-attribute vec3 vVertex;
-attribute vec3 vNormal;
-varying vec4 vFragColor;
-attribute vec2 texCoord0;
-varying vec2 vTexCoord;
+
+out vec4 vFragColor;
+out vec2 vTexCoord;
 
 void main(void) 
 { 
