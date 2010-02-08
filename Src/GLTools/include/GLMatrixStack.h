@@ -30,6 +30,7 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 */
 #include <gltools.h>
 #include <math3d.h>
+#include <glframe.h>
 
 typedef enum GLT_STACK_ERROR { GLT_STACK_NOERROR = 0, GLT_STACK_OVERFLOW, GLT_STACK_UNDERFLOW }; 
 
@@ -57,13 +58,25 @@ class GLMatrixStack
 		inline void LoadMatrix(const M3DMatrix44f mMatrix) { 
 			m3dCopyMatrix44(pStack[stackPointer], mMatrix); 
 			}
-		
+            
+        inline void LoadMatrix(GLFrame& frame) {
+            M3DMatrix44f m;
+            frame.GetMatrix(m);
+            LoadMatrix(m);
+            }
+            
 		inline void MultMatrix(const M3DMatrix44f mMatrix) {
 			M3DMatrix44f mTemp;
 			m3dCopyMatrix44(mTemp, pStack[stackPointer]);
 			m3dMatrixMultiply44(pStack[stackPointer], mTemp, mMatrix);
 			}
-				
+            
+        inline void MultMatrix(GLFrame& frame) {
+            M3DMatrix44f m;
+            frame.GetMatrix(m);
+            MultMatrix(m);
+            }
+            				
 		inline void PushMatrix(void) {
 			if(stackPointer < stackDepth) {
 				stackPointer++;
@@ -139,6 +152,12 @@ class GLMatrixStack
 				lastError = GLT_STACK_OVERFLOW;
 			}
 			
+        void PushMatrix(GLFrame& frame) {
+            M3DMatrix44f m;
+            frame.GetMatrix(m);
+            PushMatrix(m);
+            }
+            
 		// Two different ways to get the matrix
 		const M3DMatrix44f& GetMatrix(void) { return pStack[stackPointer]; }
 		void GetMatrix(M3DMatrix44f mMatrix) { m3dCopyMatrix44(mMatrix, pStack[stackPointer]); }

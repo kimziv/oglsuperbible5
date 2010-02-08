@@ -142,9 +142,11 @@ class GLFrame
 			vOrigin[1] += vCross[1] * fDelta;
 			vOrigin[2] += vCross[2] * fDelta;
 			}
+
+
 		///////////////////////////////////////////////////////////////////////
 		// Just assemble the matrix
-		void GetMatrix(M3DMatrix44f	matrix, bool bRotationOnly = false)
+        void GetMatrix(M3DMatrix44f matrix, bool bRotationOnly = false)
 			{
 			// Calculate the right side (x) vector, drop it right into the matrix
 			M3DVector3f vXAxis;
@@ -174,6 +176,7 @@ class GLFrame
 
             matrix[15] = 1.0f;
 			}
+
 
 
        ////////////////////////////////////////////////////////////////////////
