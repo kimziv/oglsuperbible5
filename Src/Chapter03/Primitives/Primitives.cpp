@@ -39,6 +39,10 @@ GLGeometryTransform	transformPipeline;
 M3DMatrix44f		shadowMatrix;
 
 
+GLfloat vGreen[] = { 0.0f, 1.0f, 0.0f, 1.0f };
+GLfloat vBlack[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+
+
 // Keep track of effects step
 int nStep = 0;
 
@@ -60,48 +64,40 @@ void SetupRC()
 	cameraFrame.MoveForward(-15.0f);
 
     //////////////////////////////////////////////////////////////////////
-    // Okay, build the batches. First fill a batch with points
-    // in a spiral pattern
-    GLfloat vPoints[200][3];
-    GLfloat radius = 1.0f;
-    GLfloat z = -2.35f;
-    int iCounter = 0;
-    for(GLfloat angle = 0.0f; angle <= (2.0f*M3D_PI)*3.0f; angle += 0.3f)
-		{
-        GLfloat x = radius * sin(angle);
-        GLfloat y = radius * cos(angle);
-            
-        // Specify the point and move the Z value up a little	
-        z += 0.075f;
-        vPoints[iCounter][0] = x;
-        vPoints[iCounter][1] = y;
-        vPoints[iCounter][2] = z;
-        iCounter++;
-		}
-
+    // Some points, more or less in the shape of Florida
+    GLfloat vCoast[24][3] = {{2.80, 1.20, 0.0 }, {2.0,  1.20, 0.0 },
+                            {2.0,  1.08, 0.0 },  {2.0,  1.08, 0.0 },
+                            {0.0,  0.80, 0.0 },  {-.32, 0.40, 0.0 },
+                            {-.48, 0.2, 0.0 },   {-.40, 0.0, 0.0 },
+                            {-.60, -.40, 0.0 },  {-.80, -.80, 0.0 },
+                            {-.80, -1.4, 0.0 },  {-.40, -1.60, 0.0 },
+                            {0.0, -1.20, 0.0 },  { .2, -.80, 0.0 },
+                            {.48, -.40, 0.0 },   {.52, -.20, 0.0 },
+                            {.48,  .20, 0.0 },   {.80,  .40, 0.0 },
+                            {1.20, .80, 0.0 },   {1.60, .60, 0.0 },
+                            {2.0, .60, 0.0 },    {2.2, .80, 0.0 },
+                            {2.40, 1.0, 0.0 },   {2.80, 1.0, 0.0 }};
+    
     // Load point batch
-    pointBatch.Begin(GL_POINTS, iCounter);
-    pointBatch.CopyVertexData3f(vPoints);
+    pointBatch.Begin(GL_POINTS, 24);
+    pointBatch.CopyVertexData3f(vCoast);
     pointBatch.End();
     
     // Load as a bunch of line segments
-    lineBatch.Begin(GL_LINES, iCounter);
-    lineBatch.CopyVertexData3f(vPoints);
+    lineBatch.Begin(GL_LINES, 24);
+    lineBatch.CopyVertexData3f(vCoast);
     lineBatch.End();
     
     // Load as a single line segment
-    lineStripBatch.Begin(GL_LINE_STRIP, iCounter);
-    lineStripBatch.CopyVertexData3f(vPoints);
+    lineStripBatch.Begin(GL_LINE_STRIP, 24);
+    lineStripBatch.CopyVertexData3f(vCoast);
     lineStripBatch.End();
     
     // Single line, connect first and last points
-    lineLoopBatch.Begin(GL_LINE_LOOP, iCounter);
-    lineLoopBatch.CopyVertexData3f(vPoints);
+    lineLoopBatch.Begin(GL_LINE_LOOP, 24);
+    lineLoopBatch.CopyVertexData3f(vCoast);
     lineLoopBatch.End();
     
-    //////////////////////////////////////////////////////////////////////
-    // For Triangles, we need to be a little more creative
-
     // For Triangles, we'll make a Pyramid
     GLfloat vPyramid[12][3] = { -2.0f, 0.0f, -2.0f, 
                                 2.0f, 0.0f, -2.0f, 
@@ -125,6 +121,7 @@ void SetupRC()
     
 
     // For a Triangle fan, just a 6 sided hex. Raise the center up a bit
+    GLfloat vPoints[100][3];    // Scratch array, more than we need
     int nVerts = 0;
     GLfloat r = 3.0f;
     vPoints[nVerts][0] = 0.0f;
@@ -138,19 +135,20 @@ void SetupRC()
         vPoints[nVerts][2] = -0.5f;
         }
 
+    // Close the fan
     nVerts++;
     vPoints[nVerts][0] = r;
     vPoints[nVerts][1] = 0;
     vPoints[nVerts][2] = 0.0f;
         
+    // Load it up
     triangleFanBatch.Begin(GL_TRIANGLE_FAN, 8);
     triangleFanBatch.CopyVertexData3f(vPoints);
     triangleFanBatch.End();     
         
-    
-    // For triangle strips, a little patch of terrain maybe
-    iCounter = 0;
-    radius = 3.0f;
+    // For triangle strips, a little ring or cylinder segment
+    int iCounter = 0;
+    GLfloat radius = 3.0f;
     for(GLfloat angle = 0.0f; angle <= (2.0f*M3D_PI); angle += 0.3f)
 		{
         GLfloat x = radius * sin(angle);
@@ -179,25 +177,43 @@ void SetupRC()
     vPoints[iCounter][2] = 0.5;
     iCounter++;            
         
-        
-        
+    // Load the triangle strip
     triangleStripBatch.Begin(GL_TRIANGLE_STRIP, iCounter);
     triangleStripBatch.CopyVertexData3f(vPoints);
     triangleStripBatch.End();    
     }
 
 
+/////////////////////////////////////////////////////////////////////////
+void DrawWireFramedBatch(GLBatch* pBatch)
+    {
+    shaderManager.UseStockShader(GLT_SHADER_FLAT, transformPipeline.GetModelViewProjectionMatrix(), vGreen);
+    pBatch->Draw();
+    
+    // Draw black outline
+    glPolygonOffset(-1.0f, -1.0f);
+    glEnable(GL_LINE_SMOOTH);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_POLYGON_OFFSET_LINE);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glLineWidth(2.5f);
+    shaderManager.UseStockShader(GLT_SHADER_FLAT, transformPipeline.GetModelViewProjectionMatrix(), vBlack);
+    pBatch->Draw();
+    
+    // Restore polygon mode and depht testing
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glDisable(GL_POLYGON_OFFSET_LINE);
+    glLineWidth(1.0f);
+    glDisable(GL_BLEND);
+    glDisable(GL_LINE_SMOOTH);
+    }
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // Called to draw scene
 void RenderScene(void)
-	{
-    static GLfloat rotValue = 0.0f;
-
-    GLfloat vGreen[] = { 0.0f, 1.0f, 0.0f, 1.0f };
-    GLfloat vBlack[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-
-    
+	{    
 	// Clear the window with current clearing color
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
@@ -234,76 +250,17 @@ void RenderScene(void)
                 glLineWidth(1.0f);
                 break;
             case 4:
-                shaderManager.UseStockShader(GLT_SHADER_FLAT, transformPipeline.GetModelViewProjectionMatrix(), vGreen);
-                triangleBatch.Draw();
- 
-                // Draw black outline
-                glPolygonOffset(-1.0f, -1.0f);
-                glEnable(GL_LINE_SMOOTH);
-                glEnable(GL_BLEND);
-                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-                glEnable(GL_POLYGON_OFFSET_LINE);
-                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-                glLineWidth(2.5f);
-                shaderManager.UseStockShader(GLT_SHADER_FLAT, transformPipeline.GetModelViewProjectionMatrix(), vBlack);
-                triangleBatch.Draw();
-                
-                // Restore polygon mode and depht testing
-                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-                glDisable(GL_POLYGON_OFFSET_LINE);
-                glLineWidth(1.0f);
-                glDisable(GL_BLEND);
-                glDisable(GL_LINE_SMOOTH);
-                
+                DrawWireFramedBatch(&triangleBatch);
                 break;
             case 5:
-                shaderManager.UseStockShader(GLT_SHADER_FLAT, transformPipeline.GetModelViewProjectionMatrix(), vGreen);
-                triangleStripBatch.Draw();
-                glPolygonOffset(-1.0f, -3.0f);
-                glEnable(GL_LINE_SMOOTH);
-                glEnable(GL_BLEND);
-                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-                glEnable(GL_POLYGON_OFFSET_LINE);
-                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-                glLineWidth(2.5f);
-                shaderManager.UseStockShader(GLT_SHADER_FLAT, transformPipeline.GetModelViewProjectionMatrix(), vBlack);
-                triangleStripBatch.Draw();
-                
-                // Restore polygon mode and depht testing
-                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-                glDisable(GL_POLYGON_OFFSET_LINE);
-                glLineWidth(1.0f);
-                glDisable(GL_BLEND);
-                glDisable(GL_LINE_SMOOTH);
+                DrawWireFramedBatch(&triangleStripBatch);
                 break;
             case 6:
-                shaderManager.UseStockShader(GLT_SHADER_FLAT, transformPipeline.GetModelViewProjectionMatrix(), vGreen);
-                // Draw normally
-                triangleFanBatch.Draw();
-
-                // Draw black outline
-                glPolygonOffset(-1.0f, -1.0f);
-                glEnable(GL_LINE_SMOOTH);
-                glEnable(GL_BLEND);
-                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-                glEnable(GL_POLYGON_OFFSET_LINE);
-                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-                glLineWidth(2.5f);
-                shaderManager.UseStockShader(GLT_SHADER_FLAT, transformPipeline.GetModelViewProjectionMatrix(), vBlack);
-                triangleFanBatch.Draw();
-                
-                // Restore polygon mode and depht testing
-                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-                glDisable(GL_POLYGON_OFFSET_LINE);
-                glLineWidth(1.0f);
-                glDisable(GL_BLEND);
-                glDisable(GL_LINE_SMOOTH);
+                DrawWireFramedBatch(&triangleFanBatch);
                 break;
             }
 		
 	modelViewMatrix.PopMatrix();
-
-    rotValue += 2.0f;
 
 	// Flush drawing commands
 	glutSwapBuffers();
@@ -365,7 +322,6 @@ void KeyPressFunc(unsigned char key, int x, int y)
             glutSetWindowTitle("GL_TRIANGLE_STRIP");
             break;
         case 6:
-        default:
             glutSetWindowTitle("GL_TRIANGLE_FAN");
             break;
         }
