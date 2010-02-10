@@ -62,7 +62,7 @@ void SetupRC()
 	transformPipeline.SetMatrixStacks(modelViewMatrix, projectionMatrix);
 
 	cameraFrame.MoveForward(-15.0f);
-
+    
     //////////////////////////////////////////////////////////////////////
     // Some points, more or less in the shape of Florida
     GLfloat vCoast[24][3] = {{2.80, 1.20, 0.0 }, {2.0,  1.20, 0.0 },
@@ -187,21 +187,26 @@ void SetupRC()
 /////////////////////////////////////////////////////////////////////////
 void DrawWireFramedBatch(GLBatch* pBatch)
     {
+    // Draw the batch solid green
     shaderManager.UseStockShader(GLT_SHADER_FLAT, transformPipeline.GetModelViewProjectionMatrix(), vGreen);
     pBatch->Draw();
     
     // Draw black outline
-    glPolygonOffset(-1.0f, -1.0f);
+    glPolygonOffset(-1.0f, -1.0f);      // Shift depth values
+    glEnable(GL_POLYGON_OFFSET_LINE);
+
+    // Draw lines antialiased
     glEnable(GL_LINE_SMOOTH);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_POLYGON_OFFSET_LINE);
+    
+    // Draw black wireframe version of geometry
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glLineWidth(2.5f);
     shaderManager.UseStockShader(GLT_SHADER_FLAT, transformPipeline.GetModelViewProjectionMatrix(), vBlack);
     pBatch->Draw();
     
-    // Restore polygon mode and depht testing
+    // Put everything back the way we found it
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glDisable(GL_POLYGON_OFFSET_LINE);
     glLineWidth(1.0f);
