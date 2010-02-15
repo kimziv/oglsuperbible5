@@ -4,7 +4,8 @@
 // OpenGL SuperBible, 5th Edition
 // Nick Haemel
 
-#include "glew.h"
+#include <glew.h>
+#include <glxew.h>
 
 #include <math.h>
 #include <stdio.h>
@@ -80,6 +81,15 @@ void CreateWindow(RenderContext *rcx)
     rcx->ctx = glXCreateContext(rcx->dpy, visualInfo, 0, True);
     glXMakeCurrent(rcx->dpy, rcx->win, rcx->ctx);
 
+    GLenum err = glewInit();
+    if (GLEW_OK != err)
+    {
+        /* Problem: glewInit failed, something is seriously wrong. */
+        fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
+    } 
+
+    const GLubyte *s = glGetString(GL_VERSION);
+    printf("GL Version = %s\n", s);
 }
 
 void SetupGLState(RenderContext *rcx)

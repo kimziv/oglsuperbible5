@@ -3,6 +3,9 @@
 // Demonstrates an assortment of basic 3D concepts
 // Program by Richard S. Wright Jr.
 
+#include <glew.h>
+#include <glxew.h>
+
 #include <GLTools.h>	// OpenGL toolkit
 #include <GLMatrixStack.h>
 #include <GLFrame.h>
@@ -293,6 +296,16 @@ void CreateWindow(RenderContext *rcx)
     // Also create a new GL context for rendering
     rcx->ctx = glXCreateContext(rcx->dpy, visualInfo, 0, True);
     glXMakeCurrent(rcx->dpy, rcx->win, rcx->ctx);
+
+    GLenum err = glewInit();
+    if (GLEW_OK != err)
+    {
+        /* Problem: glewInit failed, something is seriously wrong. */
+        fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
+    }
+     
+    const GLubyte *s = glGetString(GL_VERSION);
+    printf("GL Version = %s\n", s);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -409,7 +422,7 @@ void SetupRC(RenderContext *rcx)
     free(pBytes);
 
     // Another block face
-    pBytes = gltReadTGABits("block5.tga", &nWidth, &nHeight, &nComponents, &format);
+    pBytes = gltReadTGABits("Block5.tga", &nWidth, &nHeight, &nComponents, &format);
         glBindTexture(GL_TEXTURE_2D, textures[2]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -420,7 +433,7 @@ void SetupRC(RenderContext *rcx)
     free(pBytes);
 
     // Yet another block face
-    pBytes = gltReadTGABits("block6.tga", &nWidth, &nHeight, &nComponents, &format);
+    pBytes = gltReadTGABits("Block6.tga", &nWidth, &nHeight, &nComponents, &format);
         glBindTexture(GL_TEXTURE_2D, textures[3]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -582,7 +595,7 @@ void RenderFloor(void)
 
 ///////////////////////////////////////////////////////////////////////////////
 // Called to draw scene
-void RenderScene(void)
+void RenderScene(RenderContext *rcx)
 {
     // Clear the window with current clearing color
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -594,7 +607,8 @@ void RenderScene(void)
 
         // Reflection step... draw cube upside down, the floor
         // blended on top of it
-        if(nStep == 5) {
+        if(nStep == 5)
+        {
             glDisable(GL_CULL_FACE);
             modelViewMatrix.PushMatrix();
             modelViewMatrix.Scale(1.0f, -1.0f, 1.0f);
@@ -606,11 +620,9 @@ void RenderScene(void)
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             RenderFloor();
             glDisable(GL_BLEND);			
-            }
-
+        }
 
         modelViewMatrix.PushMatrix();
-
             // Draw normally
             modelViewMatrix.Rotate(35.0f, 0.0f, 1.0f, 0.0f);
             RenderBlock();
@@ -633,9 +645,9 @@ void RenderScene(void)
 ///////////////////////////////////////////////////////////////////////////////
 // A normal ASCII key has been pressed.
 // In this case, advance the scene when the space bar is pressed
-void KeyPressFunc(unsigned char key, int x, int y)
+void KeyPressFunc(unsigned char key)
 {
-    if(key == 32)
+    if(key == 65)
     {
         nStep++;
 
@@ -680,26 +692,25 @@ int main(int argc, char* argv[])
     RenderContext rcx;
 
     gltSetWorkingDirectory(argv[0]);
-    GLenum err = glewInit();
-    if (GLEW_OK != err)
-    {
-        /* Problem: glewInit failed, something is seriously wrong. */
-        fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
-        return 1;
-    }
+    GLuint vertexArrayObject;
+
+    // TODO Fix This!!!!!!!!!!!!!!!!1
+    glGenVertexArraysAPPLE = (void(*)(GLsizei, const GLuint*))glXGetProcAddressARB((GLubyte*)"glGenVertexArrays");
+glBindVertexArrayAPPLE = (void(*)(const GLuint))glXGetProcAddressARB((GLubyte*)"glBindVertexArray");
+glDeleteVertexArraysAPPLE = (void(*)(GLsizei, const GLuint*))glXGetProcAddressARB((GLubyte*)"glGenVertexArrays");
 
     // Set initial window size
     rcx.nWinWidth  = 800;
     rcx.nWinHeight = 600;
 
-
     // Setup X window and GLX context
+
     CreateWindow(&rcx);
     SetupRC(&rcx);
-    ChangeSize(rcx.nWinWidth, nWinHeight);
+    ChangeSize(rcx.nWinWidth, rcx.nWinHeight);
 
     // Draw the first frame before checking for messages
-    Draw(&rcx);
+    RenderScene(&rcx);
 
     // Execute loop the whole time the app runs
     for(;;)
@@ -721,7 +732,7 @@ int main(int argc, char* argv[])
             XGetWindowAttributes(rcx.dpy, rcx.win, &winData);
             rcx.nWinHeight = winData.height;
             rcx.nWinWidth = winData.width;
-            ChangeSize(rcx.nWinWidth, nWinHeight);
+            ChangeSize(rcx.nWinWidth, rcx.nWinHeight);
             break;
         case KeyPress:
             KeyPressFunc(newEvent.xkey.keycode);
@@ -734,7 +745,7 @@ int main(int argc, char* argv[])
 
         if(bWinMapped)
         {
-            Draw(&rcx);
+            RenderScene(&rcx);
         }
     }
 
