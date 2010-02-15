@@ -15,6 +15,13 @@
 
 #include <math.h>
 
+///////////
+// TODO Remove these!!!!
+#define GLX_CONTEXT_MAJOR_VERSION_ARB 0x2091
+#define GLX_CONTEXT_MINOR_VERSION_ARB 0x2092
+typedef GLXContext ( * PFNGLXCREATECONTEXTATTRIBSARBPROC) (Display* dpy, GLXFBConfig config, GLXContext share_context, Bool direct, const int *attrib_list);
+PFNGLXCREATECONTEXTATTRIBSARBPROC glXCreateContextAttribsARB;
+
 /////////////////////////////////////////////////////////////////////////////////
 // An assortment of needed classes
 GLShaderManager		shaderManager;
@@ -43,6 +50,17 @@ GLfloat vLightPos[] = { -8.0f, 20.0f, 100.0f, 1.0f };
 
 GLuint textures[4];
 
+
+void EarlyInitGLXfnPointers()
+{
+
+    glGenVertexArraysAPPLE = (void(*)(GLsizei, const GLuint*))glXGetProcAddressARB((GLubyte*)"glGenVertexArrays");
+    glBindVertexArrayAPPLE = (void(*)(const GLuint))glXGetProcAddressARB((GLubyte*)"glBindVertexArray");
+    glDeleteVertexArraysAPPLE = (void(*)(GLsizei, const GLuint*))glXGetProcAddressARB((GLubyte*)"glGenVertexArrays");
+ glXCreateContextAttribsARB = (GLXContext(*)(Display* dpy, GLXFBConfig config, GLXContext share_context, Bool direct, const int *attrib_list))glXGetProcAddressARB((GLubyte*)"glXCreateContextAttribsARB");
+ glXChooseFBConfig = (GLXFBConfig*(*)(Display *dpy, int screen, const int *attrib_list, int *nelements))glXGetProcAddressARB((GLubyte*)"glXChooseFBConfig");
+ glXGetVisualFromFBConfig = (XVisualInfo*(*)(Display *dpy, GLXFBConfig config))glXGetProcAddressARB((GLubyte*)"glXGetVisualFromFBConfig");
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Make a cube out of a batch of triangles. Texture coordinates and normals
@@ -250,8 +268,13 @@ void CreateWindow(RenderContext *rcx)
     GLint nMajorVer = 0;
     GLint nMinorVer = 0;
     XVisualInfo *visualInfo;
-    static int attributes[] = { GLX_RGBA,
-                    GLX_DOUBLEBUFFER,
+    GLXFBConfig *fbConfigs;
+    int numConfigs = 0;
+    static int fbAttribs[] = {
+                    GLX_RENDER_TYPE,   GLX_RGBA_BIT,
+                    GLX_X_RENDERABLE,  True,
+                    GLX_DRAWABLE_TYPE, GLX_WINDOW_BIT,
+                    GLX_DOUBLEBUFFER,  True,
                     GLX_RED_SIZE, 8,
                     GLX_BLUE_SIZE, 8,
                     GLX_GREEN_SIZE, 8,
@@ -271,8 +294,9 @@ void CreateWindow(RenderContext *rcx)
         exit(0);
     }
 
-    // Get a new visual that meets our attrib requirements
-    visualInfo = glXChooseVisual(rcx->dpy, DefaultScreen(rcx->dpy), attributes);
+    // Get a new fb config that meets our attrib requirements
+    fbConfigs = glXChooseFBConfig(rcx->dpy, DefaultScreen(rcx->dpy), fbAttribs, &numConfigs);
+    visualInfo = glXGetVisualFromFBConfig(rcx->dpy, fbConfigs[0]);
 
     // Now create an X window
     winAttribs.event_mask = ExposureMask | VisibilityChangeMask | 
@@ -294,7 +318,11 @@ void CreateWindow(RenderContext *rcx)
     XMapWindow(rcx->dpy, rcx->win);
 
     // Also create a new GL context for rendering
-    rcx->ctx = glXCreateContext(rcx->dpy, visualInfo, 0, True);
+    GLint attribs[] = {
+      GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
+      GLX_CONTEXT_MINOR_VERSION_ARB, 2,
+      0 };
+    rcx->ctx = glXCreateContextAttribsARB(rcx->dpy, fbConfigs[0], 0, True, attribs);
     glXMakeCurrent(rcx->dpy, rcx->win, rcx->ctx);
 
     GLenum err = glewInit();
@@ -303,9 +331,6 @@ void CreateWindow(RenderContext *rcx)
         /* Problem: glewInit failed, something is seriously wrong. */
         fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
     }
-     
-    const GLubyte *s = glGetString(GL_VERSION);
-    printf("GL Version = %s\n", s);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -694,10 +719,7 @@ int main(int argc, char* argv[])
     gltSetWorkingDirectory(argv[0]);
     GLuint vertexArrayObject;
 
-    // TODO Fix This!!!!!!!!!!!!!!!!1
-    glGenVertexArraysAPPLE = (void(*)(GLsizei, const GLuint*))glXGetProcAddressARB((GLubyte*)"glGenVertexArrays");
-glBindVertexArrayAPPLE = (void(*)(const GLuint))glXGetProcAddressARB((GLubyte*)"glBindVertexArray");
-glDeleteVertexArraysAPPLE = (void(*)(GLsizei, const GLuint*))glXGetProcAddressARB((GLubyte*)"glGenVertexArrays");
+    EarlyInitGLXfnPointers();
 
     // Set initial window size
     rcx.nWinWidth  = 800;

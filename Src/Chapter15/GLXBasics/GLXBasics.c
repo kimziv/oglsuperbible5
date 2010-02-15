@@ -12,6 +12,12 @@
 #include <stdlib.h>
 
 #define PI 3.14159265
+///////////
+// TODO Remove these!!!!
+#define GLX_CONTEXT_MAJOR_VERSION_ARB 0x2091
+#define GLX_CONTEXT_MINOR_VERSION_ARB 0x2092
+typedef GLXContext ( * PFNGLXCREATECONTEXTATTRIBSARBPROC) (Display* dpy, GLXFBConfig config, GLXContext share_context, Bool direct, const int *attrib_list);
+PFNGLXCREATECONTEXTATTRIBSARBPROC glXCreateContextAttribsARB;
 
 // Store all system info in one place
 typedef struct RenderContextRec
@@ -26,6 +32,16 @@ typedef struct RenderContextRec
 
 } RenderContext;
 
+void EarlyInitGLXfnPointers()
+{
+
+    glGenVertexArraysAPPLE = (void(*)(GLsizei, const GLuint*))glXGetProcAddressARB((GLubyte*)"glGenVertexArrays");
+    glBindVertexArrayAPPLE = (void(*)(const GLuint))glXGetProcAddressARB((GLubyte*)"glBindVertexArray");
+    glDeleteVertexArraysAPPLE = (void(*)(GLsizei, const GLuint*))glXGetProcAddressARB((GLubyte*)"glGenVertexArrays");
+ glXCreateContextAttribsARB = (GLXContext(*)(Display* dpy, GLXFBConfig config, GLXContext share_context, Bool direct, const int *attrib_list))glXGetProcAddressARB((GLubyte*)"glXCreateContextAttribsARB");
+ glXChooseFBConfig = (GLXFBConfig*(*)(Display *dpy, int screen, const int *attrib_list, int *nelements))glXGetProcAddressARB((GLubyte*)"glXChooseFBConfig");
+ glXGetVisualFromFBConfig = (XVisualInfo*(*)(Display *dpy, GLXFBConfig config))glXGetProcAddressARB((GLubyte*)"glXGetVisualFromFBConfig");
+}
 
 void CreateWindow(RenderContext *rcx)
 {
@@ -34,12 +50,19 @@ void CreateWindow(RenderContext *rcx)
     GLint nMajorVer = 0;
     GLint nMinorVer = 0;
     XVisualInfo *visualInfo;
-    static int attributes[] = { GLX_RGBA,
-                    GLX_DOUBLEBUFFER,
-                    GLX_RED_SIZE, 8,
-                    GLX_BLUE_SIZE, 8,
-                    GLX_GREEN_SIZE, 8,
+    GLXFBConfig *fbConfigs;
+    int numConfigs = 0;
+    static int fbAttribs[] = {
+                    GLX_RENDER_TYPE,   GLX_RGBA_BIT,
+                    GLX_X_RENDERABLE,  True,
+                    GLX_DRAWABLE_TYPE, GLX_WINDOW_BIT,
+                    GLX_DOUBLEBUFFER,  True,
+                    GLX_RED_SIZE,      8,
+                    GLX_BLUE_SIZE,     8,
+                    GLX_GREEN_SIZE,    8,
                     0 };
+
+    EarlyInitGLXfnPointers();
 
     // Tell X we are going to use the display
     rcx->dpy = XOpenDisplay(NULL);
@@ -54,9 +77,9 @@ void CreateWindow(RenderContext *rcx)
         XCloseDisplay(rcx->dpy);
         exit(0);
     }
-
-    // Get a new visual that meets our attrib requirements
-    visualInfo = glXChooseVisual(rcx->dpy, DefaultScreen(rcx->dpy), attributes);
+    // Get a new fb config that meets our attrib requirements
+    fbConfigs = glXChooseFBConfig(rcx->dpy, DefaultScreen(rcx->dpy), fbAttribs, &numConfigs);
+    visualInfo = glXGetVisualFromFBConfig(rcx->dpy, fbConfigs[0]);
 
     // Now create an X window
     winAttribs.event_mask = ExposureMask | VisibilityChangeMask | 
@@ -78,7 +101,11 @@ void CreateWindow(RenderContext *rcx)
     XMapWindow(rcx->dpy, rcx->win);
 
     // Also create a new GL context for rendering
-    rcx->ctx = glXCreateContext(rcx->dpy, visualInfo, 0, True);
+    GLint attribs[] = {
+      GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
+      GLX_CONTEXT_MINOR_VERSION_ARB, 2,
+      0 };
+    rcx->ctx = glXCreateContextAttribsARB(rcx->dpy, fbConfigs[0], 0, True, attribs);
     glXMakeCurrent(rcx->dpy, rcx->win, rcx->ctx);
 
     GLenum err = glewInit();
