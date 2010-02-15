@@ -33,7 +33,7 @@ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING 
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <gltools.h>
+#include <GLTools.h>
 #include <math3d.h>
 #include <GLTriangleBatch.h>
 #include <stdio.h>
@@ -811,12 +811,17 @@ GLbyte *gltReadTGABits(const char *szFileName, GLint *iWidth, GLint *iHeight, GL
 #endif
 
 #ifdef WIN32
-		case 3:     // Most likely case
-				*eFormat = GL_BGR;
-				*iComponents = GL_RGB;
-				break;				
+	case 3:     // Most likely case
+	    *eFormat = GL_BGR;
+	    *iComponents = GL_RGB;
+	    break;				
 #endif
-
+#ifdef linux
+	case 3:     // Most likely case
+	    *eFormat = GL_BGR;
+	    *iComponents = GL_RGB;
+	    break;				
+#endif
         case 4:
             *eFormat = GL_BGRA;
             *iComponents = GL_RGBA;
@@ -1011,7 +1016,7 @@ GLuint gltLoadShaderPairWithAttributes(const char *szVertexProg, const char *szF
         glDeleteShader(hVertexShader);
         glDeleteShader(hFragmentShader);
 		cout << "The shader at " << szVertexProg << "could not be found.\n";
-        return NULL;
+        return (GLuint)NULL;
 		}
 	
     if(gltLoadShaderFile(szFragmentProg, hFragmentShader) == false)
@@ -1019,7 +1024,7 @@ GLuint gltLoadShaderPairWithAttributes(const char *szVertexProg, const char *szF
         glDeleteShader(hVertexShader);
         glDeleteShader(hFragmentShader);
 		cout << "The shader at " << szFragmentProg << "could not be found.\n";
-        return NULL;
+        return (GLuint)NULL;
 		}
     
     // Compile them
@@ -1035,7 +1040,7 @@ GLuint gltLoadShaderPairWithAttributes(const char *szVertexProg, const char *szF
 		cout << "The shader at " << szVertexProg << " failed to compile with the following error:\n" << "\n";
         glDeleteShader(hVertexShader);
         glDeleteShader(hFragmentShader);
-        return NULL;
+        return (GLuint)NULL;
 		}
     
     glGetShaderiv(hFragmentShader, GL_COMPILE_STATUS, &testVal);
@@ -1046,7 +1051,7 @@ GLuint gltLoadShaderPairWithAttributes(const char *szVertexProg, const char *szF
 		cout << "The shader at " << hFragmentShader << " failed to compile with the following error:\n" << "\n";
         glDeleteShader(hVertexShader);
         glDeleteShader(hFragmentShader);
-        return NULL;
+        return (GLuint)NULL;
 		}
     
     // Link them - assuming it works...
@@ -1084,7 +1089,7 @@ GLuint gltLoadShaderPairWithAttributes(const char *szVertexProg, const char *szF
 		glGetProgramInfoLog(hReturn, 1024, NULL, infoLog);
 		cout << "The program " << hReturn << " failed to link with the following error:\n" << "\n";
 		glDeleteProgram(hReturn);
-		return NULL;
+		return (GLuint)NULL;
 		}
     
     return hReturn;  
@@ -1111,14 +1116,14 @@ GLuint gltLoadShaderPair(const char *szVertexProg, const char *szFragmentProg)
 		{
         glDeleteShader(hVertexShader);
         glDeleteShader(hFragmentShader);
-        return NULL;
+        return (GLuint)NULL;
 		}
 	
     if(gltLoadShaderFile(szFragmentProg, hFragmentShader) == false)
 		{
         glDeleteShader(hVertexShader);
         glDeleteShader(hFragmentShader);
-        return NULL;
+        return (GLuint)NULL;
 		}
     
     // Compile them
@@ -1131,7 +1136,7 @@ GLuint gltLoadShaderPair(const char *szVertexProg, const char *szFragmentProg)
 		{
         glDeleteShader(hVertexShader);
         glDeleteShader(hFragmentShader);
-        return NULL;
+        return (GLuint)NULL;
 		}
     
     glGetShaderiv(hFragmentShader, GL_COMPILE_STATUS, &testVal);
@@ -1139,7 +1144,7 @@ GLuint gltLoadShaderPair(const char *szVertexProg, const char *szFragmentProg)
 		{
         glDeleteShader(hVertexShader);
         glDeleteShader(hFragmentShader);
-        return NULL;
+        return (GLuint)NULL;
 		}
     
     // Link them - assuming it works...
@@ -1158,7 +1163,7 @@ GLuint gltLoadShaderPair(const char *szVertexProg, const char *szFragmentProg)
     if(testVal == GL_FALSE)
 		{
 		glDeleteProgram(hReturn);
-		return NULL;
+		return (GLuint)NULL;
 		}
     
     return hReturn;  
@@ -1194,7 +1199,7 @@ GLuint gltLoadShaderPairSrc(const char *szVertexSrc, const char *szFragmentSrc)
 		{
         glDeleteShader(hVertexShader);
         glDeleteShader(hFragmentShader);
-        return NULL;
+        return (GLuint)NULL;
 		}
     
     glGetShaderiv(hFragmentShader, GL_COMPILE_STATUS, &testVal);
@@ -1202,7 +1207,7 @@ GLuint gltLoadShaderPairSrc(const char *szVertexSrc, const char *szFragmentSrc)
 		{
         glDeleteShader(hVertexShader);
         glDeleteShader(hFragmentShader);
-        return NULL;
+        return (GLuint)NULL;
 		}
     
     // Link them - assuming it works...
@@ -1220,7 +1225,7 @@ GLuint gltLoadShaderPairSrc(const char *szVertexSrc, const char *szFragmentSrc)
     if(testVal == GL_FALSE)
 		{
 		glDeleteProgram(hReturn);
-		return NULL;
+		return (GLuint)NULL;
 		}
     
     return hReturn;  
@@ -1256,7 +1261,7 @@ GLuint gltLoadShaderPairSrcWithAttributes(const char *szVertexSrc, const char *s
 		{
         glDeleteShader(hVertexShader);
         glDeleteShader(hFragmentShader);
-        return NULL;
+        return (GLuint)NULL;
 		}
     
     glGetShaderiv(hFragmentShader, GL_COMPILE_STATUS, &testVal);
@@ -1264,7 +1269,7 @@ GLuint gltLoadShaderPairSrcWithAttributes(const char *szVertexSrc, const char *s
 		{
         glDeleteShader(hVertexShader);
         glDeleteShader(hFragmentShader);
-        return NULL;
+        return (GLuint)NULL;
 		}
     
     // Link them - assuming it works...
@@ -1298,7 +1303,7 @@ GLuint gltLoadShaderPairSrcWithAttributes(const char *szVertexSrc, const char *s
     if(testVal == GL_FALSE)
 		{
 		glDeleteProgram(hReturn);
-		return NULL;
+		return (GLuint)NULL;
 		}
     
     return hReturn;  

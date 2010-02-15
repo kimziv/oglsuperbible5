@@ -59,6 +59,12 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 #endif
 #endif
 
+// Linux
+#ifdef linux
+#define GLEW_STATIC
+#include <glew.h>
+#endif
+
 //////////////////////// TEMPORARY TEMPORARY TEMPORARY - On SnowLeopard this is suppored, but GLEW doens't hook up properly
 //////////////////////// Fixed probably in 10.6.3
 #ifdef __APPLE__

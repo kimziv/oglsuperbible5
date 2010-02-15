@@ -68,6 +68,12 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 #endif
 #endif
 
+// Linux
+#ifdef linux
+#define GLEW_STATIC
+#include <glew.h>
+#endif
+
 #include <math3d.h>
 #include <GLBatchBase.h>
 #include <GLShaderManager.h>

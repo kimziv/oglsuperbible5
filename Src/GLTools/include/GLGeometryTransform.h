@@ -32,7 +32,7 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 #define __GLT_GEOMETRY_PIPELINE
 
 
-#include <gltools.h>
+#include <GLTools.h>
 
 class GLGeometryTransform
 	{
