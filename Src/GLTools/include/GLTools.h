@@ -132,7 +132,7 @@ inline void LITTLE_ENDIAN_DWORD(void *pWord)
 ///////////////////////////////////////////////////////////////////////////////
 
 // Get the OpenGL version, returns false on error
-bool gltGetOpenGLVersion(int &nMajor, int &nMinor);
+bool gltGetOpenGLVersion(GLint &nMajor, GLint &nMinor);
 
 // Check to see if an exension is supported
 int gltIsExtSupported(const char *szExtension);

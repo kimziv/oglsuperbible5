@@ -43,22 +43,11 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 
 ///////////////////////////////////////////////////////////////////////////////
 // Get the OpenGL version number
-bool gltGetOpenGLVersion(int &nMajor, int &nMinor)
+bool gltGetOpenGLVersion(GLint &nMajor, GLint &nMinor)
 	{
-	const char *szVersionString = (const char *)glGetString(GL_VERSION);
-	if(szVersionString == NULL)
-		{
-		nMajor = 0;
-		nMinor = 0;
-		return false;
-		}
-	
-	// Get major version number. This stops at the first non numeric character
-	nMajor = atoi(szVersionString);
-	
-	// Get minor version number. Start past the first ".", atoi terminates on first non numeric char.
-	nMinor = atoi(strstr(szVersionString, ".")+1);
-	
+    glGetIntegerv(GL_MAJOR_VERSION, &nMajor);
+    glGetIntegerv(GL_MINOR_VERSION, &nMinor);
+
 	return true;
 	}
 
@@ -67,33 +56,13 @@ bool gltGetOpenGLVersion(int &nMajor, int &nMinor)
 // Returns 1 or 0
 int gltIsExtSupported(const char *extension)
 	{
-	GLubyte *extensions = NULL;
-	const GLubyte *start;
-	GLubyte *where, *terminator;
-	
-	where = (GLubyte *) strchr(extension, ' ');
-	if (where || *extension == '\0')
-		return 0;
-	
-	extensions = (GLubyte *)glGetString(GL_EXTENSIONS);
-	
-	start = extensions;
-	for (;;) 
-		{
-		where = (GLubyte *) strstr((const char *) start, extension);
-		
-		if (!where)
-			break;
-		
-		terminator = where + strlen(extension);
-		
-		if (where == start || *(where - 1) == ' ') 
-			{
-			if (*terminator == ' ' || *terminator == '\0') 
-				return 1;
-			}
-		start = terminator;
-		}
+    GLint nNumExtensions;
+    glGetIntegerv(GL_NUM_EXTENSIONS, &nNumExtensions);
+    
+    for(GLint i = 0; i < nNumExtensions; i++)
+        if(strcmp(extension, (const char *)glGetStringi(GL_EXTENSIONS, i)) == 0)
+           return 1;
+    
 	return 0;
 	}
 

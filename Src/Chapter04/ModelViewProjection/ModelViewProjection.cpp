@@ -8,6 +8,7 @@
 #include <GLFrustum.h>
 #include <GLGeometryTransform.h>
 #include <GLBatch.h>
+#include <StopWatch.h>
 
 #include <math.h>
 #ifdef __APPLE__
@@ -18,36 +19,63 @@
 #endif
 
 
+// Global view frustum class
 GLFrustum           viewFrustum;
+
+// The shader manager
 GLShaderManager     shaderManager;
+
+// The torus
 GLTriangleBatch     torusBatch;
+
+
+// Set up the viewport and the projection matrix
+void ChangeSize(int w, int h)
+    {
+	// Prevent a divide by zero
+	if(h == 0)
+		h = 1;
+    
+	// Set Viewport to window dimensions
+    glViewport(0, 0, w, h);
+    
+    viewFrustum.SetPerspective(35.0f, float(w)/float(h), 1.0f, 1000.0f);
+    }
 
 
 // Called to draw scene
 void RenderScene(void)
 	{
-    static float yRot = 0;
-    yRot += 0.2f;
+    // Set up time based animation
+    static CStopWatch rotTimer;
+    float yRot = rotTimer.GetElapsedSeconds() * 60.0f;
     
 	// Clear the window and the depth buffer
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    // Matrix Variables
     M3DMatrix44f mTranslate, mRotate, mModelview, mModelViewProjection;
     
-
+    // Create a translation matrix to move the torus back and into sight
     m3dTranslationMatrix44(mTranslate, 0.0f, 0.0f, -2.5f);
     
+    // Create a rotation matrix based on the current value of yRot
     m3dRotationMatrix44(mRotate, m3dDegToRad(yRot), 0.0f, 1.0f, 0.0f);
     
+    // Add the rotation to the translation, store the result in mModelView
     m3dMatrixMultiply44(mModelview, mTranslate, mRotate);
+    
+    // Add the modelview matrix to the projection matrix, 
+    // the final matrix is the ModelViewProjection matrix.
     m3dMatrixMultiply44(mModelViewProjection, viewFrustum.GetProjectionMatrix(),mModelview);
 		
-            
+    // Pass this completed matrix to the shader, and render the torus
     GLfloat vBlack[] = { 0.0f, 0.0f, 0.0f, 1.0f };
     shaderManager.UseStockShader(GLT_SHADER_FLAT, mModelViewProjection, vBlack);  
     torusBatch.Draw();
 
 
+    // Swap buffers, and immediately refresh
     glutSwapBuffers();
     glutPostRedisplay();
 	}
@@ -71,19 +99,6 @@ void SetupRC()
 	}
 
 
-
-void ChangeSize(int w, int h)
-	{
-	// Prevent a divide by zero
-	if(h == 0)
-		h = 1;
-
-	// Set Viewport to window dimensions
-    glViewport(0, 0, w, h);
-
-    viewFrustum.SetPerspective(35.0f, float(w)/float(h), 1.0f, 1000.0f);
-	}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Main entry point for GLUT based programs
 int main(int argc, char* argv[])
@@ -102,7 +117,7 @@ int main(int argc, char* argv[])
 	if (GLEW_OK != err) {
 		fprintf(stderr, "GLEW Error: %s\n", glewGetErrorString(err));
 		return 1;
-    }
+        }
 	
 	SetupRC();
     

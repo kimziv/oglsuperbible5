@@ -7,6 +7,7 @@
 #include <GLShaderManager.h>
 #include <GLFrustum.h>
 #include <GLBatch.h>
+#include <GLFrame.h>
 #include <GLMatrixStack.h>
 #include <GLGeometryTransform.h>
 #include <Stopwatch.h>
@@ -22,8 +23,6 @@
 #endif
 
 
-
-
 GLShaderManager		shaderManager;			// Shader Manager
 GLMatrixStack		modelViewMatrix;		// Modelview Matrix
 GLMatrixStack		projectionMatrix;		// Projection Matrix
@@ -32,7 +31,8 @@ GLGeometryTransform	transformPipeline;		// Geometry Transform Pipeline
 
 GLTriangleBatch		torusBatch;
 GLBatch				floorBatch;
-
+GLTriangleBatch     sphereBatch;
+GLFrame             cameraFrame;
         
 //////////////////////////////////////////////////////////////////
 // This function does any needed initialization on the rendering
@@ -50,6 +50,8 @@ void SetupRC()
 	// This makes a torus
 	gltMakeTorus(torusBatch, 0.4f, 0.15f, 30, 30);
 	
+    // This make a sphere
+    gltMakeSphere(sphereBatch, 0.1f, 26, 13);
     	
 	floorBatch.Begin(GL_LINES, 324);
     for(GLfloat x = -20.0; x <= 20.0f; x+= 0.5) {
@@ -77,6 +79,25 @@ void ChangeSize(int nWidth, int nHeight)
 	transformPipeline.SetMatrixStacks(modelViewMatrix, projectionMatrix);
     }
 
+
+// Respond to arrow keys by moving the camera frame of reference
+void SpecialKeys(int key, int x, int y)
+    {
+	float linear = 0.1f;
+	float angular = float(m3dDegToRad(5.0f));
+	
+	if(key == GLUT_KEY_UP)
+		cameraFrame.MoveForward(linear);
+	
+	if(key == GLUT_KEY_DOWN)
+		cameraFrame.MoveForward(-linear);
+	
+	if(key == GLUT_KEY_LEFT)
+		cameraFrame.RotateWorld(angular, 0.0f, 1.0f, 0.0f);
+	
+	if(key == GLUT_KEY_RIGHT)
+		cameraFrame.RotateWorld(-angular, 0.0f, 1.0f, 0.0f);		
+    }
         
 // Called to draw scene
 void RenderScene(void)
@@ -84,6 +105,7 @@ void RenderScene(void)
     // Color values
     static GLfloat vFloorColor[] = { 0.0f, 1.0f, 0.0f, 1.0f};
     static GLfloat vTorusColor[] = { 1.0f, 0.0f, 0.0f, 1.0f };
+    static GLfloat vSphereColor[] = { 0.0f, 0.0f, 1.0f, 1.0f };
 
     // Time Based animation
 	static CStopWatch	rotTimer;
@@ -95,29 +117,48 @@ void RenderScene(void)
     
     // Save the current modelview matrix (the identity matrix)
 	modelViewMatrix.PushMatrix();	
+    
+    M3DMatrix44f mCamera;
+    cameraFrame.GetCameraMatrix(mCamera);
+    modelViewMatrix.PushMatrix(mCamera);
 		
 	// Draw the ground
 	shaderManager.UseStockShader(GLT_SHADER_FLAT,
 								 transformPipeline.GetModelViewProjectionMatrix(),
 								 vFloorColor);	
 	floorBatch.Draw();
-
+    
     // Draw the spinning Torus
     modelViewMatrix.Translate(0.0f, 0.0f, -2.5f);
-    modelViewMatrix.Rotate(yRot, 0.0f, 1.0f, 0.0f);
-    shaderManager.UseStockShader(GLT_SHADER_FLAT, transformPipeline.GetModelViewProjectionMatrix(),
+    
+    // Save the Translation
+    modelViewMatrix.PushMatrix();
+    
+        // Apply a rotation and draw the torus
+        modelViewMatrix.Rotate(yRot, 0.0f, 1.0f, 0.0f);
+        shaderManager.UseStockShader(GLT_SHADER_FLAT, transformPipeline.GetModelViewProjectionMatrix(),
                                 vTorusColor);
-    torusBatch.Draw();
+        torusBatch.Draw();
+    modelViewMatrix.PopMatrix(); // "Erase" the Rotation from before
 
-	// Restore the previous modleview matrix (the idenity matrix)
+    // Apply another rotation, followed by a translation, then draw the sphere
+    modelViewMatrix.Rotate(yRot * -2.0f, 0.0f, 1.0f, 0.0f);
+    modelViewMatrix.Translate(0.8f, 0.0f, 0.0f);
+    shaderManager.UseStockShader(GLT_SHADER_FLAT, transformPipeline.GetModelViewProjectionMatrix(),
+                                     vSphereColor);
+    sphereBatch.Draw();
+
+	// Restore the previous modleview matrix (the identity matrix)
 	modelViewMatrix.PopMatrix();
-        
+    modelViewMatrix.PopMatrix();    
     // Do the buffer Swap
     glutSwapBuffers();
         
     // Tell GLUT to do it again
     glutPostRedisplay();
     }
+
+
 
 
 int main(int argc, char* argv[])
@@ -130,6 +171,7 @@ int main(int argc, char* argv[])
   
     glutCreateWindow("OpenGL SphereWorld");
  
+    glutSpecialFunc(SpecialKeys);
     glutReshapeFunc(ChangeSize);
     glutDisplayFunc(RenderScene);
     
