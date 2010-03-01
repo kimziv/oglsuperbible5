@@ -11,9 +11,9 @@
 #include <GLGeometryTransform.h>
 #include <Stopwatch.h>
 #include <gl\wglew.h>
-#include "resource.h"
 #include <math.h>
 #include <stdio.h>
+#include <iostream>
 
 
 GLShaderManager		shaderManager;			// Shader Manager
@@ -36,9 +36,9 @@ static const TCHAR g_szClassName[50]  =  TEXT("OGL_CLASS");
 static const int g_nWinWidth  = 800;
 static const int g_nWinHeight = 600;
 
-HWND         g_hWnd;
-HGLRC        g_hRC;
-HDC          g_hDC;
+    HWND         g_hWnd;
+    HGLRC        g_hRC;
+    HDC          g_hDC;
 HINSTANCE    g_hInstance;
 WNDCLASS     g_windClass; 
 RECT         g_windowRect;
@@ -198,6 +198,64 @@ void SetupRC()
 				   GL_LINEAR, GL_CLAMP_TO_EDGE);
 }
 
+void CheckErrors(GLuint progName = 0)
+{
+	GLenum error = glGetError();
+		
+	if (error != GL_NO_ERROR)
+	{
+		cout << "A GL Error has occured\n";
+	}
+	
+	GLenum fboStatus = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
+
+	if(fboStatus != GL_FRAMEBUFFER_COMPLETE)
+	{
+		switch (fboStatus)
+		{
+		case GL_FRAMEBUFFER_UNDEFINED:
+			// Oops, no window exists?
+			break;
+		case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+			// Check the status of each attachment
+			break;
+		case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+			// Attach at least one buffer to the FBO
+			break;
+		case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+			// Check that all attachments enabled via
+			// glDrawBuffers exist in FBO
+		case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
+			// Check that the buffer specified via
+			// glReadBuffer exists in FBO
+			break;
+		case GL_FRAMEBUFFER_UNSUPPORTED:
+			// Reconsider formats used for attached buffers
+			break;
+		case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
+			// Make sure the number of samples for each 
+			// attachment is the same 
+			break;
+		//case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
+			// Make sure the number of layers for each 
+			// attachment is the same 
+			//break;
+		}
+		cout << "The framebuffer is not complete\n";
+	}
+
+	if (progName != 0)
+	{
+		glValidateProgram(progName);
+		int iIsProgValid = 0;
+		glGetProgramiv(progName, GL_VALIDATE_STATUS, &iIsProgValid);
+		if(iIsProgValid == 0)
+		{
+			cout << "The current program is not valid\n";
+		}
+	}
+}
+
         
 // Called to draw scene
 void RenderScene(void)
@@ -237,13 +295,14 @@ void RenderScene(void)
 	floorBatch.Draw();
 	glDisable(GL_BLEND);
 	
-	
 	DrawSongAndDance(yRot);
 	
 	modelViewMatrix.PopMatrix();
        
     // Do the buffer Swap
     SwapBuffers(g_hDC);
+
+    CheckErrors();
 }
 
 
