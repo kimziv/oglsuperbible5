@@ -71,6 +71,9 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 #define glGenVertexArrays glGenVertexArraysAPPLE
 #define glDeleteVertexArrays  glDeleteVertexArraysAPPLE
 #define glBindVertexArray	glBindVertexArrayAPPLE
+#ifndef OPENGL_ES
+#define glGenerateMipmap    glGenerateMipmapEXT
+#endif
 #endif
 
 
@@ -131,8 +134,8 @@ inline void LITTLE_ENDIAN_DWORD(void *pWord)
 //         THE LIBRARY....
 ///////////////////////////////////////////////////////////////////////////////
 
-// Get the OpenGL version, returns false on error
-bool gltGetOpenGLVersion(GLint &nMajor, GLint &nMinor);
+// Get the OpenGL version
+void gltGetOpenGLVersion(GLint &nMajor, GLint &nMinor);
 
 // Check to see if an exension is supported
 int gltIsExtSupported(const char *szExtension);
@@ -151,13 +154,9 @@ BYTE* gltReadBMPBits(const char *szFileName, int *nWidth, int *nHeight);
 GLbyte *gltReadTGABits(const char *szFileName, GLint *iWidth, GLint *iHeight, GLint *iComponents, GLenum *eFormat);
 
 // Capture the frame buffer and write it as a .tga
-// Does not work on the iPhone OpenGL ES 1.2
-// Mac OS X
-#ifdef __APPLE__
-#include <TargetConditionals.h>
-#if !(TARGET_OS_IPHONE | TARGET_IPHONE_SIMULATOR)
+// Does not work on the iPhone
+#ifndef OPENGL_ES
 GLint gltGrabScreenTGA(const char *szFileName);
-#endif
 #endif
 
 

@@ -407,7 +407,7 @@ void GLBatch::Color4fv(M3DVector4f vColor)
         
 // Unlike normal OpenGL immediate mode, you must specify a texture coord
 // per vertex or you will get junk...
-void GLBatch::MultiTexCoord2f(GLuint texture, GLfloat s, GLfloat t)
+void GLBatch::MultiTexCoord2f(GLuint texture, GLclampf s, GLclampf t)
 	{
 	// First see if the vertex array buffer has been created...
 	if(uiTextureCoordArray[texture] == 0) {	// Nope, we need to create it

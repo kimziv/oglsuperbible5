@@ -104,7 +104,7 @@ class GLBatch : public GLBatchBase
         void Color4f(GLfloat r, GLfloat g, GLfloat b, GLfloat a);
         void Color4fv(M3DVector4f vColor);
         
-        void MultiTexCoord2f(GLuint texture, GLfloat s, GLfloat t);
+        void MultiTexCoord2f(GLuint texture, GLclampf s, GLclampf t);
         void MultiTexCoord2fv(GLuint texture, M3DVector2f vTexCoord);               
         
     protected:

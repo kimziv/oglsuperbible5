@@ -2,10 +2,10 @@
  *  gltools.cpp
  *
  *  Created by Richard Wright on 10/16/06.
- *  OpenGL SuperBible, 4th Edition
+ *  OpenGL SuperBible, 5th Edition
  *
  */
-/* Copyright (c) 2005-2009, Richard S. Wright Jr.
+/* Copyright (c) 2005-2010, Richard S. Wright Jr.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, 
@@ -43,12 +43,26 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 
 ///////////////////////////////////////////////////////////////////////////////
 // Get the OpenGL version number
-bool gltGetOpenGLVersion(GLint &nMajor, GLint &nMinor)
+void gltGetOpenGLVersion(GLint &nMajor, GLint &nMinor)
 	{
+    #ifndef OPENGL_ES       
     glGetIntegerv(GL_MAJOR_VERSION, &nMajor);
     glGetIntegerv(GL_MINOR_VERSION, &nMinor);
-
-	return true;
+    #else
+    const char *szVersionString = (const char *)glGetString(GL_VERSION);
+    if(szVersionString == NULL)
+        {
+        nMajor = 0;
+        nMinor = 0;
+        return;
+        }
+    
+    // Get major version number. This stops at the first non numeric character
+    nMajor = atoi(szVersionString);
+    
+    // Get minor version number. Start past the first ".", atoi terminates on first non numeric char.
+    nMinor = atoi(strstr(szVersionString, ".")+1);
+	#endif
 	}
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -56,13 +70,42 @@ bool gltGetOpenGLVersion(GLint &nMajor, GLint &nMinor)
 // Returns 1 or 0
 int gltIsExtSupported(const char *extension)
 	{
+    #ifndef OPENGL_ES       
     GLint nNumExtensions;
     glGetIntegerv(GL_NUM_EXTENSIONS, &nNumExtensions);
     
     for(GLint i = 0; i < nNumExtensions; i++)
         if(strcmp(extension, (const char *)glGetStringi(GL_EXTENSIONS, i)) == 0)
            return 1;
-    
+    #else
+        GLubyte *extensions = NULL;
+        const GLubyte *start;
+        GLubyte *where, *terminator;
+        
+        where = (GLubyte *) strchr(extension, ' ');
+        if (where || *extension == '\0')
+            return 0;
+        
+        extensions = (GLubyte *)glGetString(GL_EXTENSIONS);
+        
+        start = extensions;
+        for (;;) 
+		{
+            where = (GLubyte *) strstr((const char *) start, extension);
+            
+            if (!where)
+                break;
+            
+            terminator = where + strlen(extension);
+            
+            if (where == start || *(where - 1) == ' ') 
+			{
+                if (*terminator == ' ' || *terminator == '\0') 
+                    return 1;
+			}
+            start = terminator;
+		}
+    #endif
 	return 0;
 	}
 
@@ -93,7 +136,9 @@ void gltSetWorkingDirectory(const char *szArgv)
 	///////////////////////////////////////////////////////////////////////////   
 	// Change to Resources directory. Any data files need to be placed there 
 	chdir(szParentDirectory);
+#ifndef OPENGL_ES
 	chdir("../Resources");
+#endif
 	#endif
 	}
 
@@ -555,34 +600,165 @@ void gltMakeCylinder(GLTriangleBatch& cylinderBatch, GLfloat baseRadius, GLfloat
 	
 ///////////////////////////////////////////////////////////////////////////////////////
 // Make a cube, centered at the origin, and with a specified "radius"
-void gltMakeCube(GLBatch& cubeBatch, GLfloat fRadius)
+void gltMakeCube(GLBatch& cubeBatch, GLfloat fRadius )
     {
-    GLfloat vVerts[108] = { fRadius, fRadius, fRadius, fRadius, fRadius, -fRadius, -fRadius, fRadius, -fRadius, fRadius, fRadius, fRadius, -fRadius, fRadius, -fRadius, -fRadius, fRadius, fRadius,
-                        -fRadius, -fRadius, -fRadius, fRadius, -fRadius, -fRadius, fRadius, -fRadius, fRadius, -fRadius, -fRadius, fRadius, -fRadius, -fRadius, -fRadius, fRadius, -fRadius, fRadius,
-                        -fRadius, fRadius, fRadius, -fRadius, fRadius, -fRadius, -fRadius, -fRadius, -fRadius, -fRadius, fRadius, fRadius, -fRadius, -fRadius, -fRadius, -fRadius, -fRadius, fRadius,
-                        fRadius, -fRadius, -fRadius, fRadius, fRadius, -fRadius, fRadius, fRadius, fRadius, fRadius, fRadius, fRadius, fRadius, -fRadius, fRadius, fRadius, -fRadius, -fRadius,
-                        fRadius, -fRadius, fRadius, fRadius, fRadius, fRadius, -fRadius, fRadius, fRadius, -fRadius, fRadius, fRadius, -fRadius, -fRadius, fRadius, fRadius, -fRadius, fRadius,
-                        fRadius, -fRadius, -fRadius, -fRadius, -fRadius, -fRadius, -fRadius, fRadius, -fRadius, -fRadius, fRadius, -fRadius, fRadius, fRadius, -fRadius,fRadius, -fRadius, -fRadius  };
+    cubeBatch.Begin(GL_TRIANGLES, 36, 1);
+            
+    /////////////////////////////////////////////
+    // Top of cube
+    cubeBatch.Normal3f(0.0f, fRadius, 0.0f);
+    cubeBatch.MultiTexCoord2f(0, fRadius, fRadius);
+    cubeBatch.Vertex3f(fRadius, fRadius, fRadius);
     
-    static GLfloat vNorms[108] = { 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 
-                                0.0f, -1.0f, 0.0f, 0.0f,-1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f -1.0f, 0.0f,
-                                -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
-                                1.0f, 0.0f, 0.0f,1.0f, 0.0f, 0.0f,1.0f, 0.0f, 0.0f,1.0f, 0.0f, 0.0f,1.0f, 0.0f, 0.0f,1.0f, 0.0f, 0.0f,
-                                0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,0.0f, 0.0f, 1.0f,0.0f, 0.0f, 1.0f,0.0f, 0.0f, 1.0f,0.0f, 0.0f, 1.0f,
-                                0.0f, 0.0f, -1.0f,0.0f, 0.0f, -1.0f,0.0f, 0.0f, -1.0f,0.0f, 0.0f, -1.0f,0.0f, 0.0f, -1.0f,0.0f, 0.0f, -1.0f };
-        
-    static GLfloat vTex[72] = {  1.0f, 1.0f,  1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f,  0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-                                1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,  0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-                                1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,  1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f };
+    cubeBatch.Normal3f(0.0f, fRadius, 0.0f);
+    cubeBatch.MultiTexCoord2f(0, fRadius, 0.0f);
+    cubeBatch.Vertex3f(fRadius, fRadius, -fRadius);
     
-	cubeBatch.Begin(GL_TRIANGLES, 36, 1);
+    cubeBatch.Normal3f(0.0f, fRadius, 0.0f);
+    cubeBatch.MultiTexCoord2f(0, 0.0f, 0.0f);
+    cubeBatch.Vertex3f(-fRadius, fRadius, -fRadius);
+    
+    cubeBatch.Normal3f(0.0f, fRadius, 0.0f);
+    cubeBatch.MultiTexCoord2f(0, fRadius, fRadius);
+    cubeBatch.Vertex3f(fRadius, fRadius, fRadius);
+    
+    cubeBatch.Normal3f(0.0f, fRadius, 0.0f);
+    cubeBatch.MultiTexCoord2f(0, 0.0f, 0.0f);
+    cubeBatch.Vertex3f(-fRadius, fRadius, -fRadius);
+    
+    cubeBatch.Normal3f(0.0f, fRadius, 0.0f);
+    cubeBatch.MultiTexCoord2f(0, 0.0f, fRadius);
+    cubeBatch.Vertex3f(-fRadius, fRadius, fRadius);
+    
+    
+    ////////////////////////////////////////////
+    // Bottom of cube
+    cubeBatch.Normal3f(0.0f, -fRadius, 0.0f);
+    cubeBatch.MultiTexCoord2f(0, 0.0f, 0.0f);
+    cubeBatch.Vertex3f(-fRadius, -fRadius, -fRadius);
+    
+    cubeBatch.Normal3f(0.0f, -fRadius, 0.0f);
+    cubeBatch.MultiTexCoord2f(0, fRadius, 0.0f);
+    cubeBatch.Vertex3f(fRadius, -fRadius, -fRadius);
+    
+    cubeBatch.Normal3f(0.0f, -fRadius, 0.0f);
+    cubeBatch.MultiTexCoord2f(0, fRadius, fRadius);
+    cubeBatch.Vertex3f(fRadius, -fRadius, fRadius);
+    
+    cubeBatch.Normal3f(0.0f, -fRadius, 0.0f);
+    cubeBatch.MultiTexCoord2f(0, 0.0f, fRadius);
+    cubeBatch.Vertex3f(-fRadius, -fRadius, fRadius);
+    
+    cubeBatch.Normal3f(0.0f, -fRadius, 0.0f);
+    cubeBatch.MultiTexCoord2f(0, 0.0f, 0.0f);
+    cubeBatch.Vertex3f(-fRadius, -fRadius, -fRadius);
+    
+    cubeBatch.Normal3f(0.0f, -fRadius, 0.0f);
+    cubeBatch.MultiTexCoord2f(0, fRadius, fRadius);
+    cubeBatch.Vertex3f(fRadius, -fRadius, fRadius);
+    
+    ///////////////////////////////////////////
+    // Left side of cube
+    cubeBatch.Normal3f(-fRadius, 0.0f, 0.0f);
+    cubeBatch.MultiTexCoord2f(0, fRadius, fRadius);
+    cubeBatch.Vertex3f(-fRadius, fRadius, fRadius);
+    
+    cubeBatch.Normal3f(-fRadius, 0.0f, 0.0f);
+    cubeBatch.MultiTexCoord2f(0, fRadius, 0.0f);
+    cubeBatch.Vertex3f(-fRadius, fRadius, -fRadius);
+    
+    cubeBatch.Normal3f(-fRadius, 0.0f, 0.0f);
+    cubeBatch.MultiTexCoord2f(0, 0.0f, 0.0f);
+    cubeBatch.Vertex3f(-fRadius, -fRadius, -fRadius);
+    
+    cubeBatch.Normal3f(-fRadius, 0.0f, 0.0f);
+    cubeBatch.MultiTexCoord2f(0, fRadius, fRadius);
+    cubeBatch.Vertex3f(-fRadius, fRadius, fRadius);
+    
+    cubeBatch.Normal3f(-fRadius, 0.0f, 0.0f);
+    cubeBatch.MultiTexCoord2f(0, 0.0f, 0.0f);
+    cubeBatch.Vertex3f(-fRadius, -fRadius, -fRadius);
+    
+    cubeBatch.Normal3f(-fRadius, 0.0f, 0.0f);
+    cubeBatch.MultiTexCoord2f(0, 0.0f, fRadius);
+    cubeBatch.Vertex3f(-fRadius, -fRadius, fRadius);
+    
+    // Right side of cube
+    cubeBatch.Normal3f(fRadius, 0.0f, 0.0f);
+    cubeBatch.MultiTexCoord2f(0, 0.0f, 0.0f);
+    cubeBatch.Vertex3f(fRadius, -fRadius, -fRadius);
+    
+    cubeBatch.Normal3f(fRadius, 0.0f, 0.0f);
+    cubeBatch.MultiTexCoord2f(0, fRadius, 0.0f);
+    cubeBatch.Vertex3f(fRadius, fRadius, -fRadius);
+    
+    cubeBatch.Normal3f(fRadius, 0.0f, 0.0f);
+    cubeBatch.MultiTexCoord2f(0, fRadius, fRadius);
+    cubeBatch.Vertex3f(fRadius, fRadius, fRadius);
+    
+    cubeBatch.Normal3f(fRadius, 0.0f, 0.0f);
+    cubeBatch.MultiTexCoord2f(0, fRadius, fRadius);
+    cubeBatch.Vertex3f(fRadius, fRadius, fRadius);
+    
+    cubeBatch.Normal3f(fRadius, 0.0f, 0.0f);
+    cubeBatch.MultiTexCoord2f(0, 0.0f, fRadius);
+    cubeBatch.Vertex3f(fRadius, -fRadius, fRadius);
+    
+    cubeBatch.Normal3f(fRadius, 0.0f, 0.0f);
+    cubeBatch.MultiTexCoord2f(0, 0.0f, 0.0f);
+    cubeBatch.Vertex3f(fRadius, -fRadius, -fRadius);
+    
+    // Front and Back
+    // Front
+    cubeBatch.Normal3f(0.0f, 0.0f, fRadius);
+    cubeBatch.MultiTexCoord2f(0, fRadius, 0.0f);
+    cubeBatch.Vertex3f(fRadius, -fRadius, fRadius);
+    
+    cubeBatch.Normal3f(0.0f, 0.0f, fRadius);
+    cubeBatch.MultiTexCoord2f(0, fRadius, fRadius);
+    cubeBatch.Vertex3f(fRadius, fRadius, fRadius);
+    
+    cubeBatch.Normal3f(0.0f, 0.0f, fRadius);
+    cubeBatch.MultiTexCoord2f(0, 0.0f, fRadius);
+    cubeBatch.Vertex3f(-fRadius, fRadius, fRadius);
+    
+    cubeBatch.Normal3f(0.0f, 0.0f, fRadius);
+    cubeBatch.MultiTexCoord2f(0, 0.0f, fRadius);
+    cubeBatch.Vertex3f(-fRadius, fRadius, fRadius);
+    
+    cubeBatch.Normal3f(0.0f, 0.0f, fRadius);
+    cubeBatch.MultiTexCoord2f(0, 0.0f, 0.0f);
+    cubeBatch.Vertex3f(-fRadius, -fRadius, fRadius);
+    
+    cubeBatch.Normal3f(0.0f, 0.0f, fRadius);
+    cubeBatch.MultiTexCoord2f(0, fRadius, 0.0f);
+    cubeBatch.Vertex3f(fRadius, -fRadius, fRadius);
+    
+    // Back
+    cubeBatch.Normal3f(0.0f, 0.0f, -fRadius);
+    cubeBatch.MultiTexCoord2f(0, fRadius, 0.0f);
+    cubeBatch.Vertex3f(fRadius, -fRadius, -fRadius);
+    
+    cubeBatch.Normal3f(0.0f, 0.0f, -fRadius);
+    cubeBatch.MultiTexCoord2f(0, 0.0f, 0.0f);
+    cubeBatch.Vertex3f(-fRadius, -fRadius, -fRadius);
+    
+    cubeBatch.Normal3f(0.0f, 0.0f, -fRadius);
+    cubeBatch.MultiTexCoord2f(0, 0.0f, fRadius);
+    cubeBatch.Vertex3f(-fRadius, fRadius, -fRadius);
+    
+    cubeBatch.Normal3f(0.0f, 0.0f, -fRadius);
+    cubeBatch.MultiTexCoord2f(0, 0.0f, fRadius);
+    cubeBatch.Vertex3f(-fRadius, fRadius, -fRadius);
+    
+    cubeBatch.Normal3f(0.0f, 0.0f, -fRadius);
+    cubeBatch.MultiTexCoord2f(0, fRadius, fRadius);
+    cubeBatch.Vertex3f(fRadius, fRadius, -fRadius);
 
-    cubeBatch.CopyVertexData3f(vVerts);
-    cubeBatch.CopyNormalDataf(vNorms);
-    cubeBatch.CopyTexCoordData2f(vTex, 0);
-	
-
-	cubeBatch.End();
+	cubeBatch.Normal3f(0.0f, 0.0f, -fRadius);
+	cubeBatch.MultiTexCoord2f(0, fRadius, 0.0f);
+	cubeBatch.Vertex3f(fRadius, -fRadius, -fRadius);   
+    cubeBatch.End();
 	}	
 
 
@@ -613,11 +789,7 @@ typedef struct
 // glFinish for single buffered contexts before calling this function.
 // Returns 0 if an error occurs, or 1 on success.
 // Does not work on the iPhone
-// Mac OS X
-#ifdef __APPLE__
-#include <TargetConditionals.h>
-#if !(TARGET_OS_IPHONE | TARGET_IPHONE_SIMULATOR)
-
+#ifndef OPENGL_ES
 GLint gltGrabScreenTGA(const char *szFileName)
 	{
     FILE *pFile;                // File pointer
@@ -698,7 +870,6 @@ GLint gltGrabScreenTGA(const char *szFileName)
     return 1;
 	}
 #endif
-#endif
 
 
 ////////////////////////////////////////////////////////////////////
@@ -770,13 +941,11 @@ GLbyte *gltReadTGABits(const char *szFileName, GLint *iWidth, GLint *iHeight, GL
     // Set OpenGL format expected
     switch(sDepth)
 		{
-#ifdef __APPLE__
-#if !(TARGET_OS_IPHONE | TARGET_IPHONE_SIMULATOR)
+#ifndef OPENGL_ES
         case 3:     // Most likely case
             *eFormat = GL_BGR;
             *iComponents = GL_RGB;
             break;
-#endif
 #endif
 
 #ifdef WIN32
@@ -799,8 +968,23 @@ GLbyte *gltReadTGABits(const char *szFileName, GLint *iWidth, GLint *iHeight, GL
             *eFormat = GL_LUMINANCE;
             *iComponents = GL_LUMINANCE;
             break;
-		};
+        default:        // RGB
+            // If on the iPhone, TGA's are BGR, and the iPhone does not 
+            // support BGR without alpha, but it does support RGB,
+            // so a simple swizzle of the red and blue bytes will suffice.
+            // For faster iPhone loads however, save your TGA's with an Alpha!
+#ifdef OPENGL_ES
+    for(int i = 0; i < lImageSize; i+=3)
+        {
+        GLbyte temp = pBits[i];
+        pBits[i] = pBits[i+2];
+        pBits[i+2] = temp;
+        }
+#endif
+        break;
+		}
 	
+    
     
     // Done with File
     fclose(pFile);
