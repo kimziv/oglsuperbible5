@@ -3,7 +3,7 @@
 // New and improved (performance) sphere world
 // Program by Richard S. Wright Jr.
 
-#include <gltools.h>
+#include <GLTools.h>
 #include <GLShaderManager.h>
 #include <GLFrustum.h>
 #include <GLBatch.h>
@@ -21,7 +21,8 @@
 #include <gl/glut.h>
 #endif
 
-
+#define NUM_SPHERES 50
+GLFrame spheres[NUM_SPHERES];
 
 GLShaderManager		shaderManager;			// Shader Manager
 GLMatrixStack		modelViewMatrix;		// Modelview Matrix
@@ -32,7 +33,6 @@ GLFrame				cameraFrame;			// Camera frame
 
 GLTriangleBatch		torusBatch;
 GLTriangleBatch		sphereBatch;
-GLBatch				groundBatch;
 GLBatch				floorBatch;
 
 GLuint				uiTextures[3];
@@ -58,6 +58,20 @@ void DrawSongAndDance(GLfloat yRot)		// Called to draw dancing objects
 								 vWhite);
 	sphereBatch.Draw();
 	modelViewMatrix.PopMatrix();
+    
+    glBindTexture(GL_TEXTURE_2D, uiTextures[2]);
+    for(int i = 0; i < NUM_SPHERES; i++) {
+        modelViewMatrix.PushMatrix();
+        modelViewMatrix.MultMatrix(spheres[i]);
+        shaderManager.UseStockShader(GLT_SHADER_TEXTURE_POINT_LIGHT_DIFF,
+                                     modelViewMatrix.GetMatrix(),
+                                     transformPipeline.GetProjectionMatrix(),
+                                     vLightTransformed, 
+                                     vWhite,
+                                     0);
+        sphereBatch.Draw();
+        modelViewMatrix.PopMatrix();
+    }
 	
 	// Song and dance
 	modelViewMatrix.Translate(0.0f, 0.2f, -2.5f);
@@ -105,18 +119,19 @@ bool LoadTGATexture(const char *szFileName, GLenum minFilter, GLenum magFilter, 
 	
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
-	
-	if(minFilter == GL_LINEAR_MIPMAP_LINEAR || 
-	   minFilter == GL_LINEAR_MIPMAP_NEAREST ||
-	   minFilter == GL_NEAREST_MIPMAP_LINEAR ||
-	   minFilter == GL_NEAREST_MIPMAP_NEAREST)
-		glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
-	
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-	glTexImage2D(GL_TEXTURE_2D, 0, nComponents, nWidth, nHeight, 0,
+		
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_RGB, nWidth, nHeight, 0,
 				 eFormat, GL_UNSIGNED_BYTE, pBits);
 	
-	free(pBits);
+    free(pBits);
+
+    if(minFilter == GL_LINEAR_MIPMAP_LINEAR || 
+       minFilter == GL_LINEAR_MIPMAP_NEAREST ||
+       minFilter == GL_NEAREST_MIPMAP_LINEAR ||
+       minFilter == GL_NEAREST_MIPMAP_NEAREST)
+        glGenerateMipmap(GL_TEXTURE_2D);
+            
 	return true;
 	}
 
@@ -133,46 +148,30 @@ void SetupRC()
 	shaderManager.InitializeStockShaders();
 	
 	glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
 	
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	
 	// This makes a torus
-	gltMakeTorus(torusBatch, 0.4f, 0.15f, 20, 20);
+	gltMakeTorus(torusBatch, 0.4f, 0.15f, 40, 20);
 	
 	// This makes a sphere
 	gltMakeSphere(sphereBatch, 0.1f, 26, 13);
 	
-	// This makes the ground lines
-	groundBatch.Begin(GL_LINES, 328);
-	for(GLfloat x = -20.0f; x <= 20.0f; x+= 0.5f)
-	{
-		groundBatch.Vertex3f(x, -0.4f, 20.0f);	// Parallel to X, cross the z axis
-		groundBatch.Vertex3f(x, -0.4f, -20.0f);
-		
-		groundBatch.Vertex3f(20.0f, -0.4f, x); // Parallel to Z, cross the x axis
-		groundBatch.Vertex3f(-20.0f, -0.4f, x);
-	}
-	groundBatch.End();
-	
 	
 	// Make the solid ground
-	GLfloat alpha = 0.25f;
 	GLfloat texSize = 10.0f;
 	floorBatch.Begin(GL_TRIANGLE_FAN, 4, 1);
 	floorBatch.MultiTexCoord2f(0, 0.0f, 0.0f);
-	floorBatch.Color4f(1.0f, 1.0f, 1.0f, alpha);
 	floorBatch.Vertex3f(-20.0f, -0.41f, 20.0f);
 	
 	floorBatch.MultiTexCoord2f(0, texSize, 0.0f);
-	floorBatch.Color4f(1.0f, 1.0f, 1.0f, alpha);
-	floorBatch.Vertex3f(20.0f, -0.41f, 20.0f);
+    floorBatch.Vertex3f(20.0f, -0.41f, 20.0f);
 	
 	floorBatch.MultiTexCoord2f(0, texSize, texSize);
-	floorBatch.Color4f(1.0f, 1.0f, 1.0f, alpha);
 	floorBatch.Vertex3f(20.0f, -0.41f, -20.0f);
 	
 	floorBatch.MultiTexCoord2f(0, 0.0f, texSize);
-	floorBatch.Color4f(1.0f, 1.0f, 1.0f, alpha);
 	floorBatch.Vertex3f(-20.0f, -0.41f, -20.0f);
 	floorBatch.End();
 	
@@ -192,15 +191,20 @@ void SetupRC()
 	glBindTexture(GL_TEXTURE_2D, uiTextures[2]);
 	LoadTGATexture("moonlike.tga", GL_LINEAR_MIPMAP_LINEAR,
 				   GL_LINEAR, GL_CLAMP_TO_EDGE);
+                   
+    // Randomly place the spheres
+    for(int i = 0; i < NUM_SPHERES; i++) {
+        GLfloat x = ((GLfloat)((rand() % 400) - 200) * 0.1f);
+        GLfloat z = ((GLfloat)((rand() % 400) - 200) * 0.1f);
+        spheres[i].SetOrigin(x, 0.0f, z);
+        }
     }
 
 ////////////////////////////////////////////////////////////////////////
 // Do shutdown for the rendering context
 void ShutdownRC(void)
     {
-
-
-
+    glDeleteTextures(3, uiTextures);
     }
 
 
@@ -273,7 +277,7 @@ void SpecialKeys(int key, int x, int y)
 		cameraFrame.RotateWorld(angular, 0.0f, 1.0f, 0.0f);
 	
 	if(key == GLUT_KEY_RIGHT)
-		cameraFrame.RotateWorld(-angular, 0.0f, 1.0f, 0.0f);		
+		cameraFrame.RotateWorld(-angular, 0.0f, 1.0f, 0.0f);	
     }
 
 
