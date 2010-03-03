@@ -254,8 +254,6 @@ void ChangeSize(int w, int h)
 // Called to draw scene
 void RenderScene(void)
     {
-    GLfloat z;
-    
     // Clear the window with current clearing color
     glClear(GL_COLOR_BUFFER_BIT);
 
@@ -313,8 +311,7 @@ int main(int argc, char *argv[])
     if (GLEW_OK != err) {
         fprintf(stderr, "GLEW Error: %s\n", glewGetErrorString(err));
         return 1;
-    }
-        
+		}
     
     // Startup, loop, shutdown
     SetupRC();
