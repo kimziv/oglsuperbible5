@@ -5,20 +5,16 @@
 
 #pragma warning( disable : 4305 )
 
-static GLfloat vRed[]   = { 1.0f, 0.0f, 0.0f, 1.0f };
-static GLfloat vGreen[]  = { 0.0f, 1.0f, 0.0f, 1.0f };
-static GLfloat vBlue[]   = { 0.0f, 0.0f, 1.0f, 1.0f };
-
 static GLfloat vLtBlue[]    = { 0.00f, 0.00f, 1.00f, 0.90f };
 static GLfloat vLtPink[]    = { 0.40f, 0.00f, 0.20f, 0.50f };
 static GLfloat vLtYellow[]  = { 0.98f, 0.96f, 0.14f, 0.30f };
 static GLfloat vLtMagenta[] = { 0.83f, 0.04f, 0.83f, 0.70f };
 static GLfloat vLtGreen[]   = { 0.05f, 0.98f, 0.14f, 0.30f };
 
-static GLfloat vWhite[]  = { 1.0f, 1.0f, 1.0f, 1.0f };
-static GLfloat vBlack[]  = { 0.0f, 0.0f, 0.0f, 1.0f };
 static GLfloat vGrey[]   = { 0.5f, 0.5f, 0.5f, 1.0f };
 
+#define USER_OIT   1 
+#define USER_BLEND 2
 
 ////////////////////////////////////////////////////////////////////////////
 // Do not put any OpenGL code here. General guidence on constructors in 
@@ -193,16 +189,27 @@ void OrderIndependentTransparancy::Initialize(void)
     // Reset framebuffer binding
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
-    // Load resolve shader
+    // Load oit resolve shader
+    oitResolve =  gltLoadShaderPairWithAttributes("basic.vs", "oitResolve.fs", 3, 
+                            GLT_ATTRIBUTE_VERTEX, "vVertex", 
+                            GLT_ATTRIBUTE_NORMAL, "vNormal", 
+                            GLT_ATTRIBUTE_TEXTURE0, "vTexCoord0");
+    glBindFragDataLocation(oitResolve, 0, "oColor");
+    glLinkProgram(oitResolve);
+
+	// Load multisample resolve shader
     msResolve =  gltLoadShaderPairWithAttributes("basic.vs", "msResolve.fs", 3, 
                             GLT_ATTRIBUTE_VERTEX, "vVertex", 
                             GLT_ATTRIBUTE_NORMAL, "vNormal", 
                             GLT_ATTRIBUTE_TEXTURE0, "vTexCoord0");
+
     glBindFragDataLocation(msResolve, 0, "oColor");
     glLinkProgram(msResolve);
 
     // Make sure all went well
+    CheckErrors(oitResolve);
     CheckErrors(msResolve);
+    
     int numMasks = 0;
     glGetIntegerv(GL_MAX_SAMPLE_MASK_WORDS, &numMasks);
 }
@@ -255,7 +262,6 @@ void OrderIndependentTransparancy::Resize(GLsizei nWidth, GLsizei nHeight)
 
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, msTexture[0]);
     glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 8, GL_RGBA8, screenWidth, screenHeight, GL_FALSE);
-    
 }
 
 
@@ -285,9 +291,9 @@ void OrderIndependentTransparancy::MoveCamera(void)
             worldAngle += 360;
     }
     if(GetAsyncKeyState('o') || GetAsyncKeyState('O'))
-        mode = 1;
+        mode = USER_OIT;
     if(GetAsyncKeyState('b') || GetAsyncKeyState('B'))
-    	mode = 2;
+    	mode = USER_BLEND;
 
     if(GetAsyncKeyState('1'))
     	blendMode = 1;
@@ -303,7 +309,6 @@ void OrderIndependentTransparancy::MoveCamera(void)
     	blendMode = 6;
     if(GetAsyncKeyState('7'))
     	blendMode = 7;
-
 }
 
 
@@ -380,15 +385,39 @@ void OrderIndependentTransparancy::SetupResolveProg()
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, msTexture[0]);
     glUniform1i(glGetUniformLocation(msResolve, "origImage"), 0);
+
+    glUniform1i(glGetUniformLocation(msResolve, "sampleCount"), 8);
     
+    glActiveTexture(GL_TEXTURE0);
+	    
+	CheckErrors(msResolve);
+} 
+
+void OrderIndependentTransparancy::SetupOITResolveProg()
+{
+    glUseProgram(oitResolve);
+
+    // Set projection matrix
+    glUniformMatrix4fv(glGetUniformLocation(oitResolve, "pMatrix"), 
+        1, GL_FALSE, transformPipeline.GetProjectionMatrix());
+
+    // Set MVP matrix
+    glUniformMatrix4fv(glGetUniformLocation(oitResolve, "mvMatrix"), 
+        1, GL_FALSE, transformPipeline.GetModelViewMatrix());
+
+    // Now setup the right textures
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, msTexture[0]);
+    glUniform1i(glGetUniformLocation(oitResolve, "origImage"), 0);
+
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, depthTextureName);
-    int depthLoc =glGetUniformLocation(msResolve, "origDepth");
-    glUniform1i(depthLoc, 1);
-    
-    CheckErrors(msResolve);
+    glUniform1i(glGetUniformLocation(oitResolve, "origDepth"), 1);
 
+    glUniform1f(glGetUniformLocation(oitResolve, "sampleCount"), 8);
+    
     glActiveTexture(GL_TEXTURE0);
+    CheckErrors(oitResolve);
 } 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -401,7 +430,7 @@ void OrderIndependentTransparancy::DrawWorld()
         modelViewMatrix.Translate(-0.3f, 0.f, 0.0f);
         modelViewMatrix.Scale(0.40, 0.8, 0.40);
         modelViewMatrix.Rotate(50.0, 0.0, 10.0, 0.0);
-        glSampleMaski(0, 0x02020202);
+        glSampleMaski(0, 0x02);
         shaderManager.UseStockShader(GLT_SHADER_FLAT, transformPipeline.GetModelViewProjectionMatrix(), vLtYellow);
         glass1Batch.Draw();
     modelViewMatrix.PopMatrix();
@@ -410,25 +439,25 @@ void OrderIndependentTransparancy::DrawWorld()
         modelViewMatrix.Translate(0.4f, 0.0f, 0.0f);
         modelViewMatrix.Scale(0.5, 0.8, 1.0);
         modelViewMatrix.Rotate(-20.0, 0.0, 1.0, 0.0);
-        glSampleMaski(0, 0x04040404);
+        glSampleMaski(0, 0x04);
         shaderManager.UseStockShader(GLT_SHADER_FLAT, transformPipeline.GetModelViewProjectionMatrix(), vLtGreen);
         glass2Batch.Draw();
     modelViewMatrix.PopMatrix();
 
     modelViewMatrix.PushMatrix();
-        modelViewMatrix.Translate(1.0f, 0.0f, -1.0f);
+        modelViewMatrix.Translate(1.0f, 0.0f, -0.6f);
         modelViewMatrix.Scale(0.3, 0.9, 1.0);
         modelViewMatrix.Rotate(-40.0, 0.0, 1.0, 0.0);
-        glSampleMaski(0, 0x08080808);
+        glSampleMaski(0, 0x08);
         shaderManager.UseStockShader(GLT_SHADER_FLAT, transformPipeline.GetModelViewProjectionMatrix(), vLtMagenta);
         glass3Batch.Draw();
     modelViewMatrix.PopMatrix();
 
     modelViewMatrix.PushMatrix();
-        modelViewMatrix.Translate(-0.8f, 0.0f, -1.0f);
+        modelViewMatrix.Translate(-0.8f, 0.0f, -0.60f);
         modelViewMatrix.Scale(0.6, 0.9, 0.40);
         modelViewMatrix.Rotate(60.0, 0.0, 1.0, 0.0);
-        glSampleMaski(0, 0x10101010);
+        glSampleMaski(0, 0x10);
         shaderManager.UseStockShader(GLT_SHADER_FLAT, transformPipeline.GetModelViewProjectionMatrix(), vLtBlue);
         glass4Batch.Draw();
     modelViewMatrix.PopMatrix();
@@ -437,42 +466,11 @@ void OrderIndependentTransparancy::DrawWorld()
         modelViewMatrix.Translate(0.1f, 0.0f, 0.50f);
         modelViewMatrix.Scale(0.4, 0.9, 0.4);
         modelViewMatrix.Rotate(205.0, 0.0, 1.0, 0.0);
-        glSampleMaski(0, 0x20202020);
+        glSampleMaski(0, 0x20);
         shaderManager.UseStockShader(GLT_SHADER_FLAT, transformPipeline.GetModelViewProjectionMatrix(), vLtPink);
         glass4Batch.Draw();
     modelViewMatrix.PopMatrix();
 }
-
-void OrderIndependentTransparancy::DrawSimpleWorld()
-{
-    // Set Sample mask
-    glSampleMaski(0, 0x01010101);
-    //glEnable(GL_SAMPLE_MASK);
-    CheckErrors();
-    glDisable(GL_DEPTH_TEST);
-    glDepthFunc(GL_ALWAYS);
-
-    // Now draw the mirror surfaces
-    modelViewMatrix.PushMatrix();
-        modelViewMatrix.Translate(-1.0f, -0.4f, -6.0f);
-        shaderManager.UseStockShader(GLT_SHADER_FLAT, transformPipeline.GetModelViewProjectionMatrix(), vLtBlue);
-        
-        glSampleMaski(0, 0x02020202);
-        glass1Batch.Draw();
-
-        modelViewMatrix.Translate(1.0f, 0.0f, 1.0f);
-        shaderManager.UseStockShader(GLT_SHADER_FLAT, transformPipeline.GetModelViewProjectionMatrix(), vLtPink);
-        glSampleMaski(0, 0x04040404);
-        glass1Batch.Draw();
-
-        modelViewMatrix.Translate(1.5f, 0.0f, -1.0f);
-        shaderManager.UseStockShader(GLT_SHADER_FLAT, transformPipeline.GetModelViewProjectionMatrix(), vLtBlue);
-        glSampleMaski(0, 0x08080808);
-        glass1Batch.Draw();
-    modelViewMatrix.PopMatrix();
-
-}
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // Render a frame. The owning framework is responsible for buffer swaps,
@@ -480,16 +478,21 @@ void OrderIndependentTransparancy::DrawSimpleWorld()
 void OrderIndependentTransparancy::Render(void)
 {
     MoveCamera();
-    glClearColor(0.0f, 0.0f, 0.0f, 0.5f);
-
-    // Reset FBO. Draw world again from the real cameras perspective
+    
+    // Bind the FBO with multisample buffers
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, msFBO);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    if (mode == 1)
+
+	// User selected order independant transparency
+    if (mode == USER_OIT)
     {
         // Use OIT, setup sample masks
-        glSampleMaski(0, 0x01010101);
+        glSampleMaski(0, 0x01);
         glEnable(GL_SAMPLE_MASK);
+
+		// Prevent depth test from culling covered surfaces
+        glDepthFunc(GL_ALWAYS);
     }
     
     modelViewMatrix.PushMatrix();	
@@ -501,6 +504,7 @@ void OrderIndependentTransparancy::Render(void)
         modelViewMatrix.Translate(0.0f, -0.4f, -4.0f);
         modelViewMatrix.Rotate(worldAngle, 0.0, 1.0, 0.0);
 
+		// Draw the background and disk to the first sample
         modelViewMatrix.PushMatrix();
           modelViewMatrix.Translate(0.0f, 3.0f, 0.0f);
           modelViewMatrix.Rotate(90.0, 1.0, 0.0, 0.0);
@@ -516,10 +520,13 @@ void OrderIndependentTransparancy::Render(void)
             shaderManager.UseStockShader(GLT_SHADER_FLAT, transformPipeline.GetModelViewProjectionMatrix(), vGrey);
             diskBatch.Draw();
         modelViewMatrix.PopMatrix();
+		modelViewMatrix.Translate(0.0f, 0.1f, 0.0f);
 
-        if (mode ==2)
+		// User selected blending
+        if (mode == USER_BLEND)
         {
             // Setup blend state
+			glDisable(GL_DEPTH_TEST);
             glEnable(GL_BLEND);
             switch (blendMode)
             {
@@ -548,24 +555,17 @@ void OrderIndependentTransparancy::Render(void)
                 glDisable(GL_BLEND);
             }
         }
-        
-        // Prevent depth test from culling covered surfaces
-        glDisable(GL_DEPTH_TEST);
-        glDepthFunc(GL_ALWAYS);
-
+   
+		// Now draw the glass pieces
         DrawWorld();
     
       modelViewMatrix.PopMatrix();
     modelViewMatrix.PopMatrix();
     
     // Clean up all state 
-    glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
     glDisable(GL_BLEND);
     glDisable(GL_SAMPLE_MASK);
-    glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
-    glDisable(GL_SAMPLE_COVERAGE);
-    glDisable(GL_SAMPLE_SHADING_ARB);
     glSampleMaski(0, 0xffffffff);
 
     // Resolve multisample buffer
@@ -573,15 +573,22 @@ void OrderIndependentTransparancy::Render(void)
       projectionMatrix.LoadMatrix(orthoMatrix);
       modelViewMatrix.PushMatrix();
         modelViewMatrix.LoadIdentity();
+		// Setup and Clear the default framebuffer
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
         glViewport(0, 0, screenWidth, screenHeight);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        SetupResolveProg();
+        
+        if (mode == USER_OIT)
+            SetupOITResolveProg();
+        else if (mode == USER_BLEND)
+            SetupResolveProg();
+
+		// Draw a full-size quad to resolve the multisample surfaces
         screenQuad.Draw();
       modelViewMatrix.PopMatrix();
     projectionMatrix.PopMatrix();
     
-    
+	// Reset texture state
     glEnable(GL_DEPTH_TEST);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);

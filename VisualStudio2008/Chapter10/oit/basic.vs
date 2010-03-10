@@ -1,4 +1,4 @@
-#version 150 
+//#version 150 
 // hdr_bloom.vs
 // outputs MVP transformed position 
 // passes texture coordinates through
@@ -37,4 +37,5 @@ void main(void)
 	mat4 mvpMatrix;
 	mvpMatrix = pMatrix * mvMatrix;
 	gl_Position = mvpMatrix * vec4(vVertex, 1.0); 
+	gl_TexCoord[0] = gl_MultiTexCoord0;
 }

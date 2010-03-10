@@ -65,14 +65,15 @@ class OrderIndependentTransparancy
 		GLuint				msTexture[1];
         GLuint              depthTextureName; 
         GLuint              msResolve;
+        GLuint              oitResolve;
         GLuint              flatBlendProg;
 
 		void MoveCamera(void);
-		void DrawSimpleWorld();
         void DrawWorld();
 		bool LoadBMPTexture(const char *szFileName, GLenum minFilter, GLenum magFilter, GLenum wrapMode);
         void GenerateOrtho2DMat(GLuint imageWidth, GLuint imageHeight);
         void SetupResolveProg();
+        void SetupOITResolveProg();
 	};
 		
 #endif // __OrderIndependentTransparancy__

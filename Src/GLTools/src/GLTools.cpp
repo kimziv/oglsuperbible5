@@ -948,12 +948,6 @@ GLbyte *gltReadTGABits(const char *szFileName, GLint *iWidth, GLint *iHeight, GL
             break;
 #endif
 
-#ifdef WIN32
-	case 3:     // Most likely case
-	    *eFormat = GL_BGR;
-	    *iComponents = GL_RGB;
-	    break;				
-#endif
 #ifdef linux
 	case 3:     // Most likely case
 	    *eFormat = GL_BGR;
