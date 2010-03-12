@@ -33,14 +33,14 @@ void main(void) {
     // clamp input color to make sure it is between 0.0 and 1.0
     vColor = clamp(vColor, 0.0f, 1.0f);
      
-    int offset = int(vColor.r * 1024); 
-    oLumAdjColor.r = texelFetchBuffer(lumCurveSampler, offset ).r;
+    int offset = int(vColor.r * (1024 - 1)); 
+    oLumAdjColor.r = texelFetch(lumCurveSampler, offset ).r;
     
-    offset = int(vColor.g * 1024); 
-    oLumAdjColor.g = texelFetchBuffer(lumCurveSampler, offset ).r;
+    offset = int(vColor.g * (1024 - 1)); 
+    oLumAdjColor.g = texelFetch(lumCurveSampler, offset ).r;
     
-    offset = int(vColor.b * 1024); 
-    oLumAdjColor.b = texelFetchBuffer(lumCurveSampler, offset ).r;
+    offset = int(vColor.b * (1024 - 1)); 
+    oLumAdjColor.b = texelFetch(lumCurveSampler, offset ).r;
     
     oLumAdjColor.a = 1.0f;
 }

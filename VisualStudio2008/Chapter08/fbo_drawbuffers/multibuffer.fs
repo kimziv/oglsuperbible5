@@ -29,13 +29,13 @@ void main(void) {
 	// clamp input color to make sure it is between 0.0 and 1.0
 	vColor = clamp(vColor, 0.0f, 1.0f);
 	 
-    int offset = int(vColor.r * 1024); 
+    int offset = int(vColor.r * (1024 - 1)); 
     lumFactor.r = texelFetch(lumCurveSampler, offset ).r;
     
-    offset = int(vColor.g * 1024); 
+    offset = int(vColor.g * (1024 - 1)); 
     lumFactor.g = texelFetch(lumCurveSampler, offset ).r;
     
-    offset = int(vColor.b * 1024); 
+    offset = int(vColor.b * (1024 - 1)); 
     lumFactor.b = texelFetch(lumCurveSampler, offset ).r;
     
     lumFactor.a = 1.0f;
