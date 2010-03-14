@@ -14,7 +14,7 @@
 #pragma comment (lib, "zlib.lib")
 #endif
 
- 
+#pragma warning (disable : 4305)
 
 ////////////////////////////////////////////////////////////////////////////
 // Do not put any OpenGL code here. General guidence on constructors in 
@@ -26,64 +26,6 @@ HDRImaging::HDRImaging(void) : screenWidth(614), screenHeight(655), bFullScreen(
 {
  
 }  
-	 
-void CheckErrors(GLuint progName = 0)
-{
-	GLenum error = glGetError();
-		
-	if (error != GL_NO_ERROR)
-	{
-		cout << "A GL Error has occured\n";
-	}
-	
-	GLenum fboStatus = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
-
-	if(fboStatus != GL_FRAMEBUFFER_COMPLETE)
-	{
-		switch (fboStatus)
-		{
-		case GL_FRAMEBUFFER_UNDEFINED:
-			// Oops, no window exists?
-			break;
-		case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-			// Check the status of each attachment
-			break;
-		case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-			// Attach at least one buffer to the FBO
-			break;
-		case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
-			// Check that all attachments enabled via
-			// glDrawBuffers exist in FBO
-		case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
-			// Check that the buffer specified via
-			// glReadBuffer exists in FBO
-			break;
-		case GL_FRAMEBUFFER_UNSUPPORTED:
-			// Reconsider formats used for attached buffers
-			break;
-		case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
-			// Make sure the number of samples for each 
-			// attachment is the same 
-			break;
-		//case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
-			// Make sure the number of layers for each 
-			// attachment is the same 
-			//break;
-		}
-		cout << "The framebuffer is not complete\n";
-	}
-
-	if (progName != 0)
-	{
-		glValidateProgram(progName);
-		int iIsProgValid = 0;
-		glGetProgramiv(progName, GL_VALIDATE_STATUS, &iIsProgValid);
-		if(iIsProgValid == 0)
-		{
-			cout << "The current program is not valid\n";
-		}
-	}
-}
 
 
 ////////////////////////////////////////////////////////////////////////////
@@ -192,7 +134,8 @@ void HDRImaging::Initialize(void)
 
 	// Create ortho matrix and screen-sized quad matching images aspect ratio
     GenerateOrtho2DMat(GetWidth(), GetHeight(), hdrTexturesWidth[curHDRTex], hdrTexturesHeight[curHDRTex]);
-	GenerateFBOOrtho2DMat(hdrTexturesWidth[curHDRTex], hdrTexturesHeight[curHDRTex]);
+	//GenerateFBOOrtho2DMat(hdrTexturesWidth[curHDRTex], hdrTexturesHeight[curHDRTex]);
+    gltGenerateOrtho2DMat(hdrTexturesWidth[curHDRTex], hdrTexturesHeight[curHDRTex], fboOrthoMatrix, fboQuad);
 
 	// Setup tex coords to be used for fetching HDR kernel data
 	for (int k = 0; k < 4; k++)
@@ -242,7 +185,7 @@ void HDRImaging::Initialize(void)
 	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fboTextures[0], 0);
     
 	// Make sure all went well
-	CheckErrors();
+	gltCheckErrors();
 	
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
@@ -274,61 +217,6 @@ void HDRImaging::Shutdown(void)
 
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////
-// Create a matrix that maps geometry to the fbo. 1 unit in the x direction equals one pixel 
-// of width, same with the y direction.
-// 
-void HDRImaging::GenerateFBOOrtho2DMat(GLuint imageWidth, GLuint imageHeight)
-{
-    float right = (float)imageWidth;
-	float quadWidth = right;
-	float left  = 0.0f;
-	float top = (float)imageHeight;
-	float quadHeight = top;
-	float bottom = 0.0f;
-
-    // set ortho matrix
-	fboOrthoMatrix[0] = (float)(2 / (right));
-	fboOrthoMatrix[1] = 0.0;
-	fboOrthoMatrix[2] = 0.0;
-	fboOrthoMatrix[3] = 0.0;
-
-	fboOrthoMatrix[4] = 0.0;
-	fboOrthoMatrix[5] = (float)(2 / (top));
-	fboOrthoMatrix[6] = 0.0;
-	fboOrthoMatrix[7] = 0.0;
-
-	fboOrthoMatrix[8] = 0.0;
-	fboOrthoMatrix[9] = 0.0;
-	fboOrthoMatrix[10] = (float)(-2 / (1.0 - 0.0));
-	fboOrthoMatrix[11] = 0.0;
-
-	fboOrthoMatrix[12] = -1.0f;
-	fboOrthoMatrix[13] = -1.0f;
-	fboOrthoMatrix[14] = -1.0f;
-	fboOrthoMatrix[15] =  1.0;
-
-    // set screen quad vertex array
-	fboQuad.Reset();
-	fboQuad.Begin(GL_TRIANGLE_STRIP, 4, 1);
-		fboQuad.Color4f(0.0f, 1.0f, 0.0f, 1.0f);
-		fboQuad.MultiTexCoord2f(0, 0.0f, 0.0f); 
-		fboQuad.Vertex3f(0.0f, 0.0f, 0.0f);
-
-		fboQuad.Color4f(0.0f, 1.0f, 0.0f, 1.0f);
-		fboQuad.MultiTexCoord2f(0, 1.0f, 0.0f);
-		fboQuad.Vertex3f(right, 0.0f, 0.0f);
-
-		fboQuad.Color4f(0.0f, 1.0f, 0.0f, 1.0f);
-		fboQuad.MultiTexCoord2f(0, 0.0f, 1.0f);
-		fboQuad.Vertex3f(0.0f, top, 0.0f);
-
-		fboQuad.Color4f(0.0f, 1.0f, 0.0f, 1.0f);
-		fboQuad.MultiTexCoord2f(0, 1.0f, 1.0f);
-		fboQuad.Vertex3f(right, top, 0.0f);
-	fboQuad.End();
-
-}
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 // Create a matrix that maps geometry to the screen. 1 unit in the x direction equals one pixel 
 // of width, same with the y direction.

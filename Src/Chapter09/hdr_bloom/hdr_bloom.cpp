@@ -16,12 +16,8 @@
 
 #pragma warning( disable : 4244)
 
-static GLfloat vRed[] = { 1.0f, 0.0f, 0.0f, 1.0f };
-static GLfloat vGreen[] = { 0.0f, 1.0f, 0.0f, 1.0f };
-static GLfloat vBlue[] = { 0.0f, 0.0f, 1.0f, 1.0f };
 static GLfloat vWhite[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 static GLfloat vWhiteX2[] = { 2.0f, 2.0f, 2.0f, 2.0f };
-static GLfloat vBlack[] = { 0.0f, 0.0f, 0.0f, 1.0f };
 static GLfloat vGrey[] =  { 0.5f, 0.5f, 0.5f, 1.0f };
 static GLfloat vLightPos[] = { -2.0f, 3.0f, -2.0f, 1.0f };
 static GLfloat vSkyBlue[] = { 0.160f, 0.376f, 0.925f, 1.0f};
@@ -41,63 +37,6 @@ HDRBloom::HDRBloom(void) : screenWidth(800), screenHeight(600), bFullScreen(fals
 
 }
 	
-void CheckErrors(GLuint progName = 0)
-{
-	GLenum error = glGetError();
-		
-	if (error != GL_NO_ERROR)
-	{
-		cout << "A GL Error has occured\n";
-	}
-	
-	GLenum fboStatus = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
-
-	if(fboStatus != GL_FRAMEBUFFER_COMPLETE)
-	{
-		switch (fboStatus)
-		{
-		case GL_FRAMEBUFFER_UNDEFINED:
-			// Oops, no window exists?
-			break;
-		case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-			// Check the status of each attachment
-			break;
-		case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-			// Attach at least one buffer to the FBO
-			break;
-		case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
-			// Check that all attachments enabled via
-			// glDrawBuffers exist in FBO
-		case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
-			// Check that the buffer specified via
-			// glReadBuffer exists in FBO
-			break;
-		case GL_FRAMEBUFFER_UNSUPPORTED:
-			// Reconsider formats used for attached buffers
-			break;
-		case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
-			// Make sure the number of samples for each 
-			// attachment is the same 
-			break;
-		//case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
-			// Make sure the number of layers for each 
-			// attachment is the same 
-			//break;
-		}
-		cout << "The framebuffer is not complete\n";
-	}
-
-	if (progName != 0)
-	{
-		glValidateProgram(progName);
-		int iIsProgValid = 0;
-		glGetProgramiv(progName, GL_VALIDATE_STATUS, &iIsProgValid);
-		if(iIsProgValid == 0)
-		{
-			cout << "The current program is not valid\n";
-		}
-	}
-}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 // Load in a BMP file as a texture. Allows specification of the filters and the wrap mode
@@ -113,15 +52,15 @@ bool HDRBloom::LoadBMPTexture(const char *szFileName, GLenum minFilter, GLenum m
 	// Set Wrap modes
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapMode);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapMode);
-
-	// Do I need to generate mipmaps?
-	if(minFilter == GL_LINEAR_MIPMAP_LINEAR || minFilter == GL_LINEAR_MIPMAP_NEAREST || minFilter == GL_NEAREST_MIPMAP_LINEAR || minFilter == GL_NEAREST_MIPMAP_NEAREST)
-		glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
-
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, iWidth, iHeight, 0, GL_BGR, GL_UNSIGNED_BYTE, pBits);
+
+    // Do I need to generate mipmaps?
+	if(minFilter == GL_LINEAR_MIPMAP_LINEAR || minFilter == GL_LINEAR_MIPMAP_NEAREST || minFilter == GL_NEAREST_MIPMAP_LINEAR || minFilter == GL_NEAREST_MIPMAP_NEAREST)
+		glGenerateMipmap(GL_TEXTURE_2D);    
+
 	return true;
 }
 
@@ -367,7 +306,6 @@ void HDRBloom::Initialize(void)
 	{
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, brightPassFBO[i]);
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, brightBlurTextures[i+1], 0);
-		CheckErrors();
 	}
 
 	// Create window texture
@@ -417,10 +355,10 @@ void HDRBloom::Initialize(void)
 	glUniform2fv(glGetUniformLocation(blurProg, "tc_offset"), 25, &texCoordOffsets[0]);
 
 	// Make sure all went well
-	CheckErrors(flatColorProg);
-	CheckErrors(texReplaceProg);
-	CheckErrors(hdrBloomProg);
-	CheckErrors(blurProg);
+	gltCheckErrors(flatColorProg);
+	gltCheckErrors(texReplaceProg);
+	gltCheckErrors(hdrBloomProg);
+	gltCheckErrors(blurProg);
 	
 	// Reset framebuffer binding
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
@@ -532,7 +470,7 @@ void HDRBloom::SetupFlatColorProg(GLfloat *vLightPos, GLfloat *vColor)
 	// Set Color
 	glUniform4fv(glGetUniformLocation(flatColorProg, "vColor"), 1, vColor);
 
-	CheckErrors(flatColorProg);
+	gltCheckErrors(flatColorProg);
 }
 
 void HDRBloom::SetupTexReplaceProg(GLfloat *vLightPos, GLfloat *vColor)
@@ -556,8 +494,7 @@ void HDRBloom::SetupTexReplaceProg(GLfloat *vLightPos, GLfloat *vColor)
 	// Set Tex Unit
 	glUniform1i(glGetUniformLocation(texReplaceProg, "textureUnit0"), 0);
 
-	CheckErrors(texReplaceProg);
-
+	gltCheckErrors(texReplaceProg);
 }
 
 void HDRBloom::SetupHDRProg()
@@ -592,7 +529,7 @@ void HDRBloom::SetupHDRProg()
 		glActiveTexture(GL_TEXTURE1+i);
 		glBindTexture(GL_TEXTURE_2D, brightBlurTextures[i]);
 	}
-	CheckErrors(hdrBloomProg);
+	gltCheckErrors(hdrBloomProg);
 } 
 
 void HDRBloom::SetupBlurProg()
@@ -609,9 +546,8 @@ void HDRBloom::SetupBlurProg()
 		1, GL_FALSE, transformPipeline.GetModelViewMatrix());
 
 	glUniform1i(glGetUniformLocation(blurProg, "textureUnit0"), 0);
-
-	CheckErrors(blurProg);
-
+ 
+	gltCheckErrors(blurProg);
 }
 ///////////////////////////////////////////////////////////////////////////////
 // This is called at least once and before any rendering occurs. If the screen

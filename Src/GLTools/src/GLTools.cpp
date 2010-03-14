@@ -1456,3 +1456,133 @@ GLuint gltLoadShaderPairSrcWithAttributes(const char *szVertexSrc, const char *s
     return hReturn;  
 	}   
 
+
+
+
+/////////////////////////////////////////////////////////////////
+// Check for any GL errors that may affect rendering
+// Check the framebuffer, the shader, and general errors
+bool gltCheckErrors(GLuint progName)
+{
+    bool bFoundError = false;
+	GLenum error = glGetError();
+		
+	if (error != GL_NO_ERROR)
+	{
+		cout << "A GL Error has occured\n";
+        bFoundError = true;
+	}
+	
+	GLenum fboStatus = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
+
+	if(fboStatus != GL_FRAMEBUFFER_COMPLETE)
+	{
+        bFoundError = true;
+        cout << "The framebuffer is not complete - ";
+		switch (fboStatus)
+		{
+		case GL_FRAMEBUFFER_UNDEFINED:
+			// Oops, no window exists?
+            cout << "GL_FRAMEBUFFER_UNDEFINED\n";
+			break;
+		case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+			// Check the status of each attachment
+            cout << "GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT\n";
+			break;
+		case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+			// Attach at least one buffer to the FBO
+            cout << "GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT\n";
+			break;
+		case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+			// Check that all attachments enabled via
+			// glDrawBuffers exist in FBO
+            cout << "GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER\n";
+            break;
+		case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
+			// Check that the buffer specified via
+			// glReadBuffer exists in FBO
+            cout << "GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER\n";
+			break;
+		case GL_FRAMEBUFFER_UNSUPPORTED:
+			// Reconsider formats used for attached buffers
+            cout << "GL_FRAMEBUFFER_UNSUPPORTED\n";
+			break;
+		case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
+			// Make sure the number of samples for each 
+			// attachment is the same 
+            cout << "GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE\n";
+			break; 
+		case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
+			// Make sure the number of layers for each 
+			// attachment is the same 
+            cout << "GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS\n";
+			break;
+		}
+	}
+
+	if (progName != 0)
+	{
+		glValidateProgram(progName);
+		int iIsProgValid = 0;
+		glGetProgramiv(progName, GL_VALIDATE_STATUS, &iIsProgValid);
+		if(iIsProgValid == 0)
+		{
+            bFoundError = true;
+			cout << "The current program (" << progName << ") is not valid\n";
+		}
+	}
+    return bFoundError;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+// Create a matrix that maps geometry to the screen. 1 unit in the x directionequals one pixel 
+// of width, same with the y direction.
+void gltGenerateOrtho2DMat(GLuint screenWidth, GLuint screenHeight, 
+                           M3DMatrix44f &orthoMatrix, GLBatch &screenQuad)
+{
+    float right = (float)screenWidth;
+	float left  = 0.0f;
+	float top = (float)screenHeight;
+	float bottom = 0.0f;
+	
+    // set ortho matrix
+	orthoMatrix[0] = (float)(2 / (right - left));
+	orthoMatrix[1] = 0.0;
+	orthoMatrix[2] = 0.0;
+	orthoMatrix[3] = 0.0;
+
+	orthoMatrix[4] = 0.0;
+	orthoMatrix[5] = (float)(2 / (top - bottom));
+	orthoMatrix[6] = 0.0;
+	orthoMatrix[7] = 0.0;
+
+	orthoMatrix[8] = 0.0;
+	orthoMatrix[9] = 0.0;
+	orthoMatrix[10] = (float)(-2 / (1.0 - 0.0));
+	orthoMatrix[11] = 0.0;
+
+	orthoMatrix[12] = -1*(right + left) / (right - left);
+	orthoMatrix[13] = -1*(top + bottom) / (top - bottom);
+	orthoMatrix[14] = -1.0f;
+	orthoMatrix[15] =  1.0;
+
+    // set screen quad vertex array
+	screenQuad.Reset();
+	screenQuad.Begin(GL_TRIANGLE_STRIP, 4, 1);
+		screenQuad.Color4f(0.0f, 1.0f, 0.0f, 1.0f);
+		screenQuad.MultiTexCoord2f(0, 0.0f, 0.0f); 
+		screenQuad.Vertex3f(0.0f, 0.0f, 0.0f);
+
+		screenQuad.Color4f(0.0f, 1.0f, 0.0f, 1.0f);
+		screenQuad.MultiTexCoord2f(0, 1.0f, 0.0f);
+		screenQuad.Vertex3f((float)screenWidth, 0.0f, 0.0f);
+
+		screenQuad.Color4f(0.0f, 1.0f, 0.0f, 1.0f);
+		screenQuad.MultiTexCoord2f(0, 0.0f, 1.0f);
+		screenQuad.Vertex3f(0.0f, (float)screenHeight, 0.0f);
+
+		screenQuad.Color4f(0.0f, 1.0f, 0.0f, 1.0f);
+		screenQuad.MultiTexCoord2f(0, 1.0f, 1.0f);
+		screenQuad.Vertex3f((float)screenWidth, (float)screenHeight, 0.0f);
+	screenQuad.End();
+}

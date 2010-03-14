@@ -66,7 +66,7 @@ class PixBuffs
 		void MoveCamera(void);
 		void DrawWorld(GLfloat yRot, GLfloat xPos);
 		bool LoadBMPTexture(const char *szFileName, GLenum minFilter, GLenum magFilter, GLenum wrapMode);
-		void GenerateOrtho2DMat(GLuint width, GLuint height);
+
 		void SetupBlurProg(void);
 		
 		// returns 1 - 6 for blur texture units

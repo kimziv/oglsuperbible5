@@ -25,65 +25,7 @@ OrderIndependentTransparancy::OrderIndependentTransparancy(void) : screenWidth(8
 {
 
 }
-    
-void CheckErrors(GLuint progName = 0)
-{
-    GLenum error = glGetError();
-        
-    if (error != GL_NO_ERROR)
-    {
-        cout << "A GL Error has occured\n";
-    }
-    
-    GLenum fboStatus = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
 
-    if(fboStatus != GL_FRAMEBUFFER_COMPLETE)
-    {
-        switch (fboStatus)
-        {
-        case GL_FRAMEBUFFER_UNDEFINED:
-            // Oops, no window exists?
-            break;
-        case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-            // Check the status of each attachment
-            break;
-        case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-            // Attach at least one buffer to the FBO
-            break;
-        case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
-            // Check that all attachments enabled via
-            // glDrawBuffers exist in FBO
-        case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
-            // Check that the buffer specified via
-            // glReadBuffer exists in FBO
-            break;
-        case GL_FRAMEBUFFER_UNSUPPORTED:
-            // Reconsider formats used for attached buffers
-            break;
-        case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
-            // Make sure the number of samples for each 
-            // attachment is the same 
-            break;
-        //case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
-            // Make sure the number of layers for each 
-            // attachment is the same 
-            //break;
-        }
-        cout << "The framebuffer is not complete\n";
-    }
-
-    if (progName != 0)
-    {
-        glValidateProgram(progName);
-        int iIsProgValid = 0;
-        glGetProgramiv(progName, GL_VALIDATE_STATUS, &iIsProgValid);
-        if(iIsProgValid == 0)
-        {
-            cout << "The current program is not valid\n";
-        }
-    }
-}
-GLint mode = 0;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 // Load in a BMP file as a texture. Allows specification of the filters and the wrap mode
@@ -207,8 +149,8 @@ void OrderIndependentTransparancy::Initialize(void)
     glLinkProgram(msResolve);
 
     // Make sure all went well
-    CheckErrors(oitResolve);
-    CheckErrors(msResolve);
+    gltCheckErrors(oitResolve);
+    gltCheckErrors(msResolve);
     
     int numMasks = 0;
     glGetIntegerv(GL_MAX_SAMPLE_MASK_WORDS, &numMasks);
@@ -390,7 +332,7 @@ void OrderIndependentTransparancy::SetupResolveProg()
     
     glActiveTexture(GL_TEXTURE0);
 	    
-	CheckErrors(msResolve);
+	gltCheckErrors(msResolve);
 } 
 
 void OrderIndependentTransparancy::SetupOITResolveProg()
@@ -417,7 +359,7 @@ void OrderIndependentTransparancy::SetupOITResolveProg()
     glUniform1f(glGetUniformLocation(oitResolve, "sampleCount"), 8);
     
     glActiveTexture(GL_TEXTURE0);
-    CheckErrors(oitResolve);
+    gltCheckErrors(oitResolve);
 } 
 
 ///////////////////////////////////////////////////////////////////////////////

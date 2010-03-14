@@ -36,6 +36,9 @@
 #  include <GL/glxew.h>
 #endif
 
+
+#pragma warning (disable : 4273)
+
 /*
  * Define glewGetContext and related helper macros.
  */

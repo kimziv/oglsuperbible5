@@ -177,8 +177,8 @@ GLuint   gltLoadShaderPairWithAttributes(const char *szVertexProg, const char *s
 GLuint gltLoadShaderPairSrc(const char *szVertexSrc, const char *szFragmentSrc);
 GLuint gltLoadShaderPairSrcWithAttributes(const char *szVertexProg, const char *szFragmentProg, ...);
 
-
-
+bool gltCheckErrors(GLuint progName = 0);
+void gltGenerateOrtho2DMat(GLuint width, GLuint height, M3DMatrix44f &orthoMatrix, GLBatch &screenQuad);
 
 
 #endif

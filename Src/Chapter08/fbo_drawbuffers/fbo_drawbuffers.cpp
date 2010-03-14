@@ -3,9 +3,7 @@
 #include <stdio.h>
 #include <iostream>
 
-static GLfloat vRed[] = { 1.0f, 0.0f, 0.0f, 1.0f };
 static GLfloat vGreen[] = { 0.0f, 1.0f, 0.0f, 1.0f };
-static GLfloat vBlue[] = { 0.0f, 0.0f, 1.0f, 1.0f };
 static GLfloat vWhite[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 static GLfloat vLightPos[] = { 0.0f, 3.0f, 0.0f, 1.0f };
 static const GLenum windowBuff[] = { GL_BACK_LEFT };
@@ -59,65 +57,6 @@ FBOdrawbuffers::FBOdrawbuffers(void) : screenWidth(800), screenHeight(600), bFul
 
 }
 	
-void CheckErrors(GLuint progName = 0)
-{
-	GLenum error = glGetError();
-		
-	if (error != GL_NO_ERROR)
-	{
-		cout << "A GL Error has occured\n";
-	}
-	
-	GLenum fboStatus = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
-
-	if(fboStatus != GL_FRAMEBUFFER_COMPLETE)
-	{
-		switch (fboStatus)
-		{
-		case GL_FRAMEBUFFER_UNDEFINED:
-			// Oops, no window exists?
-			break;
-		case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-			// Check the status of each attachment
-			break;
-		case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-			// Attach at least one buffer to the FBO
-			break;
-		case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
-			// Check that all attachments enabled via
-			// glDrawBuffers exist in FBO
-		case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
-			// Check that the buffer specified via
-			// glReadBuffer exists in FBO
-			break;
-		case GL_FRAMEBUFFER_UNSUPPORTED:
-			// Reconsider formats used for attached buffers
-			break;
-			/*
-		case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
-			// Make sure the number of samples for each 
-			// attachment is the same 
-			break; 
-		case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
-			// Make sure the number of layers for each 
-			// attachment is the same 
-			break;
-			*/
-		}
-		cout << "The framebuffer is not complete\n";
-	}
-
-	if (progName != 0)
-	{
-		glValidateProgram(progName);
-		int iIsProgValid = 0;
-		glGetProgramiv(progName, GL_VALIDATE_STATUS, &iIsProgValid);
-		if(iIsProgValid == 0)
-		{
-			cout << "The current program is not valid\n";
-		}
-	}
-}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 // Load in a BMP file as a texture. Allows specification of the filters and the wrap mode
@@ -133,15 +72,15 @@ bool FBOdrawbuffers::LoadBMPTexture(const char *szFileName, GLenum minFilter, GL
 	// Set Wrap modes
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapMode);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapMode);
-
-	// Do I need to generate mipmaps?
-	if(minFilter == GL_LINEAR_MIPMAP_LINEAR || minFilter == GL_LINEAR_MIPMAP_NEAREST || minFilter == GL_NEAREST_MIPMAP_LINEAR || minFilter == GL_NEAREST_MIPMAP_NEAREST)
-		glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
-
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, iWidth, iHeight, 0, GL_BGR, GL_UNSIGNED_BYTE, pBits);
+
+    // Do I need to generate mipmaps?
+	if(minFilter == GL_LINEAR_MIPMAP_LINEAR || minFilter == GL_LINEAR_MIPMAP_NEAREST || minFilter == GL_NEAREST_MIPMAP_LINEAR || minFilter == GL_NEAREST_MIPMAP_NEAREST)
+		glGenerateMipmap(GL_TEXTURE_2D);    
+
 	return true;
 }
 
@@ -275,7 +214,7 @@ void FBOdrawbuffers::Initialize(void)
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
 	// Make sure all went well
-	CheckErrors();
+	gltCheckErrors();
 }
 
 
@@ -436,7 +375,7 @@ void FBOdrawbuffers::UseProcessProgram(M3DVector4f vLightPos, M3DVector4f vColor
 		glUniform1i(glGetUniformLocation(processProg, "bUseTexture"), 0);
 	}
 
-	CheckErrors(processProg);
+	gltCheckErrors(processProg);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
