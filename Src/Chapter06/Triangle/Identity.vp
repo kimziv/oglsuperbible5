@@ -1,0 +1,14 @@
+// The Identity Shader
+// Vertex Shader
+// Richard S. Wright Jr.
+// OpenGL SuperBible
+#version 150
+
+in vec4 vVertex;
+
+out vec4 gl_Position;
+
+void main(void) 
+    { 
+    gl_Position = vVertex;
+    }
