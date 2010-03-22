@@ -42,9 +42,9 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 // This shader does no transformations at all, and uses the current
 // glColor value for fragments.
 // It will shade between verticies.
-static const char *szIdentityShaderVP = "attribute vec3 vVertex;"
+static const char *szIdentityShaderVP = "attribute vec4 vVertex;"
 										"void main(void) "
-										"{ gl_Position = vec4(vVertex, 1.0); "
+										"{ gl_Position = vVertex; "
 										"}";
 									
 static const char *szIdentityShaderFP = 
@@ -62,9 +62,9 @@ static const char *szIdentityShaderFP =
 // This shader applies the given model view matrix to the verticies, 
 // and uses a uniform color value.
 static const char *szFlatShaderVP =	"uniform mat4 mvpMatrix;"
-									"attribute vec3 vVertex;"
+									"attribute vec4 vVertex;"
 									"void main(void) "
-									"{ gl_Position = mvpMatrix * vec4(vVertex, 1.0); "
+									"{ gl_Position = mvpMatrix * vVertex; "
 									"}";
 									
 static const char *szFlatShaderFP = 
@@ -81,11 +81,11 @@ static const char *szFlatShaderFP =
 // Point light, diffuse lighting only
 static const char *szShadedVP =		"uniform mat4 mvpMatrix;"
 									"attribute vec4 vColor;"
-									"attribute vec3 vVertex;"
+									"attribute vec4 vVertex;"
 									"varying vec4 vFragColor;"
 									"void main(void) {"
 									"vFragColor = vColor; "
-									" gl_Position = mvpMatrix * vec4(vVertex, 1.0); "
+									" gl_Position = mvpMatrix * vVertex; "
 									"}";
 
 static const char *szShadedFP =     
@@ -102,7 +102,7 @@ static const char *szShadedFP =
 static const char *szDefaultLightVP = "uniform mat4 mvMatrix;"
 									  "uniform mat4 pMatrix;"
 									  "varying vec4 vFragColor;"
-									  "attribute vec3 vVertex;"
+									  "attribute vec4 vVertex;"
 									  "attribute vec3 vNormal;"
 									  "uniform vec4 vColor;"
 									  "void main(void) { "
@@ -117,7 +117,7 @@ static const char *szDefaultLightVP = "uniform mat4 mvMatrix;"
 									  " vFragColor.a = vColor.a;"
 									  " mat4 mvpMatrix;"
 									  " mvpMatrix = pMatrix * mvMatrix;"
-									  " gl_Position = mvpMatrix * vec4(vVertex, 1.0); "
+									  " gl_Position = mvpMatrix * vVertex; "
 									  "}";
 
 
@@ -136,7 +136,7 @@ static const char *szPointLightDiffVP =	  "uniform mat4 mvMatrix;"
 										  "uniform mat4 pMatrix;"
 										  "uniform vec3 vLightPos;"
 										  "uniform vec4 vColor;"
-										  "attribute vec3 vVertex;"
+										  "attribute vec4 vVertex;"
 										  "attribute vec3 vNormal;"
 										  "varying vec4 vFragColor;"
 										  "void main(void) { "
@@ -147,7 +147,7 @@ static const char *szPointLightDiffVP =	  "uniform mat4 mvMatrix;"
 										  " vec3 vNorm = normalize(mNormalMatrix * vNormal);"
 										  " vec4 ecPosition;"
 										  " vec3 ecPosition3;"
-										  " ecPosition = mvMatrix * vec4(vVertex, 1.0);"
+										  " ecPosition = mvMatrix * vVertex;"
 										  " ecPosition3 = ecPosition.xyz /ecPosition.w;"
 										  " vec3 vLightDir = normalize(vLightPos - ecPosition3);"
 										  " float fDot = max(0.0, dot(vNorm, vLightDir)); "
@@ -155,7 +155,7 @@ static const char *szPointLightDiffVP =	  "uniform mat4 mvMatrix;"
 										  " vFragColor.a = vColor.a;"
 										  " mat4 mvpMatrix;"
 										  " mvpMatrix = pMatrix * mvMatrix;"
-										  " gl_Position = mvpMatrix * vec4(vVertex, 1.0); "
+										  " gl_Position = mvpMatrix * vVertex; "
 										  "}";
 
 
@@ -171,12 +171,12 @@ static const char *szPointLightDiffFP =
 //GLT_SHADER_TEXTURE_REPLACE
 // Just put the texture on the polygons
 static const char *szTextureReplaceVP =	"uniform mat4 mvpMatrix;"
-										"attribute vec3 vVertex;"
+										"attribute vec4 vVertex;"
 										"attribute vec2 vTexCoord0;"
 										"varying vec2 vTex;"
 										"void main(void) "
 										"{ vTex = vTexCoord0;" 
-										" gl_Position = mvpMatrix * vec4(vVertex, 1.0); "
+										" gl_Position = mvpMatrix * vVertex; "
 										"}";
 									
 static const char *szTextureReplaceFP = 
@@ -192,12 +192,12 @@ static const char *szTextureReplaceFP =
 
 // Just put the texture on the polygons
 static const char *szTextureRectReplaceVP =	"uniform mat4 mvpMatrix;"
-                                        "attribute vec3 vVertex;"
+                                        "attribute vec4 vVertex;"
                                         "attribute vec2 vTexCoord0;"
                                         "varying vec2 vTex;"
                                         "void main(void) "
                                         "{ vTex = vTexCoord0;" 
-                                        " gl_Position = mvpMatrix * vec4(vVertex, 1.0); "
+                                        " gl_Position = mvpMatrix * vVertex; "
                                         "}";
 
 static const char *szTextureRectReplaceFP = 
@@ -215,12 +215,12 @@ static const char *szTextureRectReplaceFP =
 //GLT_SHADER_TEXTURE_MODULATE
 // Just put the texture on the polygons, but multiply by the color (as a unifomr)
 static const char *szTextureModulateVP ="uniform mat4 mvpMatrix;"
-										"attribute vec3 vVertex;"
+										"attribute vec4 vVertex;"
 										"attribute vec2 vTexCoord0;"
 										"varying vec2 vTex;"
 										"void main(void) "
 										"{ vTex = vTexCoord0;" 
-										" gl_Position = mvpMatrix * vec4(vVertex, 1.0); "
+										" gl_Position = mvpMatrix * vVertex; "
 										"}";
 									
 static const char *szTextureModulateFP =
@@ -242,7 +242,7 @@ static const char *szTexturePointLightDiffVP =	  "uniform mat4 mvMatrix;"
 												  "uniform mat4 pMatrix;"
 												  "uniform vec3 vLightPos;"
 												  "uniform vec4 vColor;"
-												  "attribute vec3 vVertex;"
+												  "attribute vec4 vVertex;"
 												  "attribute vec3 vNormal;"
 												  "varying vec4 vFragColor;"
 												  "attribute vec2 vTexCoord0;"
@@ -255,7 +255,7 @@ static const char *szTexturePointLightDiffVP =	  "uniform mat4 mvMatrix;"
 												  " vec3 vNorm = normalize(mNormalMatrix * vNormal);"
 												  " vec4 ecPosition;"
 												  " vec3 ecPosition3;"
-												  " ecPosition = mvMatrix * vec4(vVertex, 1.0);"
+												  " ecPosition = mvMatrix * vVertex;"
 												  " ecPosition3 = ecPosition.xyz /ecPosition.w;"
 												  " vec3 vLightDir = normalize(vLightPos - ecPosition3);"
 												  " float fDot = max(0.0, dot(vNorm, vLightDir)); "
@@ -264,7 +264,7 @@ static const char *szTexturePointLightDiffVP =	  "uniform mat4 mvMatrix;"
 												  " vTex = vTexCoord0;"
 												  " mat4 mvpMatrix;"
 												  " mvpMatrix = pMatrix * mvMatrix;"
-												  " gl_Position = mvpMatrix * vec4(vVertex, 1.0); "
+												  " gl_Position = mvpMatrix * vVertex; "
 												  "}";
 
 
