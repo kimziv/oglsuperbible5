@@ -2,10 +2,10 @@
 // Fragment Shader
 // Richard S. Wright Jr.
 // OpenGL SuperBible
-#version 150
+#version 140
 
 out vec4 gl_FragColor;
-in vec4 vVaryingColor;
+centroid in vec4 vVaryingColor;
 
 void main(void)
    { 
