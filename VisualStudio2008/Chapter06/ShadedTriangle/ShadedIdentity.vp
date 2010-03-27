@@ -2,13 +2,13 @@
 // Vertex Shader
 // Richard S. Wright Jr.
 // OpenGL SuperBible
-#version 140
+#version 130
 
-layout (location = 0) in vec4 vVertex;
 in vec4 vColor;
+in vec4 vVertex;
 
 out vec4 gl_Position;
-centroid out vec4 vVaryingColor;
+out vec4 vVaryingColor;
 
 void main(void) 
     { 
