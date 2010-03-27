@@ -1184,7 +1184,7 @@ GLuint gltLoadShaderPairWithAttributes(const char *szVertexProg, const char *szF
 		{
 		char infoLog[1024];
 		glGetShaderInfoLog(hVertexShader, 1024, NULL, infoLog);
-		cout << "The shader at " << szVertexProg << " failed to compile with the following error:\n" << "\n";
+		cout << "The shader at " << szVertexProg << " failed to compile with the following error:\n" << infoLog << "\n";
         glDeleteShader(hVertexShader);
         glDeleteShader(hFragmentShader);
         return (GLuint)NULL;
@@ -1195,7 +1195,7 @@ GLuint gltLoadShaderPairWithAttributes(const char *szVertexProg, const char *szF
 		{
 		char infoLog[1024];
 		glGetShaderInfoLog(hFragmentShader, 1024, NULL, infoLog);
-		cout << "The shader at " << hFragmentShader << " failed to compile with the following error:\n" << "\n";
+		cout << "The shader at " << hFragmentShader << " failed to compile with the following error:\n" << infoLog << "\n";
         glDeleteShader(hVertexShader);
         glDeleteShader(hFragmentShader);
         return (GLuint)NULL;
@@ -1234,7 +1234,7 @@ GLuint gltLoadShaderPairWithAttributes(const char *szVertexProg, const char *szF
 		{
 		char infoLog[1024];
 		glGetProgramInfoLog(hReturn, 1024, NULL, infoLog);
-		cout << "The program " << hReturn << " failed to link with the following error:\n" << "\n";
+		cout << "The program " << hReturn << " failed to link with the following error:\n" << infoLog << "\n";
 		glDeleteProgram(hReturn);
 		return (GLuint)NULL;
 		}

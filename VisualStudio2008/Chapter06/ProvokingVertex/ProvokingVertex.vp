@@ -1,4 +1,4 @@
-// The ShadedIdentity Shader
+// ProvokingVertex flat shader demo
 // Vertex Shader
 // Richard S. Wright Jr.
 // OpenGL SuperBible
@@ -8,7 +8,7 @@ in vec4 vColor;
 in vec4 vVertex;
 
 out vec4 gl_Position;
-out vec4 vVaryingColor;
+flat out vec4 vVaryingColor;
 
 void main(void) 
     { 
