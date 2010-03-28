@@ -1,0 +1,21 @@
+// Flat Shader
+// Vertex Shader
+// Richard S. Wright Jr.
+// OpenGL SuperBible
+#version 130
+
+// Transformation Matrix
+uniform mat4	mvpMatrix;
+
+// Incoming per vertex
+in vec4 vVertex;
+
+// Transformed vertex position out
+out vec4 gl_Position;
+
+
+void main(void) 
+    { 
+    // This is pretty much it, transform the geometry
+    gl_Position = mvpMatrix * vVertex;
+    }

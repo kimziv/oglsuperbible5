@@ -49,7 +49,7 @@ void SetupRC()
 	triangleBatch.CopyColorData4f(vColors);
 	triangleBatch.End();
 
-	myIdentityShader = shaderManager.LoadShaderPairWithAttributes("ShadedIdentity.vp", "ShadedIdentity.fp", 2, 
+	myIdentityShader = gltLoadShaderPairWithAttributes("ShadedIdentity.vp", "ShadedIdentity.fp", 2, 
 		                            GLT_ATTRIBUTE_VERTEX, "vVertex", GLT_ATTRIBUTE_COLOR, "vColor");
 	}
 

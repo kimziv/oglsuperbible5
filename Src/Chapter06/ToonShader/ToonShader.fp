@@ -1,4 +1,4 @@
-// ADS Point lighting Shader
+// Cell lighting Shader
 // Fragment Shader
 // Richard S. Wright Jr.
 // OpenGL SuperBible
