@@ -2,7 +2,7 @@
 // Fragment Shader
 // Richard S. Wright Jr.
 // OpenGL SuperBible
-#version 150
+#version 130
 
 out vec4 gl_FragColor;
 in vec4 vVaryingColor;
