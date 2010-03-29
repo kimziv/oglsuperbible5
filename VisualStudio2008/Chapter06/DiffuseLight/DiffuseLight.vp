@@ -36,8 +36,10 @@ void main(void)
     // Dot product gives us diffuse intensity
     float diff = max(0.0, dot(vEyeNormal, vLightDir));
 
-    // Multiply intensity by diffuse color, force alpha to 1.0
-    vVaryingColor.xyz = diff * diffuseColor.xyz;
-    vVaryingColor.a = 1.0;
+    // Multiply intensity by diffuse color
+    vVaryingColor.rgb = diff * diffuseColor.rgb;
+    vVaryingColor.a = diffuseColor.a;
+
+    // Let's not forget to transform the geometry
     gl_Position = mvpMatrix * vVertex;
     }

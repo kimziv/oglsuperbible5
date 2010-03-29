@@ -82,11 +82,16 @@ GLBatch::~GLBatch(void)
 	delete [] pTexCoords;
 	}
 
-	
+
+// Start the primitive batch.
 void GLBatch::Begin(GLenum primitive, GLuint nVerts, GLuint nTextureUnits)
 	{
 	primitiveType = primitive;
 	nNumVerts = nVerts;
+    
+    if(nTextureUnits > 4)   // Limit to four texture units
+        nTextureUnits = 4;
+        
 	nNumTextureUnits = nTextureUnits;
 	
 	if(nNumTextureUnits != 0) {

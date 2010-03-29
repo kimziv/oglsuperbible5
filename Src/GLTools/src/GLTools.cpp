@@ -1108,7 +1108,7 @@ bool gltLoadShaderFile(const char *szFile, GLuint shader)
     fp = fopen(szFile, "r");
     if(fp != NULL)
 		{
-        // See how long the file s
+        // See how long the file is
         while (fgetc(fp) != EOF)
             shaderLength++;
 		
@@ -1158,27 +1158,29 @@ GLuint gltLoadShaderPairWithAttributes(const char *szVertexProg, const char *szF
     hFragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 	
     // Load them. If fail clean up and return null
+    // Vertex Program
     if(gltLoadShaderFile(szVertexProg, hVertexShader) == false)
 		{
         glDeleteShader(hVertexShader);
         glDeleteShader(hFragmentShader);
-		cout << "The shader at " << szVertexProg << "could not be found.\n";
+		cout << "The shader at " << szVertexProg << " could not be found.\n";
         return (GLuint)NULL;
 		}
 	
+    // Fragment Program
     if(gltLoadShaderFile(szFragmentProg, hFragmentShader) == false)
 		{
         glDeleteShader(hVertexShader);
         glDeleteShader(hFragmentShader);
-		cout << "The shader at " << szFragmentProg << "could not be found.\n";
+		cout << "The shader at " << szFragmentProg << " could not be found.\n";
         return (GLuint)NULL;
 		}
     
-    // Compile them
+    // Compile them both
     glCompileShader(hVertexShader);
     glCompileShader(hFragmentShader);
     
-    // Check for errors
+    // Check for errors in vertex shader
     glGetShaderiv(hVertexShader, GL_COMPILE_STATUS, &testVal);
     if(testVal == GL_FALSE)
 		{
@@ -1190,6 +1192,7 @@ GLuint gltLoadShaderPairWithAttributes(const char *szVertexProg, const char *szF
         return (GLuint)NULL;
 		}
     
+    // Check for errors in fragment shader
     glGetShaderiv(hFragmentShader, GL_COMPILE_STATUS, &testVal);
     if(testVal == GL_FALSE)
 		{
@@ -1201,16 +1204,18 @@ GLuint gltLoadShaderPairWithAttributes(const char *szVertexProg, const char *szF
         return (GLuint)NULL;
 		}
     
-    // Link them - assuming it works...
+    // Create the final program object, and attach the shaders
     hReturn = glCreateProgram();
     glAttachShader(hReturn, hVertexShader);
     glAttachShader(hReturn, hFragmentShader);
 
 
+    // Now, we need to bind the attribute names to their specific locations
 	// List of attributes
 	va_list attributeList;
 	va_start(attributeList, szFragmentProg);
 
+    // Iterate over this argument list
 	char *szNextArg;
 	int iArgCount = va_arg(attributeList, int);	// Number of attributes
 	for(int i = 0; i < iArgCount; i++)
@@ -1219,9 +1224,9 @@ GLuint gltLoadShaderPairWithAttributes(const char *szVertexProg, const char *szF
 		szNextArg = va_arg(attributeList, char*);
 		glBindAttribLocation(hReturn, index, szNextArg);
 		}
-
 	va_end(attributeList);
 
+    // Attempt to link    
     glLinkProgram(hReturn);
 	
     // These are no longer needed
@@ -1239,6 +1244,7 @@ GLuint gltLoadShaderPairWithAttributes(const char *szVertexProg, const char *szF
 		return (GLuint)NULL;
 		}
     
+    // All done, return our ready to use shader program
     return hReturn;  
 	}   
 
