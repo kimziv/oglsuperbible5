@@ -85,7 +85,7 @@
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="4"
 			CharacterSet="2"
-			WholeProgramOptimization="1"
+			WholeProgramOptimization="0"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -108,6 +108,7 @@
 				EnableIntrinsicFunctions="true"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;GLEW_STATIC"
 				RuntimeLibrary="0"
+				BufferSecurityCheck="false"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -126,6 +127,7 @@
 				Name="VCLibrarianTool"
 				OutputFile="$(OutDir)\gltools.lib"
 				IgnoreAllDefaultLibraries="true"
+				IgnoreDefaultLibraryNames="LIBCMT;LIBCPMT"
 			/>
 			<Tool
 				Name="VCALinkTool"
