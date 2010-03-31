@@ -116,6 +116,7 @@
 				PreprocessorDefinitions="NDEBUG;FREEGLUT_STATIC;WIN32;_LIB"
 				StringPooling="true"
 				RuntimeLibrary="0"
+				BufferSecurityCheck="false"
 				EnableFunctionLevelLinking="true"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
@@ -135,6 +136,7 @@
 				Name="VCLibrarianTool"
 				OutputFile="$(OutDir)\freeglut_static.lib"
 				IgnoreAllDefaultLibraries="true"
+				IgnoreDefaultLibraryNames="LIBCMT;MSVCRT"
 			/>
 			<Tool
 				Name="VCALinkTool"
