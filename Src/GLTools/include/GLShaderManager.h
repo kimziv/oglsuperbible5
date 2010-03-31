@@ -63,9 +63,8 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 #include <glew.h>
 #endif
 
-#include <vector>
-
-using namespace std;
+//#include <vector>
+//using namespace std;
 
 // Maximum length of shader name
 #define MAX_SHADER_NAME_LENGTH	64
@@ -119,7 +118,7 @@ class GLShaderManager
 	
 	protected:
 		GLuint	uiStockShaders[GLT_SHADER_LAST];
-		vector <SHADERLOOKUPETRY>	shaderTable;
+//		vector <SHADERLOOKUPETRY>	shaderTable;
 
 	};
 

@@ -307,8 +307,8 @@ GLShaderManager::~GLShaderManager(void)
 			glDeleteProgram(uiStockShaders[i]);
 			
 		// Free shader table too
-		for(i = 0; i < shaderTable.size(); i++)
-			glDeleteProgram(shaderTable[i].uiShaderID);
+//		for(i = 0; i < shaderTable.size(); i++)
+//			glDeleteProgram(shaderTable[i].uiShaderID);
 		}
 	}
 	
@@ -319,7 +319,7 @@ bool GLShaderManager::InitializeStockShaders(void)
 	{
 	// Be warned, going over 128 shaders may cause a
 	// hickup for a reallocation.
-	shaderTable.reserve(128);
+//	shaderTable.reserve(128);
 	
 	uiStockShaders[GLT_SHADER_IDENTITY]			= gltLoadShaderPairSrcWithAttributes(szIdentityShaderVP, szIdentityShaderFP, 1, GLT_ATTRIBUTE_VERTEX, "vVertex");
 	uiStockShaders[GLT_SHADER_FLAT]				= gltLoadShaderPairSrcWithAttributes(szFlatShaderVP, szFlatShaderFP, 1, GLT_ATTRIBUTE_VERTEX, "vVertex");
@@ -506,11 +506,11 @@ GLuint GLShaderManager::GetStockShader(GLT_STOCK_SHADER nShaderID)
 GLuint GLShaderManager::LookupShader(const char *szVertexProg, const char *szFragProg)
 	{
 	// Linear Search... this isn't supposed to be relied on all the time
-	for(unsigned int i = 0; i < shaderTable.size(); i++)
+/*	for(unsigned int i = 0; i < shaderTable.size(); i++)
 		if((strncmp(szVertexProg, shaderTable[i].szVertexShaderName, MAX_SHADER_NAME_LENGTH) == 0) && 
 			(strncmp(szFragProg, shaderTable[i].szFragShaderName, MAX_SHADER_NAME_LENGTH) == 0))
 			return shaderTable[i].uiShaderID;
-	
+*/	
 	// Failed
 	return 0;
 	}
@@ -537,7 +537,7 @@ GLuint GLShaderManager::LoadShaderPair(const char *szVertexProgFileName, const c
 	// Add to the table
 	strncpy(shaderEntry.szVertexShaderName, szVertexProgFileName, MAX_SHADER_NAME_LENGTH);
 	strncpy(shaderEntry.szFragShaderName, szFragProgFileName, MAX_SHADER_NAME_LENGTH);
-	shaderTable.push_back(shaderEntry);	
+//	shaderTable.push_back(shaderEntry);	
 	return shaderEntry.uiShaderID;
 	}
 
@@ -564,7 +564,7 @@ GLuint GLShaderManager::LoadShaderPairSrc(const char *szName, const char *szVert
 	// Add it...
 	strncpy(shaderEntry.szVertexShaderName, szName, MAX_SHADER_NAME_LENGTH);
 	strncpy(shaderEntry.szFragShaderName, szName, MAX_SHADER_NAME_LENGTH);
-	shaderTable.push_back(shaderEntry);	
+//	shaderTable.push_back(shaderEntry);	
 	return shaderEntry.uiShaderID;		
 	}
 
@@ -664,7 +664,7 @@ GLuint GLShaderManager::LoadShaderPairWithAttributes(const char *szVertexProgFil
 	// Add it...
 	strncpy(shaderEntry.szVertexShaderName, szVertexProgFileName, MAX_SHADER_NAME_LENGTH);
 	strncpy(shaderEntry.szFragShaderName, szFragmentProgFileName, MAX_SHADER_NAME_LENGTH);
-	shaderTable.push_back(shaderEntry);	
+//	shaderTable.push_back(shaderEntry);	
 	return shaderEntry.uiShaderID;		
 	}
 
@@ -751,6 +751,6 @@ GLuint GLShaderManager::LoadShaderPairSrcWithAttributes(const char *szName, cons
 	// Add it...
 	strncpy(shaderEntry.szVertexShaderName, szName, MAX_SHADER_NAME_LENGTH);
 	strncpy(shaderEntry.szFragShaderName, szName, MAX_SHADER_NAME_LENGTH);
-	shaderTable.push_back(shaderEntry);	
+//	shaderTable.push_back(shaderEntry);	
 	return shaderEntry.uiShaderID;		
 	}
