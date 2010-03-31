@@ -7,7 +7,6 @@
 in vec4 vVertex;
 in vec2 vTexCoords;
 
-out vec4 gl_Position;
 smooth out vec2 vVaryingTexCoords;
 
 void main(void) 

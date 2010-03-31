@@ -7,7 +7,6 @@
 in vec4 vColor;
 in vec4 vVertex;
 
-out vec4 gl_Position;
 flat out vec4 vVaryingColor;
 
 void main(void) 

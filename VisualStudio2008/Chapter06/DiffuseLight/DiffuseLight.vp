@@ -15,9 +15,6 @@ uniform mat4	mvpMatrix;
 uniform mat4	mvMatrix;
 uniform mat3	normalMatrix;
 
-// Transformed vertex position
-out vec4 gl_Position;
-
 // Color to fragment program
 smooth out vec4 vVaryingColor;
 

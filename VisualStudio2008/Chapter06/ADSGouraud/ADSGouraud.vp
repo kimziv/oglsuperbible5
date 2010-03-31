@@ -10,16 +10,13 @@ in vec3 vNormal;
 
 // Set per batch
 uniform vec4    ambientColor;
-uniform vec4	diffuseColor;	
+uniform vec4    diffuseColor;	
 uniform vec4    specularColor;
 
 uniform vec3	vLightPosition;
 uniform mat4	mvpMatrix;
 uniform mat4	mvMatrix;
 uniform mat3	normalMatrix;
-
-// Transformed vertex position
-out vec4 gl_Position;
 
 // Color to fragment program
 smooth out vec4 vVaryingColor;

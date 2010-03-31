@@ -6,8 +6,6 @@
 
 in vec4 vVertex;
 
-out vec4 gl_Position;
-
 void main(void) 
     { 
     gl_Position = vVertex;

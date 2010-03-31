@@ -62,6 +62,8 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="opengl32.lib"
 				LinkIncremental="2"
+				IgnoreAllDefaultLibraries="false"
+				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				TargetMachine="1"
