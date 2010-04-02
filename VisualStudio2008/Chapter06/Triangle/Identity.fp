@@ -4,7 +4,7 @@
 // OpenGL SuperBible
 #version 330
 
-layout (location = 0) out vec4 vFragColor;
+out vec4 vFragColor;
 
 uniform vec4 vColor;
 

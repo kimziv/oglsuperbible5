@@ -7,7 +7,7 @@
 
 uniform sampler2D colorMap;
 
-layout (location=0) out vec4 vFragColor;
+out vec4 vFragColor;
 smooth in vec4 vVaryingTexCoords;
 
 

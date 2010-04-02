@@ -5,8 +5,7 @@
 #version 330
 
 uniform sampler1D colorTable;
-
-layout (location=0) out vec4 vFragColor;
+out vec4 vFragColor;
 
 smooth in float textureCoordinate;
 
