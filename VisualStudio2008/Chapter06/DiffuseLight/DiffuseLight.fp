@@ -2,12 +2,12 @@
 // Fragment Shader
 // Richard S. Wright Jr.
 // OpenGL SuperBible
-#version 130
+#version 330
 
-out vec4 gl_FragColor;
-in vec4 vVaryingColor;
+layout (location=0) out vec4 vFragColor;
+smooth in vec4 vVaryingColor;
 
 void main(void)
    { 
-   gl_FragColor = vVaryingColor;
+   vFragColor = vVaryingColor;
    }

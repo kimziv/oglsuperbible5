@@ -2,17 +2,13 @@
 // Vertex Shader
 // Richard S. Wright Jr.
 // OpenGL SuperBible
-#version 130
+#version 330
 
 // Transformation Matrix
 uniform mat4	mvpMatrix;
 
 // Incoming per vertex
 in vec4 vVertex;
-
-// Transformed vertex position out
-out vec4 gl_Position;
-
 
 void main(void) 
     { 

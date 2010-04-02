@@ -2,11 +2,9 @@
 // Vertex Shader
 // Richard S. Wright Jr.
 // OpenGL SuperBible
-#version 130
+#version 330
 
 in vec4 vVertex;
-
-out vec4 gl_Position;
 
 void main(void) 
     { 

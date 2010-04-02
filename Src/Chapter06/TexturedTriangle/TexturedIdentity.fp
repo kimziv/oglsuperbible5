@@ -2,16 +2,16 @@
 // Fragment Shader
 // Richard S. Wright Jr.
 // OpenGL SuperBible
-#version 130
+#version 330
 
 
 uniform sampler2D colorMap;
 
-out vec4 gl_FragColor; 
-in vec4 vVaryingTexCoords;
+layout (location=0) out vec4 vFragColor;
+smooth in vec4 vVaryingTexCoords;
 
 
 void main(void)
    { 
-   gl_FragColor = texture2D(colorMap, vVaryingTexCoords.st);
+   vFragColor = texture(colorMap, vVaryingTexCoords.st);
    }

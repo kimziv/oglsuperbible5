@@ -2,15 +2,15 @@
 // Fragment Shader
 // Richard S. Wright Jr.
 // OpenGL SuperBible
-#version 130
+#version 330
 
-out vec4 gl_FragColor;
+layout (location=0) out vec4 vFragColor;
 
-uniform vec4    ambientColor;
-uniform vec4   diffuseColor;   
-uniform vec4    specularColor;
-uniform sampler2D	cloudTexture;
-uniform float		dissolveFactor;
+uniform vec4       ambientColor;
+uniform vec4       diffuseColor;   
+uniform vec4       specularColor;
+uniform sampler2D  cloudTexture;
+uniform float      dissolveFactor;
 
 smooth in vec3 vVaryingNormal;
 smooth in vec3 vVaryingLightDir;
@@ -18,7 +18,7 @@ smooth in vec2 vVaryingTexCoord;
 
 void main(void)
     { 
-    vec4 vCloudSample = texture2D(cloudTexture, vVaryingTexCoord);
+    vec4 vCloudSample = texture(cloudTexture, vVaryingTexCoord);
 
     if(vCloudSample.r < dissolveFactor)
         discard;
@@ -28,10 +28,10 @@ void main(void)
     float diff = max(0.0, dot(normalize(vVaryingNormal), normalize(vVaryingLightDir)));
 
     // Multiply intensity by diffuse color, force alpha to 1.0
-    gl_FragColor = diff * diffuseColor;
+    vFragColor = diff * diffuseColor;
 
     // Add in ambient light
-    gl_FragColor += ambientColor;
+    vFragColor += ambientColor;
 
 
     // Specular Light
@@ -39,7 +39,7 @@ void main(void)
     float spec = max(0.0, dot(normalize(vVaryingNormal), vReflection));
     if(diff != 0) {
         float fSpec = pow(spec, 128.0);
-        gl_FragColor.rgb += vec3(fSpec, fSpec, fSpec);
+        vFragColor.rgb += vec3(fSpec, fSpec, fSpec);
         }
     }
     

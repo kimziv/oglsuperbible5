@@ -2,13 +2,13 @@
 // Fragment Shader
 // Richard S. Wright Jr.
 // OpenGL SuperBible
-#version 130
+#version 330
 
-out vec4 gl_FragColor;
+layout (location = 0) out vec4 vFragColor;
 
 uniform vec4 vColor;
 
 void main(void)
    { 
-   gl_FragColor = vColor;
+   vFragColor = vColor;
    }

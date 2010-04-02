@@ -2,21 +2,18 @@
 // Vertex Shader
 // Richard S. Wright Jr.
 // OpenGL SuperBible
-#version 130
+#version 330
 
 // Incoming per vertex... position and normal
 in vec4 vVertex;
 in vec3 vNormal;
 
-out float textureCoordinate;
+smooth out float textureCoordinate;
 
 uniform vec3	vLightPosition;
 uniform mat4	mvpMatrix;
 uniform mat4	mvMatrix;
 uniform mat3	normalMatrix;
-
-// Transformed vertex position
-out vec4 gl_Position;
 
 
 void main(void) 
