@@ -1,0 +1,34 @@
+// Reflection Shader
+// Vertex Shader
+// Richard S. Wright Jr.
+// OpenGL SuperBible
+//#version 330
+
+// Incoming per vertex... position and normal
+attribute vec4 vVertex;
+attribute vec3 vNormal;
+
+uniform mat4   mvpMatrix;
+uniform mat4   mvMatrix;
+uniform mat3   normalMatrix;
+
+// Texture coordinate to fragment program
+varying vec3 vVaryingTexCoord;
+
+void main(void) 
+    {
+    // Normal in Eye Space
+    vec3 vEyeNormal = normalMatrix * vNormal;
+    
+    // Vertex position in Eye Space
+    vec4 vVert4 = mvMatrix * vVertex;
+    vec3 vEyeVertex = normalize(vVert4.xyz / vVert4.w);
+    
+    
+    // Pass on the texture coordinates 
+    vVaryingTexCoord = reflect(vEyeVertex, vEyeNormal);
+        
+
+    // Don't forget to transform the geometry!
+    gl_Position = mvpMatrix * vVertex;
+    }

@@ -1,0 +1,53 @@
+// ADS Point lighting Shader
+// Vertex Shader
+// Richard S. Wright Jr.
+// OpenGL SuperBible
+#version 120
+
+// Incoming per vertex... position and normal
+attribute vec4 vVertex;
+attribute vec3 vNormal;
+attribute vec4 vTexture0;
+
+uniform mat4   mvpMatrix;
+uniform mat4   mvMatrix;
+uniform mat3   normalMatrix;
+uniform vec3   vLightPosition;
+
+// Color to fragment program
+vec3 vEyeNormal;
+varying vec3 vVaryingLightDir;
+varying vec2 vTexCoords;
+
+vec3 vTangent = vec3(1.0, 0.0, 0.0);
+
+void main(void) 
+    { 
+    // Tangent Basis
+    vec3 b, t, v;
+    
+    // Get surface normal in eye coordinates
+    vEyeNormal = normalMatrix * vNormal;
+
+    // Get vertex position in eye coordinates
+    vec4 vPosition4 = mvMatrix * vVertex;
+    vec3 vPosition3 = vPosition4.xyz / vPosition4.w;
+
+    // Get vector to light source
+    vVaryingLightDir = normalize(vLightPosition - vPosition3);
+
+    // Build Tangent Basis
+    t = normalize(normalMatrix * vTangent);
+    b = cross(vEyeNormal, t);
+    v.x = dot(vVaryingLightDir, t);
+    v.y = dot(vVaryingLightDir, b);
+    v.z = dot(vVaryingLightDir, vEyeNormal);
+    
+    vVaryingLightDir = normalize(v);
+
+    // Pass along the texture coordinates
+    vTexCoords = vTexture0.st;
+
+    // Don't forget to transform the geometry!
+    gl_Position = mvpMatrix * vVertex;
+    }
