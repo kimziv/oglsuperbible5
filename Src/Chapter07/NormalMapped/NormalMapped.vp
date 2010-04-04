@@ -1,13 +1,13 @@
-// ADS Point lighting Shader
+// Normal mapping light shader
 // Vertex Shader
 // Richard S. Wright Jr.
 // OpenGL SuperBible
-#version 120
+#version 330
 
 // Incoming per vertex... position and normal
-attribute vec4 vVertex;
-attribute vec3 vNormal;
-attribute vec4 vTexture0;
+in vec4 vVertex;
+in vec3 vNormal;
+in vec4 vTexture0;
 
 uniform mat4   mvpMatrix;
 uniform mat4   mvMatrix;
@@ -16,8 +16,8 @@ uniform vec3   vLightPosition;
 
 // Color to fragment program
 vec3 vEyeNormal;
-varying vec3 vVaryingLightDir;
-varying vec2 vTexCoords;
+smooth out vec3 vVaryingLightDir;
+smooth out vec2 vTexCoords;
 
 vec3 vTangent = vec3(1.0, 0.0, 0.0);
 

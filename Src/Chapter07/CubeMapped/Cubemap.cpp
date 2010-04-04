@@ -33,7 +33,8 @@ GLuint              cubeTexture;
 GLint               reflectionShader;
 GLint               skyBoxShader;
 
-GLint               locMVPReflect, locMVReflect, locNormalReflect;
+GLint               locMVPReflect, locMVReflect, locNormalReflect, locInvertedCamera;
+GLint				locMVPSkyBox;
 
 
 // Six sides of a cube map
@@ -60,7 +61,6 @@ void SetupRC()
     // Cull backs of polygons
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
-    glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
         
     glGenTextures(1, &cubeTexture);
@@ -88,7 +88,7 @@ void SetupRC()
     
     viewFrame.MoveForward(-4.0f);
     gltMakeSphere(sphereBatch, 1.0f, 52, 26);
-    gltMakeCube(cubeBatch, 10.0f);
+    gltMakeCube(cubeBatch, 20.0f);
     
     reflectionShader = gltLoadShaderPairWithAttributes("Reflection.vp", "Reflection.fp", 2, 
                                                 GLT_ATTRIBUTE_VERTEX, "vVertex",
@@ -97,11 +97,15 @@ void SetupRC()
     locMVPReflect = glGetUniformLocation(reflectionShader, "mvpMatrix");
     locMVReflect = glGetUniformLocation(reflectionShader, "mvMatrix");
     locNormalReflect = glGetUniformLocation(reflectionShader, "normalMatrix");
+	locInvertedCamera = glGetUniformLocation(reflectionShader, "mInverseCamera");
                                                 
                                                 
     skyBoxShader = gltLoadShaderPairWithAttributes("SkyBox.vp", "SkyBox.fp", 2, 
                                                 GLT_ATTRIBUTE_VERTEX, "vVertex",
                                                 GLT_ATTRIBUTE_NORMAL, "vNormal");
+
+	locMVPSkyBox = glGetUniformLocation(skyBoxShader, "mvpMatrix");
+
     
     }
 
@@ -117,24 +121,33 @@ void RenderScene(void)
     // Clear the window
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
-    modelViewMatrix.PushMatrix();
-        
-        M3DMatrix44f mCamera;
-        M3DMatrix44f mCameraRotOnly;
-        
-        viewFrame.GetCameraMatrix(mCamera, false);
-        viewFrame.GetCameraMatrix(mCameraRotOnly, true);
+    M3DMatrix44f mCamera;
+    M3DMatrix44f mCameraRotOnly;
+	M3DMatrix44f mInverseCamera;
     
+    viewFrame.GetCameraMatrix(mCamera, false);
+    viewFrame.GetCameraMatrix(mCameraRotOnly, true);
+	m3dInvertMatrix44(mInverseCamera, mCameraRotOnly);
+
+    modelViewMatrix.PushMatrix();    
         // Draw the sphere
         modelViewMatrix.MultMatrix(mCamera);
         glUseProgram(reflectionShader);
         glUniformMatrix4fv(locMVPReflect, 1, GL_FALSE, transformPipeline.GetModelViewProjectionMatrix());
-        glUniformMatrix4fv(locMVPReflect, 1, GL_FALSE, transformPipeline.GetModelViewMatrix());
+        glUniformMatrix4fv(locMVReflect, 1, GL_FALSE, transformPipeline.GetModelViewMatrix());
         glUniformMatrix3fv(locNormalReflect, 1, GL_FALSE, transformPipeline.GetNormalMatrix());
+		glUniformMatrix4fv(locInvertedCamera, 1, GL_FALSE, mInverseCamera);
+
+		glEnable(GL_CULL_FACE);
         sphereBatch.Draw();
-    
-    
-        
+		glDisable(GL_CULL_FACE);
+	modelViewMatrix.PopMatrix();
+
+	modelViewMatrix.PushMatrix();
+	    modelViewMatrix.MultMatrix(mCameraRotOnly);
+		glUseProgram(skyBoxShader);
+		glUniformMatrix4fv(locMVPSkyBox, 1, GL_FALSE, transformPipeline.GetModelViewProjectionMatrix());
+		cubeBatch.Draw();       
     modelViewMatrix.PopMatrix();
         
     // Do the buffer Swap
@@ -172,7 +185,7 @@ void ChangeSize(int w, int h)
     // Set Viewport to window dimensions
     glViewport(0, 0, w, h);
     
-    viewFrustum.SetPerspective(35.0f, float(w)/float(h), 1.0f, 100.0f);
+    viewFrustum.SetPerspective(35.0f, float(w)/float(h), 1.0f, 1000.0f);
     
     projectionMatrix.LoadMatrix(viewFrustum.GetProjectionMatrix());
     transformPipeline.SetMatrixStacks(modelViewMatrix, projectionMatrix);

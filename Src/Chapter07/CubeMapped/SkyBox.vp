@@ -1,49 +1,22 @@
-// ADS Point lighting Shader
+// Skybox Shader
 // Vertex Shader
 // Richard S. Wright Jr.
 // OpenGL SuperBible
-//#version 330
+#version 330
 
 // Incoming per vertex... position and normal
-attribute vec4 vVertex;
-attribute vec3 vNormal;
+in vec4 vVertex;
 
-attribute vec2 vTexCoords0;
 uniform mat4   mvpMatrix;
-uniform mat4   mvMatrix;
-uniform mat3   normalMatrix;
 
-// Color to fragment program
-varying vec2 vVaryingTexCoord;
-
-
-// Generates a sphere map texture coordinate based on the eyespace surface normal
-// and the eye space vertex.
-vec2 sphereMap(in vec3 normal, in vec3 ecPosition3)
-   {
-   float m;
-   vec3 r, u;
-   u = normalize(ecPosition3);
-   r = reflect(u, normal);
-   m = 2.0 * sqrt(r.x * r.x + r.y * r.y + (r.z + 1.0) * (r.z + 1.0));
-   return vec2 (r.x / m + 0.5, r.y / m + 0.5);
-   }
-
-
+// Texture Coordinate to fragment program
+varying vec3 vVaryingTexCoord;
 
 
 void main(void) 
     {
-    // Normal in Eye Space
-    vec3 vEyeNormal = normalMatrix * vNormal;
-    
-    // Vertex position in Eye Space
-    vec4 vVert4 = mvMatrix * vVertex;
-    vec3 vEyeVertex = vVert4.xyz / vVert4.w;
-    
-    
     // Pass on the texture coordinates 
-    vVaryingTexCoord = sphereMap(vEyeNormal, vEyeVertex);
+    vVaryingTexCoord = normalize(vVertex.xyz);
     
     
 

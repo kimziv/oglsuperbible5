@@ -1,20 +1,19 @@
-// ADS Point lighting Shader
+// Sphere Mapping Shader
 // Vertex Shader
 // Richard S. Wright Jr.
 // OpenGL SuperBible
-//#version 330
+#version 330
 
 // Incoming per vertex... position and normal
-attribute vec4 vVertex;
-attribute vec3 vNormal;
+in vec4 vVertex;
+in vec3 vNormal;
 
-attribute vec2 vTexCoords0;
 uniform mat4   mvpMatrix;
 uniform mat4   mvMatrix;
 uniform mat3   normalMatrix;
 
 // Color to fragment program
-varying vec2 vVaryingTexCoord;
+smooth out vec2 vVaryingTexCoord;
 
 
 // Generates a sphere map texture coordinate based on the eyespace surface normal
