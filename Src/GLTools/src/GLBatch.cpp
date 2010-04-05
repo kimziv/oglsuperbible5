@@ -407,7 +407,7 @@ void GLBatch::Color4fv(M3DVector4f vColor)
 		return;
 	
 	// Copy it in...
-	memcpy(pColors, vColor, sizeof(M3DVector4f));
+	memcpy(pColors[nVertsBuilding], vColor, sizeof(M3DVector4f));
 	}
         
 // Unlike normal OpenGL immediate mode, you must specify a texture coord

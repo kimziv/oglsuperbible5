@@ -70,16 +70,17 @@ void SetupRC(void)
 	// Background
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f );
 
-	glEnable(GL_DEPTH_TEST);
+	//glEnable(GL_DEPTH_TEST);
+	glEnable(GL_POINT_SPRITE);
 
 
-    GLfloat fColors[4][4] = {{ 1.0f, 1.0f, 1.0f, 1.0f}, // White
-                             { 0.3f, 0.3f, 1.0f, 1.0f}, // Blue Stars
+	GLfloat fColors[4][4] = {{ 1.0f, 1.0f, 1.0f, 1.0f}, // White
+                             { 0.67f, 0.68f, 0.82f, 1.0f}, // Blue Stars
                              { 1.0f, 0.5f, 0.5f, 1.0f}, // Reddish
-                             { 0.75f, 0.75f, 0.0f, 1.0f}}; // Orange
+	                         { 1.0f, 0.82f, 0.65f, 1.0f}}; // Orange
 
 
-    // Randomly place the stars in thier initial positions, and pick a random color
+    // Randomly place the stars in their initial positions, and pick a random color
     starsBatch.Begin(GL_POINTS, 10000);
     for(int i = 0; i < 10000; i++)
         {
@@ -101,13 +102,13 @@ void SetupRC(void)
                 break;
                 
                 case 6:
+				default:
                 starsBatch.Color4fv(fColors[3]);
                 break;
                 }
-        
-        float x = 0.0f; //float(rand() % 10)*.1f;
-        float y = 0.0f; //float(rand() % 10)*.1f;
-        float z = -10.0f;// - float(rand() % 10)*.1f;
+        float x = (800.0f - float(rand() % 1600))*.1f;
+        float y = (800.0f - float(rand() % 1600))*.1f;
+        float z = -99.0f; //-float(rand() % 500)*.1f;
         starsBatch.Vertex3f(x, y, z);        
         }
     starsBatch.End();
@@ -117,12 +118,12 @@ void SetupRC(void)
 			GLT_ATTRIBUTE_COLOR, "vColor");
 
 	locMVP = glGetUniformLocation(starFieldShader, "mvpMatrix");
-	locTexture = glGetUniformLocation(starFieldShader, "sphereMap");
+	locTexture = glGetUniformLocation(starFieldShader, "starImage");
     locTimeStamp = glGetUniformLocation(starFieldShader, "timeStamp");
     
 	glGenTextures(1, &starTexture);
 	glBindTexture(GL_TEXTURE_2D, starTexture);
-	LoadTGATexture("SphereMap.tga", GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadTGATexture("Star.tga", GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE);
     }
 
 // Cleanup
@@ -135,20 +136,22 @@ void ShutdownRC(void)
 // Called to draw scene
 void RenderScene(void)
 	{
-	static CStopWatch rotTimer;
+	static CStopWatch timer;
 
 	// Clear the window and the depth buffer
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
-    glPointSize(15.0f);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE, GL_ONE);
+	glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
+
     glUseProgram(starFieldShader);
     glUniformMatrix4fv(locMVP, 1, GL_FALSE, viewFrustum.GetProjectionMatrix());
     glUniform1i(locTexture, 0);
-    glUniform1f(locTimeStamp, 0.0f);
+    glUniform1f(locTimeStamp, timer.GetElapsedSeconds()*10.0f);
 
     starsBatch.Draw();
     
-
     glutSwapBuffers();
 	glutPostRedisplay();
 	}
@@ -164,7 +167,7 @@ void ChangeSize(int w, int h)
 	// Set Viewport to window dimensions
     glViewport(0, 0, w, h);
 
-    viewFrustum.SetPerspective(35.0f, float(w)/float(h), 1.0f, 1000.0f);
+    viewFrustum.SetPerspective(35.0f, float(w)/float(h), 1.0f, 100.0f);
 	}
 
 ///////////////////////////////////////////////////////////////////////////////
