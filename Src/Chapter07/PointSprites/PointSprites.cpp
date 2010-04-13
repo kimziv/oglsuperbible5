@@ -81,8 +81,8 @@ void SetupRC(void)
 
 
     // Randomly place the stars in their initial positions, and pick a random color
-    starsBatch.Begin(GL_POINTS, 10000);
-    for(int i = 0; i < 10000; i++)
+    starsBatch.Begin(GL_POINTS, 20000);
+    for(int i = 0; i < 20000; i++)
         {
         // Pick a random color
         switch(rand() %7) {
@@ -106,9 +106,9 @@ void SetupRC(void)
                 starsBatch.Color4fv(fColors[3]);
                 break;
                 }
-        float x = (800.0f - float(rand() % 1600))*.1f;
-        float y = (800.0f - float(rand() % 1600))*.1f;
-        float z = -99.0f; //-float(rand() % 500)*.1f;
+        float x = (700.0f - float(rand() % 1400))*.1f;
+        float y = (700.0f - float(rand() % 1400))*.1f;
+        float z = -float(rand() % 1000)*.1f;
         starsBatch.Vertex3f(x, y, z);        
         }
     starsBatch.End();
@@ -143,7 +143,7 @@ void RenderScene(void)
 		
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE, GL_ONE);
-	glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
+	glEnable(GL_PROGRAM_POINT_SIZE);
 
     glUseProgram(starFieldShader);
     glUniformMatrix4fv(locMVP, 1, GL_FALSE, viewFrustum.GetProjectionMatrix());
