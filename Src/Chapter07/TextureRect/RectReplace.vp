@@ -1,0 +1,24 @@
+// Rectangle Texture (replace) Shader
+// Vertex Shader
+// Richard S. Wright Jr.
+// OpenGL SuperBible
+#version 330
+
+// Incoming per vertex... position and texture coordinate
+in vec4 vVertex;
+in vec2 vTexCoord;
+
+uniform mat4   mvpMatrix;
+
+// Texture Coordinate to fragment program
+smooth out vec2 vVaryingTexCoord;
+
+
+void main(void) 
+    {
+    // Pass on the texture coordinates 
+    vVaryingTexCoord = vTexCoord;
+    
+    // Don't forget to transform the geometry!
+    gl_Position = mvpMatrix * vVertex;
+    }

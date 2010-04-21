@@ -37,6 +37,9 @@ GLBatch				floorBatch;
 GLBatch				logoBatch;
 
 GLuint				uiTextures[4];
+GLint				rectReplaceShader;
+GLint				locRectMVP;
+GLint				locRectTexture;
 
 
 void DrawSongAndDance(GLfloat yRot)		// Called to draw dancing objects
@@ -246,7 +249,15 @@ void SetupRC()
 	// Load the Logo
 	glBindTexture(GL_TEXTURE_RECTANGLE, uiTextures[3]);
 	LoadTGATextureRect("OpenGL-Logo.tga", GL_NEAREST, GL_NEAREST, GL_CLAMP_TO_EDGE);
-                   
+
+    rectReplaceShader = gltLoadShaderPairWithAttributes("RectReplace.vp", "RectReplace.fp", 
+			2, GLT_ATTRIBUTE_VERTEX, "vVertex", GLT_ATTRIBUTE_TEXTURE0, "vTexCoord");
+                 
+
+	locRectMVP = glGetUniformLocation(rectReplaceShader, "mvpMatrix");
+	locRectTexture = glGetUniformLocation(rectReplaceShader, "rectangleImage");
+
+
     // Randomly place the spheres
     for(int i = 0; i < NUM_SPHERES; i++) {
         GLfloat x = ((GLfloat)((rand() % 400) - 200) * 0.1f);
@@ -314,7 +325,10 @@ void RenderScene(void)
         
 	glEnable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
-	shaderManager.UseStockShader(GLT_SHADER_TEXTURE_RECT_REPLACE, mScreenSpace, 0);
+
+	glUseProgram(rectReplaceShader);
+	glUniform1i(locRectTexture, 0);
+	glUniformMatrix4fv(locRectMVP, 1, GL_FALSE, mScreenSpace);
 	glBindTexture(GL_TEXTURE_RECTANGLE, uiTextures[3]);
 	logoBatch.Draw();
 	glDisable(GL_BLEND);
