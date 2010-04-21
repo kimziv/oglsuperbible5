@@ -1,7 +1,7 @@
-// CubeMapped.cpp
+// MultiTexture.cpp
 // OpenGL SuperBible
-// Demonstrates applying a cube map to an object (sphere) using
-// and using the same map for the skybox.
+// Demonstrates applying a cube map to an object (sphere)
+// simultaneously with a "tarnish" texture.
 // Program by Richard S. Wright Jr.
 
 #include <GLTools.h>	// OpenGL toolkit
@@ -30,10 +30,12 @@ GLMatrixStack       modelViewMatrix;
 GLMatrixStack       projectionMatrix;
 GLGeometryTransform transformPipeline;
 GLuint              cubeTexture;
+GLuint				tarnishTexture;
 GLint               reflectionShader;
 GLint               skyBoxShader;
 
 GLint               locMVPReflect, locMVReflect, locNormalReflect, locInvertedCamera;
+GLint				locCubeMap, locTarnishMap;
 GLint				locMVPSkyBox;
 
 
@@ -62,7 +64,23 @@ void SetupRC()
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
     glEnable(GL_DEPTH_TEST);
-        
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+	// Load the tarnish texture
+	glGenTextures(1, &tarnishTexture);
+	glBindTexture(GL_TEXTURE_2D, tarnishTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	pBytes = gltReadTGABits("tarnish.tga", &iWidth, &iHeight, &iComponents, &eFormat);
+    glTexImage2D(GL_TEXTURE_2D, 0, iComponents, iWidth, iHeight, 0, eFormat, GL_UNSIGNED_BYTE, pBytes);
+    free(pBytes);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+
+    // Load the cube map    
     glGenTextures(1, &cubeTexture);
     glBindTexture(GL_TEXTURE_CUBE_MAP, cubeTexture);
         
@@ -71,9 +89,7 @@ void SetupRC()
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);       
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);             
   
     // Load Cube Map images
     for(i = 0; i < 6; i++)
@@ -89,15 +105,17 @@ void SetupRC()
     gltMakeSphere(sphereBatch, 1.0f, 52, 26);
     gltMakeCube(cubeBatch, 20.0f);
     
-    reflectionShader = gltLoadShaderPairWithAttributes("Reflection.vp", "Reflection.fp", 2, 
+    reflectionShader = gltLoadShaderPairWithAttributes("Reflection.vp", "Reflection.fp", 3, 
                                                 GLT_ATTRIBUTE_VERTEX, "vVertex",
-                                                GLT_ATTRIBUTE_NORMAL, "vNormal");
+                                                GLT_ATTRIBUTE_NORMAL, "vNormal",
+												GLT_ATTRIBUTE_TEXTURE0, "vTexCoords");
                                                 
     locMVPReflect = glGetUniformLocation(reflectionShader, "mvpMatrix");
     locMVReflect = glGetUniformLocation(reflectionShader, "mvMatrix");
     locNormalReflect = glGetUniformLocation(reflectionShader, "normalMatrix");
 	locInvertedCamera = glGetUniformLocation(reflectionShader, "mInverseCamera");
-                                                
+    locCubeMap = glGetUniformLocation(reflectionShader, "cubeMap");
+	locTarnishMap = glGetUniformLocation(reflectionShader, "tarnishMap");
                                                 
     skyBoxShader = gltLoadShaderPairWithAttributes("SkyBox.vp", "SkyBox.fp", 2, 
                                                 GLT_ATTRIBUTE_VERTEX, "vVertex",
@@ -105,7 +123,13 @@ void SetupRC()
 
 	locMVPSkyBox = glGetUniformLocation(skyBoxShader, "mvpMatrix");
 
-    
+    // Set textures to their texture units
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, tarnishTexture);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, cubeTexture);
+
+
     }
 
 void ShutdownRC(void)
@@ -136,6 +160,8 @@ void RenderScene(void)
         glUniformMatrix4fv(locMVReflect, 1, GL_FALSE, transformPipeline.GetModelViewMatrix());
         glUniformMatrix3fv(locNormalReflect, 1, GL_FALSE, transformPipeline.GetNormalMatrix());
 		glUniformMatrix4fv(locInvertedCamera, 1, GL_FALSE, mInverseCamera);
+		glUniform1i(locCubeMap, 0);
+		glUniform1i(locTarnishMap, 1);
 
 		glEnable(GL_CULL_FACE);
         sphereBatch.Draw();
@@ -195,7 +221,7 @@ int main(int argc, char* argv[])
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
     glutInitWindowSize(800,600);
-    glutCreateWindow("OpenGL Cube Maps");
+    glutCreateWindow("OpenGL MultiTexture");
     glutReshapeFunc(ChangeSize);
     glutDisplayFunc(RenderScene);
     glutSpecialFunc(SpecialKeys);
