@@ -208,21 +208,22 @@ void SetupRC()
 	int height = 155;
 	logoBatch.Begin(GL_TRIANGLE_FAN, 4, 1);
 	
-	// Upper left hand corner
-	logoBatch.MultiTexCoord2f(0, 0.0f, height);
-	logoBatch.Vertex3f(x, y, 0.0);
-	
-	// Lower left hand corner
-	logoBatch.MultiTexCoord2f(0, 0.0f, 0.0f);
-	logoBatch.Vertex3f(x, y - height, 0.0f);
+        // Upper left hand corner
+        logoBatch.MultiTexCoord2f(0, 0.0f, height);
+        logoBatch.Vertex3f(x, y, 0.0);
+        
+        // Lower left hand corner
+        logoBatch.MultiTexCoord2f(0, 0.0f, 0.0f);
+        logoBatch.Vertex3f(x, y - height, 0.0f);
 
-	// Lower right hand corner
-	logoBatch.MultiTexCoord2f(0, width, 0.0f);
-	logoBatch.Vertex3f(x + width, y - height, 0.0f);
+        // Lower right hand corner
+        logoBatch.MultiTexCoord2f(0, width, 0.0f);
+        logoBatch.Vertex3f(x + width, y - height, 0.0f);
 
-	// Upper righ hand corner
-	logoBatch.MultiTexCoord2f(0, width, height);
-	logoBatch.Vertex3f(x + width, y, 0.0f);
+        // Upper righ hand corner
+        logoBatch.MultiTexCoord2f(0, width, height);
+        logoBatch.Vertex3f(x + width, y, 0.0f);
+
 	logoBatch.End();
 
 	// Make 4 texture objects
@@ -305,10 +306,14 @@ void RenderScene(void)
 	modelViewMatrix.PopMatrix();
 
 	// Render the overlay
+    
+    // Creating this matrix really doesn't need to be done every frame. I'll leave it here
+    // so all the pertenant code is together
+    M3DMatrix44f mScreenSpace;
+    m3dMakeOrthographicMatrix(mScreenSpace, 0.0f, 800.0f, 0.0f, 600.0f, -1.0f, 1.0f);
+        
 	glEnable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
-	M3DMatrix44f mScreenSpace;
-	m3dMakeOrthographicMatrix(mScreenSpace, 0.0f, 800.0f, 0.0f, 600.0f, -1.0f, 1.0f);
 	shaderManager.UseStockShader(GLT_SHADER_TEXTURE_RECT_REPLACE, mScreenSpace, 0);
 	glBindTexture(GL_TEXTURE_RECTANGLE, uiTextures[3]);
 	logoBatch.Draw();

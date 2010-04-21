@@ -14,7 +14,7 @@
 GLBatch	triangleBatch;
 GLShaderManager	shaderManager;
 
-GLint	myIdentityShader;
+GLint	myTexturedIdentityShader;
 GLuint	textureID;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -84,7 +84,7 @@ void SetupRC()
 	triangleBatch.CopyTexCoordData2f(vTexCoords, 0);
 	triangleBatch.End();
 
-	myIdentityShader = shaderManager.LoadShaderPairWithAttributes("TexturedIdentity.vp", "TexturedIdentity.fp", 2, 
+	myIdentityShader = gltLoadShaderPairWithAttributes("TexturedIdentity.vp", "TexturedIdentity.fp", 2, 
 		                            GLT_ATTRIBUTE_VERTEX, "vVertex", GLT_ATTRIBUTE_TEXTURE0, "vTexCoords");
 
 	glGenTextures(1, &textureID);
@@ -97,7 +97,7 @@ void SetupRC()
 // Cleanup
 void ShutdownRC()
    {
-   glDeleteProgram(myIdentityShader);
+   glDeleteProgram(myTexturedIdentityShader);
    glDeleteTextures(1, &textureID);
    }
 
@@ -109,8 +109,9 @@ void RenderScene(void)
 	// Clear the window with current clearing color
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-	glUseProgram(myIdentityShader);
-	GLint iTextureUniform = glGetUniformLocation(myIdentityShader, "colorMap");
+	glUseProgram(myTexturedIdentityShader);
+    glBindTexture(GL_TEXTURE_2D, textureID);
+    GLint iTextureUniform = glGetUniformLocation(myTexturedIdentityShader, "colorMap");
 	glUniform1i(iTextureUniform, 0);
 
 	triangleBatch.Draw();

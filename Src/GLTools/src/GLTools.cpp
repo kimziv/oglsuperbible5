@@ -39,6 +39,7 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 #include <stdio.h>
 #include <assert.h>
 #include <stdarg.h>
+#include <unistd.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 // Get the OpenGL version number
@@ -1477,7 +1478,7 @@ bool gltCheckErrors(GLuint progName)
 //		cout << "A GL Error has occured\n";
         bFoundError = true;
 	}
-	
+#ifndef OPENGL_ES
 	GLenum fboStatus = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
 
 	if(fboStatus != GL_FRAMEBUFFER_COMPLETE)
@@ -1525,6 +1526,8 @@ bool gltCheckErrors(GLuint progName)
 		}
 	}
 
+#endif
+
 	if (progName != 0)
 	{
 		glValidateProgram(progName);
@@ -1533,7 +1536,7 @@ bool gltCheckErrors(GLuint progName)
 		if(iIsProgValid == 0)
 		{
             bFoundError = true;
-			fprintf(stderr, "The current program(%s) is not valid\n", progName);
+			fprintf(stderr, "The current program(%d) is not valid\n", progName);
 //			cout << "The current program (" << progName << ") is not valid\n";
 		}
 	}

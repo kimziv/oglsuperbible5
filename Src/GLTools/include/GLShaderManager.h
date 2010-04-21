@@ -114,7 +114,7 @@ class GLShaderManager
 		GLuint LoadShaderPairSrcWithAttributes(const char *szName, const char *szVertexProg, const char *szFragmentProg, ...);
 
 		// Lookup a previously loaded shader
-		GLuint LookupShader(const char *szVertexProg, const char *szFragProg = NULL);
+		GLuint LookupShader(const char *szVertexProg, const char *szFragProg = 0);
 	
 	protected:
 		GLuint	uiStockShaders[GLT_SHADER_LAST];
