@@ -323,6 +323,7 @@ void RenderScene(void)
     M3DMatrix44f mScreenSpace;
     m3dMakeOrthographicMatrix(mScreenSpace, 0.0f, 800.0f, 0.0f, 600.0f, -1.0f, 1.0f);
         
+    // Turn blending on, and depth testing off
 	glEnable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
 
@@ -331,6 +332,8 @@ void RenderScene(void)
 	glUniformMatrix4fv(locRectMVP, 1, GL_FALSE, mScreenSpace);
 	glBindTexture(GL_TEXTURE_RECTANGLE, uiTextures[3]);
 	logoBatch.Draw();
+
+    // Restore no blending and depth test
 	glDisable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
         

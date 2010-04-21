@@ -25,9 +25,10 @@ void main(void)
     vec4 vVert4 = mvMatrix * vVertex;
     vec3 vEyeVertex = normalize(vVert4.xyz / vVert4.w);
     
-    
-    // Pass on the texture coordinates 
+    // Get reflected vector
     vec4 vCoords = vec4(reflect(vEyeVertex, vEyeNormal), 1.0);
+   
+    // Rotate by flipped camera
     vCoords = mInverseCamera * vCoords;
     vVaryingTexCoord.xyz = normalize(vCoords.xyz);
 

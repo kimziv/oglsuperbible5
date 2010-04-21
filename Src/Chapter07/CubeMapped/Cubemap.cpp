@@ -84,7 +84,7 @@ void SetupRC()
         glTexImage2D(cube[i], 0, iComponents, iWidth, iHeight, 0, eFormat, GL_UNSIGNED_BYTE, pBytes);
         free(pBytes);
         }
-    glGenerateMipmap(GL_TEXTURE_2D);
+    glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
     
     viewFrame.MoveForward(-4.0f);
     gltMakeSphere(sphereBatch, 1.0f, 52, 26);
