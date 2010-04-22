@@ -1,0 +1,20 @@
+// MoonShader
+// Vertex Shader
+// Richard S. Wright Jr.
+// OpenGL SuperBible
+#version 330
+
+in vec4 vVertex;
+in vec4 vTexCoords;
+
+uniform mat4 mvpMatrix;
+
+smooth out vec3 vMoonCoords;
+
+void main(void) 
+    { 
+    vMoonCoords.st = vTexCoords.st;
+    vMoonCoords.p = 4.0;
+
+    gl_Position = mvpMatrix * vVertex;
+    }
