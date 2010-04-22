@@ -135,12 +135,16 @@ void RenderScene(void)
 	static CStopWatch timer;
 
 	// Clear the window and the depth buffer
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT);
 		
+    // Turn on additive blending
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE, GL_ONE);
+
+    // Let the vertex program determine the point size
 	glEnable(GL_PROGRAM_POINT_SIZE);
 
+    // Bind to our shader, set uniforms
     glUseProgram(starFieldShader);
     glUniformMatrix4fv(locMVP, 1, GL_FALSE, viewFrustum.GetProjectionMatrix());
     glUniform1i(locTexture, 0);
@@ -150,6 +154,7 @@ void RenderScene(void)
 	fTime = fmod(fTime, 999.0f);
     glUniform1f(locTimeStamp, fTime);
 
+    // Draw the stars
     starsBatch.Draw();
     
     glutSwapBuffers();
