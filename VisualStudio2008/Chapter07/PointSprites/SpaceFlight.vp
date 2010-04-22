@@ -27,6 +27,11 @@ void main(void)
 
     gl_PointSize = 30.0 + (vNewVertex.z / sqrt(-vNewVertex.z));
 
+    // If they are very small, fade them up
+    if(gl_PointSize < 4.0)
+        vStarColor = smoothstep(0.0, 4.0, gl_PointSize) * vStarColor;
+
+
     // Don't forget to transform the geometry!
     gl_Position = mvpMatrix * vNewVertex;
     }
