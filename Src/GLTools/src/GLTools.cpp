@@ -39,7 +39,9 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 #include <stdio.h>
 #include <assert.h>
 #include <stdarg.h>
+#ifdef __APPLE__
 #include <unistd.h>
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 // Get the OpenGL version number

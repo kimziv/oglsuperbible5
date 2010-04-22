@@ -175,27 +175,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\Src\GLTools\src\GLBatch.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\Src\GLTools\src\glew.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\Src\GLTools\src\GLShaderManager.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\Src\GLTools\src\GLTools.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\Src\GLTools\src\GLTriangleBatch.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\Src\GLTools\src\math3d.cpp"
+				RelativePath="..\..\GLTools\Release\gltools.lib"
 				>
 			</File>
 			<File

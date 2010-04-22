@@ -23,11 +23,9 @@ void main(void)
     
     // If out of range, adjust
     if(vNewVertex.z > -1.0)
-        vNewVertex.z -= 99.0;
+        vNewVertex.z -= 999.0;
 
-
-    gl_PointSize = 10.0;
-
+    gl_PointSize = 30.0 + (vNewVertex.z / sqrt(-vNewVertex.z));
 
     // Don't forget to transform the geometry!
     gl_Position = mvpMatrix * vNewVertex;

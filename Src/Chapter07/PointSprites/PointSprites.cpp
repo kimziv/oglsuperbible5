@@ -17,6 +17,7 @@
 #include <GL/glut.h>
 #endif
 
+#define NUM_STARS 10000
 
 GLFrustum           viewFrustum;
 GLBatch             starsBatch;
@@ -70,9 +71,7 @@ void SetupRC(void)
 	// Background
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f );
 
-	//glEnable(GL_DEPTH_TEST);
-	glEnable(GL_POINT_SPRITE);
-
+	//glEnable(GL_POINT_SPRITE);
 
 	GLfloat fColors[4][4] = {{ 1.0f, 1.0f, 1.0f, 1.0f}, // White
                              { 0.67f, 0.68f, 0.82f, 1.0f}, // Blue Stars
@@ -81,36 +80,33 @@ void SetupRC(void)
 
 
     // Randomly place the stars in their initial positions, and pick a random color
-    starsBatch.Begin(GL_POINTS, 20000);
-    for(int i = 0; i < 20000; i++)
+    starsBatch.Begin(GL_POINTS, NUM_STARS);
+    for(int i = 0; i < NUM_STARS; i++)
         {
-        // Pick a random color
-        switch(rand() %7) {
-                case 0:
-                case 1:
-                case 2:
-                starsBatch.Color4fv(fColors[0]);
-                break;
-                
-                case 3:
-                case 4:
-                starsBatch.Color4fv(fColors[1]);
-                break;
-                
-                case 5:
-                starsBatch.Color4fv(fColors[2]);
-                break;
-                
-                case 6:
-				default:
-                starsBatch.Color4fv(fColors[3]);
-                break;
-                }
-        float x = (700.0f - float(rand() % 1400))*.1f;
-        float y = (700.0f - float(rand() % 1400))*.1f;
-        float z = -float(rand() % 1000)*.1f;
-        starsBatch.Vertex3f(x, y, z);        
-        }
+		int iColor = 0;		// All stars start as white
+
+		// One in five will be blue
+        if(rand() % 5 == 1)
+			iColor = 1;
+
+		// One in 50 red
+		if(rand() % 50 == 1)
+			iColor = 2;
+
+		// One in 100 is amber
+		if(rand() % 100 == 1)
+			iColor = 3;
+
+		
+		starsBatch.Color4fv(fColors[iColor]);
+			    
+		M3DVector3f vPosition;
+		vPosition[0] = float(3000 - (rand() % 6000)) * 0.1f;
+		vPosition[1] = float(3000 - (rand() % 6000)) * 0.1f;
+		vPosition[2] = -float(rand() % 1000)-1.0f;  // -1 to -1000.0f
+
+		starsBatch.Vertex3fv(vPosition);
+		}
     starsBatch.End();
 
 
@@ -148,7 +144,11 @@ void RenderScene(void)
     glUseProgram(starFieldShader);
     glUniformMatrix4fv(locMVP, 1, GL_FALSE, viewFrustum.GetProjectionMatrix());
     glUniform1i(locTexture, 0);
-    glUniform1f(locTimeStamp, timer.GetElapsedSeconds()*10.0f);
+
+	// fTime goes from 0.0 to 999.0 and recycles
+	float fTime = timer.GetElapsedSeconds() * 10.0f;
+	fTime = fmod(fTime, 999.0f);
+    glUniform1f(locTimeStamp, fTime);
 
     starsBatch.Draw();
     
@@ -167,7 +167,7 @@ void ChangeSize(int w, int h)
 	// Set Viewport to window dimensions
     glViewport(0, 0, w, h);
 
-    viewFrustum.SetPerspective(35.0f, float(w)/float(h), 1.0f, 100.0f);
+    viewFrustum.SetPerspective(35.0f, float(w)/float(h), 1.0f, 1000.0f);
 	}
 
 ///////////////////////////////////////////////////////////////////////////////
