@@ -3,7 +3,6 @@
 // Richard S. Wright Jr.
 // OpenGL SuperBible
 #version 330
-#extension GL_EXT_gpu_shader4 : enable
 
 out vec4 vFragColor;
 

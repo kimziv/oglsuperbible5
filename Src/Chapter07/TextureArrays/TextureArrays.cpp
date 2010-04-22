@@ -4,6 +4,7 @@
 // Program by Richard S. Wright Jr.
 #include <GLTools.h>	// OpenGL toolkit
 #include <GLFrustum.h>
+#include <Stopwatch.h>
 
 #ifdef __APPLE__
 #include <glut/glut.h>
@@ -30,6 +31,7 @@ GLuint  moonTexture;
 GLuint  moonShader;
 GLint   locMoonMVP;
 GLint   locMoonTexture;
+GLint	locMoonTime;
 
 GLint   locTimeStamp;       // The location of the time stamp
 
@@ -84,6 +86,8 @@ bool LoadTGATexture(const char *szFileName, GLenum minFilter, GLenum magFilter, 
 // Called to draw scene
 void RenderScene(void)
     {		        
+	static CStopWatch timer;
+
     // Clear the window
     glClear(GL_COLOR_BUFFER_BIT);
          
@@ -117,11 +121,19 @@ void RenderScene(void)
 	glUseProgram(moonShader);
     glUniformMatrix4fv(locMoonMVP, 1, GL_FALSE, viewFrustum.GetProjectionMatrix());
     glUniform1i(locMoonTexture, 0);
+
+	// fTime goes from 0.0 to 28.0 and recycles
+	float fTime = timer.GetElapsedSeconds();
+	fTime = fmod(fTime, 28.0f);
+    glUniform1f(locTimeStamp, fTime);
+
     moonBatch.Draw();
 
 
     // Swap buffers
     glutSwapBuffers();
+
+	glutPostRedisplay();
     }
 
 
@@ -223,7 +235,7 @@ void SetupRC()
 					GLT_ATTRIBUTE_TEXTURE0, "vTexCoords");
 	locMoonMVP = glGetUniformLocation(moonShader, "mvpMatrix");
 	locMoonTexture = glGetUniformLocation(moonShader, "moonImage");
-
+    locMoonTime = glGetUniformLocation(moonShader, "fTime");
 
 
 	glGenTextures(1, &starTexture);
@@ -239,6 +251,9 @@ void SetupRC()
 	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+	glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, 64, 64, 30, 0,
+					 GL_BGRA, GL_UNSIGNED_BYTE, NULL);
+
 	for(int i = 0; i < 29; i++) {
 		char cFile[32];
 		sprintf(cFile, "moon%02d.tga", i);
@@ -249,16 +264,13 @@ void SetupRC()
 		
 		// Read the texture bits
 		pBits = gltReadTGABits(cFile, &nWidth, &nHeight, &nComponents, &eFormat);
+		glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, nWidth, nHeight, 1, GL_BGRA, GL_UNSIGNED_BYTE, pBits);
 			    
-		glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, nComponents, nWidth, nHeight, i, 0,
-					 eFormat, GL_UNSIGNED_BYTE, pBits);
 		free(pBits);
 		}
+   
 
-
-	glEnable(GL_POINT_SPRITE);
-    }
-
+	}
 
 
 void ChangeSize(int w, int h)
