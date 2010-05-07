@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="Grass"
+	Name="Julia"
 	ProjectGUID="{E4BE10C1-1B2D-4815-BC95-58797BC71AFB}"
-	RootNamespace="Grass"
+	RootNamespace="Julia"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
@@ -179,15 +179,15 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\Src\Chapter12\Grass\Grass.cpp"
+				RelativePath="..\..\..\Src\Chapter11\Julia\Julia.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\Grass.fs"
+				RelativePath=".\Julia.fs"
 				>
 			</File>
 			<File
-				RelativePath=".\Grass.vs"
+				RelativePath=".\Julia.vs"
 				>
 			</File>
 		</Filter>

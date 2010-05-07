@@ -58,29 +58,29 @@ mat4 construct_rotation_matrix(float angle)
 
 void main(void)
 {
-    vec4 offset = vec4(float(gl_InstanceID >> 8) - 128.0,
+    vec4 offset = vec4(float(gl_InstanceID >> 10) - 512.0,
                        0.0f,
-                       float(gl_InstanceID & 0xFF) - 128.0,
+                       float(gl_InstanceID & 0x3FF) - 512.0,
                        0.0f);
     int number1 = random(gl_InstanceID, 3);
     int number2 = random(number1, 2);
-    offset += vec4(float(number1 & 0xFF) / 256.0,
+    offset += vec4(float(number1 & 0xFF) / 1024.0,
                    0.0f,
-                   float(number2 & 0xFF) / 256.0,
+                   float(number2 & 0xFF) / 1024.0,
                    0.0f);
-    // float angle = float(random(number2, 2) & 0x3FF) / 256.0;
+    // float angle = float(random(number2, 2) & 0x3FF) / 1024.0;
 
-    vec2 texcoord = offset.xz / 256.0 + vec2(0.5);
+    vec2 texcoord = offset.xz / 1024.0 + vec2(0.5);
 
     // float bend_factor = float(random(number2, 7) & 0x3FF) / 1024.0;
-    float bend_factor = texture(bend_texture, texcoord).r;
+    float bend_factor = texture(bend_texture, texcoord).r * 2.0;
     float bend_amount = cos(vVertex.y);
 
     float angle = texture(orientation_texture, texcoord).r * 2.0 * 3.141592;
     mat4 rot = construct_rotation_matrix(angle);
     vec4 position = (rot * (vVertex + vec4(0.0, 0.0, bend_amount * bend_factor, 0.0))) + offset;
 
-    position *= vec4(1.0, texture(length_texture, texcoord).r * 0.7 + 0.3, 1.0, 1.0);
+    position *= vec4(1.0, texture(length_texture, texcoord).r * 0.9 + 0.3, 1.0, 1.0);
 
     gl_Position = mvpMatrix * position; // (rot * position);
     // color = vec4(random_vector(gl_InstanceID).xyz * vec3(0.1, 0.5, 0.1) + vec3(0.1, 0.4, 0.1), 1.0);

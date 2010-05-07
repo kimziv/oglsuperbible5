@@ -1,4 +1,4 @@
-// perspectiveShader.cpp
+// grassShader.cpp
 // OpenGL SuperBible
 // Demonstrates the effect of the 'noperspective' interpolation qualifier
 // Program by Graham Sellers
@@ -26,7 +26,7 @@ GLMatrixStack       modelViewMatrix;
 GLMatrixStack       projectionMatrix;
 GLGeometryTransform transformPipeline;
 
-GLuint  perspectiveShader;      // The perspective demonstration shader
+GLuint  grassShader;      // The perspective demonstration shader
 GLint   locMVP;                 // The location of the ModelViewProjection matrix uniform
 
 GLuint  length_texture;         //
@@ -435,21 +435,21 @@ void SetupRC(void)
 
     glEnable(GL_DEPTH_TEST);
 
-    viewFrame.MoveForward(55.0f);
-    viewFrame.MoveUp(-20.0f);
+    viewFrame.MoveForward(-155.0f);
+    viewFrame.MoveUp(20.0f);
 
-    perspectiveShader = gltLoadShaderPairWithAttributes("Grass.vs", "Grass.fs",
+    grassShader = gltLoadShaderPairWithAttributes("Grass.vs", "Grass.fs",
                                                         1,
                                                         GLT_ATTRIBUTE_VERTEX, "vVertex");
 
-    locMVP = glGetUniformLocation(perspectiveShader, "mvpMatrix");
+    locMVP = glGetUniformLocation(grassShader, "mvpMatrix");
 
-    glUseProgram(perspectiveShader);
-    glUniform1i(glGetUniformLocation(perspectiveShader, "length_texture"), 0);
-    glUniform1i(glGetUniformLocation(perspectiveShader, "orientation_texture"), 1);
-    glUniform1i(glGetUniformLocation(perspectiveShader, "grasspalette_texture"), 2);
-    glUniform1i(glGetUniformLocation(perspectiveShader, "grasscolor_texture"), 3);
-    glUniform1i(glGetUniformLocation(perspectiveShader, "bend_texture"), 4);
+    glUseProgram(grassShader);
+    glUniform1i(glGetUniformLocation(grassShader, "length_texture"), 0);
+    glUniform1i(glGetUniformLocation(grassShader, "orientation_texture"), 1);
+    glUniform1i(glGetUniformLocation(grassShader, "grasspalette_texture"), 2);
+    glUniform1i(glGetUniformLocation(grassShader, "grasscolor_texture"), 3);
+    glUniform1i(glGetUniformLocation(grassShader, "bend_texture"), 4);
 
     static const GLfloat grass_blade[] =
     {
@@ -541,15 +541,16 @@ void RenderScene(void)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     modelViewMatrix.PushMatrix(viewFrame);
-    modelViewMatrix.Rotate(-20.0, 1.0f, 0.0f, 0.0f);
+    modelViewMatrix.Translate(0.0f, 0.0f, 800.0f);
+    modelViewMatrix.Rotate(-12.0, 1.0f, 0.0f, 0.0f);
     modelViewMatrix.Rotate(rotTimer.GetElapsedSeconds() * 15.0f, 0.0f, 1.0f, 0.0f);
 
-    glUseProgram(perspectiveShader);
+    glUseProgram(grassShader);
     glUniformMatrix4fv(locMVP, 1, GL_FALSE, transformPipeline.GetModelViewProjectionMatrix());
 
     glBindVertexArray(vao);
 
-    // glDrawArraysInstancedARB(GL_TRIANGLE_STRIP, 0, 6, 256 * 256);
+    glDrawArraysInstancedARB(GL_TRIANGLE_STRIP, 0, 6, 1024 * 1024);
 
     modelViewMatrix.PopMatrix();
 
@@ -566,7 +567,7 @@ void ChangeSize(int w, int h)
     // Set Viewport to window dimensions
     glViewport(0, 0, w, h);
 
-    viewFrustum.SetPerspective(35.0f, float(w)/float(h), 1.0f, 1000.0f);
+    viewFrustum.SetPerspective(35.0f, float(w)/float(h), 1.0f, 3000.0f);
 
     projectionMatrix.LoadMatrix(viewFrustum.GetProjectionMatrix());
     transformPipeline.SetMatrixStacks(modelViewMatrix, projectionMatrix);
@@ -593,7 +594,7 @@ int main(int argc, char* argv[])
       // glutInitContextProfile(GLUT_CORE_PROFILE);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH | GLUT_STENCIL);
     glutInitWindowSize(800, 600);
-    glutCreateWindow("Depth Clamping");
+    glutCreateWindow("Grass");
     glutReshapeFunc(ChangeSize);
     glutKeyboardFunc(Keyboard);
     glutDisplayFunc(RenderScene);
