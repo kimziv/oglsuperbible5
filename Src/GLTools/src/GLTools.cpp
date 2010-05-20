@@ -1165,7 +1165,7 @@ GLuint gltLoadShaderPairWithAttributes(const char *szVertexProg, const char *szF
 		{
         glDeleteShader(hVertexShader);
         glDeleteShader(hFragmentShader);
-//		cout << "The shader at " << szVertexProg << " could not be found.\n";
+		fprintf(stderr, "The shader at %s could ot be found.\n", szVertexProg);
         return (GLuint)NULL;
 		}
 	
@@ -1174,7 +1174,7 @@ GLuint gltLoadShaderPairWithAttributes(const char *szVertexProg, const char *szF
 		{
         glDeleteShader(hVertexShader);
         glDeleteShader(hFragmentShader);
-//		cout << "The shader at " << szFragmentProg << " could not be found.\n";
+		fprintf(stderr,"The shader at %s  could not be found.\n", szFragmentProg);
         return (GLuint)NULL;
 		}
     
@@ -1188,7 +1188,7 @@ GLuint gltLoadShaderPairWithAttributes(const char *szVertexProg, const char *szF
 		{
 		char infoLog[1024];
 		glGetShaderInfoLog(hVertexShader, 1024, NULL, infoLog);
-//		cout << "The shader at " << szVertexProg << " failed to compile with the following error:\n" << infoLog << "\n";
+		fprintf(stderr, "The shader at %s failed to compile with the following error:\n%s\n", szVertexProg, infoLog);
         glDeleteShader(hVertexShader);
         glDeleteShader(hFragmentShader);
         return (GLuint)NULL;
@@ -1200,7 +1200,7 @@ GLuint gltLoadShaderPairWithAttributes(const char *szVertexProg, const char *szF
 		{
 		char infoLog[1024];
 		glGetShaderInfoLog(hFragmentShader, 1024, NULL, infoLog);
-//		cout << "The shader at " << hFragmentShader << " failed to compile with the following error:\n" << infoLog << "\n";
+		fprintf(stderr, "The shader at %s failed to compile with the following error:\n%s\n", szFragmentProg, infoLog);
         glDeleteShader(hVertexShader);
         glDeleteShader(hFragmentShader);
         return (GLuint)NULL;
@@ -1241,7 +1241,8 @@ GLuint gltLoadShaderPairWithAttributes(const char *szVertexProg, const char *szF
 		{
 		char infoLog[1024];
 		glGetProgramInfoLog(hReturn, 1024, NULL, infoLog);
-//		cout << "The program " << hReturn << " failed to link with the following error:\n" << infoLog << "\n";
+		fprintf(stderr,"The programs %s and %s failed to link with the following errors:\n%s\n",
+			szVertexProg, szFragmentProg, infoLog);
 		glDeleteProgram(hReturn);
 		return (GLuint)NULL;
 		}
@@ -1477,7 +1478,7 @@ bool gltCheckErrors(GLuint progName)
 		
 	if (error != GL_NO_ERROR)
 	{
-//		cout << "A GL Error has occured\n";
+	    fprintf(stderr, "A GL Error has occured\n");
         bFoundError = true;
 	}
 #ifndef OPENGL_ES
@@ -1486,44 +1487,44 @@ bool gltCheckErrors(GLuint progName)
 	if(fboStatus != GL_FRAMEBUFFER_COMPLETE)
 	{
         bFoundError = true;
-//        cout << "The framebuffer is not complete - ";
+		fprintf(stderr,"The framebuffer is not complete - ");
 		switch (fboStatus)
 		{
 		case GL_FRAMEBUFFER_UNDEFINED:
 			// Oops, no window exists?
-//            cout << "GL_FRAMEBUFFER_UNDEFINED\n";
+            fprintf(stderr, "GL_FRAMEBUFFER_UNDEFINED\n");
 			break;
 		case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
 			// Check the status of each attachment
-//            cout << "GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT\n";
+            fprintf(stderr, "GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT\n");
 			break;
 		case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
 			// Attach at least one buffer to the FBO
- //           cout << "GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT\n";
+            fprintf(stderr, "GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT\n");
 			break;
 		case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
 			// Check that all attachments enabled via
 			// glDrawBuffers exist in FBO
-//            cout << "GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER\n";
+            fprintf(stderr, "GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER\n");
             break;
 		case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
 			// Check that the buffer specified via
 			// glReadBuffer exists in FBO
-//            cout << "GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER\n";
+            fprintf(stderr, "GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER\n");
 			break;
 		case GL_FRAMEBUFFER_UNSUPPORTED:
 			// Reconsider formats used for attached buffers
- //           cout << "GL_FRAMEBUFFER_UNSUPPORTED\n";
+            fprintf(stderr, "GL_FRAMEBUFFER_UNSUPPORTED\n");
 			break;
 		case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
 			// Make sure the number of samples for each 
 			// attachment is the same 
- //           cout << "GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE\n";
+            fprintf(stderr, "GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE\n");
 			break; 
 		case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
 			// Make sure the number of layers for each 
 			// attachment is the same 
- //           cout << "GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS\n";
+            fprintf(stderr, "GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS\n");
 			break;
 		}
 	}
@@ -1539,7 +1540,6 @@ bool gltCheckErrors(GLuint progName)
 		{
             bFoundError = true;
 			fprintf(stderr, "The current program(%d) is not valid\n", progName);
-//			cout << "The current program (" << progName << ") is not valid\n";
 		}
 	}
     return bFoundError;
