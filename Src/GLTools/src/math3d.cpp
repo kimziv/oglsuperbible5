@@ -577,8 +577,8 @@ void m3dProjectXY(M3DVector2f vPointOut, const M3DMatrix44f mModelView, const M3
 	memcpy(vBack, vPointIn, sizeof(float)*3);
 	vBack[3] = 1.0f;
     
-    m3dTransformVector4(vForth, mModelView, vBack);
-    m3dTransformVector4(vBack, mProjection, vForth);
+    m3dTransformVector4(vForth, vBack, mModelView);
+    m3dTransformVector4(vBack, vForth, mProjection);
     
     if(!m3dCloseEnough(vBack[3], 0.0f, 0.000001f)) {
         float div = 1.0f / vBack[3];
@@ -608,8 +608,8 @@ void m3dProjectXYZ(M3DVector3f vPointOut, const M3DMatrix44f mModelView, const M
 	memcpy(vBack, vPointIn, sizeof(float)*3);
 	vBack[3] = 1.0f;
     
-    m3dTransformVector4(vForth, mModelView, vBack);
-    m3dTransformVector4(vBack, mProjection, vForth);
+    m3dTransformVector4(vForth, vBack, mModelView);
+    m3dTransformVector4(vBack, vForth, mProjection);
     
     if(!m3dCloseEnough(vBack[3], 0.0f, 0.000001f)) {
         float div = 1.0f / vBack[3];
