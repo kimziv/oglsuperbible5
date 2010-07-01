@@ -97,7 +97,7 @@ void m3dLoadIdentity44(M3DMatrix44d m)
 ////////////////////////////////////////////////////////////////////////
 // Return the square of the distance between two points
 // Should these be inlined...?
-float m3dGetDistanceSquared(const M3DVector3f u, const M3DVector3f v)
+float m3dGetDistanceSquared3(const M3DVector3f u, const M3DVector3f v)
 	{
 	float x = u[0] - v[0];
 	x = x*x;
@@ -112,7 +112,7 @@ float m3dGetDistanceSquared(const M3DVector3f u, const M3DVector3f v)
     }
 
 // Ditto above, but for doubles
-double m3dGetDistanceSquared(const M3DVector3d u, const M3DVector3d v)
+double m3dGetDistanceSquared3(const M3DVector3d u, const M3DVector3d v)
 	{
 	double x = u[0] - v[0];
 	x = x*x;
@@ -1019,7 +1019,7 @@ double m3dClosestPointOnRay(M3DVector3d vPointOnRay, const M3DVector3d vRayOrigi
 	vPointOnRay[1] = vRayOrigin[1] + (t * vUnitRayDir[1]);
 	vPointOnRay[2] = vRayOrigin[2] + (t * vUnitRayDir[2]);
 	
-	return m3dGetDistanceSquared(vPointOnRay, vPointInSpace);
+	return m3dGetDistanceSquared3(vPointOnRay, vPointInSpace);
 	}
 
 // ditto above... but with floats
@@ -1036,5 +1036,5 @@ float m3dClosestPointOnRay(M3DVector3f vPointOnRay, const M3DVector3f vRayOrigin
 	vPointOnRay[1] = vRayOrigin[1] + (t * vUnitRayDir[1]);
 	vPointOnRay[2] = vRayOrigin[2] + (t * vUnitRayDir[2]);
 	
-	return m3dGetDistanceSquared(vPointOnRay, vPointInSpace);
+	return m3dGetDistanceSquared3(vPointOnRay, vPointInSpace);
 	}

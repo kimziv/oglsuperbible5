@@ -297,10 +297,10 @@ inline void m3dNormalizeVector3(M3DVector3d u)
 // the magnitude of the difference between two vectors
 // Located in math.cpp
 float m3dGetDistanceSquared3(const M3DVector3f u, const M3DVector3f v);
-double m3dGetDistanceSquared(const M3DVector3d u, const M3DVector3d v);
+double m3dGetDistanceSquared3(const M3DVector3d u, const M3DVector3d v);
 
 inline double m3dGetDistance3(const M3DVector3d u, const M3DVector3d v)
-{ return sqrt(m3dGetDistanceSquared(u, v)); }
+{ return sqrt(m3dGetDistanceSquared3(u, v)); }
 
 inline float m3dGetDistance3(const M3DVector3f u, const M3DVector3f v)
 { return sqrtf(m3dGetDistanceSquared3(u, v)); }
