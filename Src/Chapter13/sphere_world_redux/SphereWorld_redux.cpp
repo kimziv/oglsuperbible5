@@ -204,7 +204,7 @@ void CheckErrors(GLuint progName = 0)
 		
 	if (error != GL_NO_ERROR)
 	{
-		cout << "A GL Error has occured\n";
+		fprintf(stderr, "A GL Error has occured\n");
 	}
 	
 	GLenum fboStatus = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
@@ -241,7 +241,7 @@ void CheckErrors(GLuint progName = 0)
 			// attachment is the same 
 			//break;
 		}
-		cout << "The framebuffer is not complete\n";
+		fprintf(stderr,"The framebuffer is not complete\n");
 	}
 
 	if (progName != 0)
@@ -251,7 +251,7 @@ void CheckErrors(GLuint progName = 0)
 		glGetProgramiv(progName, GL_VALIDATE_STATUS, &iIsProgValid);
 		if(iIsProgValid == 0)
 		{
-			cout << "The current program is not valid\n";
+			fprintf(stderr,"The current program is not valid\n");
 		}
 	}
 }
