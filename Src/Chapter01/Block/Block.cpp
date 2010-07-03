@@ -400,14 +400,15 @@ void RenderBlock(void)
 		case 1:
 			shaderManager.UseStockShader(GLT_SHADER_FLAT, transformPipeline.GetModelViewProjectionMatrix(), vRed);
 
-			// Draw (back side) solid block in stencil buffer
+			// Draw solid block in stencil buffer
+			// Back face culling prevents the back sides from showing through
+			// The stencil pattern is used to mask when we draw the floor under it
+			// to keep it from showing through.
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 			glEnable(GL_STENCIL_TEST);
 			glStencilFunc(GL_NEVER, 0, 0);
 			glStencilOp(GL_INCR, GL_INCR, GL_INCR);
-			glFrontFace(GL_CW);
 			cubeBatch.Draw();
-			glFrontFace(GL_CCW);
 			glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 			glDisable(GL_STENCIL_TEST);
 
