@@ -2,7 +2,7 @@
 // Fragment Shader
 // Richard S. Wright Jr.
 // OpenGL SuperBible
-#version 330
+#version 130
 
 uniform vec4      ambientColor;
 uniform vec4      diffuseColor;   

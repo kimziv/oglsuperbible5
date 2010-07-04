@@ -2,11 +2,11 @@
 // Fragment Shader
 // Richard S. Wright Jr.
 // OpenGL SuperBible
-#version 330
+#version 130
 
 out vec4 vFragColor;
 
-uniform samplerRect  rectangleImage;
+uniform sampler2DRect  rectangleImage;
 
 smooth in vec2 vVaryingTexCoord;
 

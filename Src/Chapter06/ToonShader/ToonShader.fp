@@ -2,7 +2,7 @@
 // Fragment Shader
 // Richard S. Wright Jr.
 // OpenGL SuperBible
-#version 330
+#version 130
 
 uniform sampler1D colorTable;
 out vec4 vFragColor;
