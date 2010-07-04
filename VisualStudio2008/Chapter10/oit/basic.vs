@@ -1,4 +1,4 @@
-//#version 150 
+#version 150 
 // hdr_bloom.vs
 // outputs MVP transformed position 
 // passes texture coordinates through
