@@ -1,4 +1,5 @@
 #include "fbo_drawbuffers.h"
+
 #include <GL\glu.h>
 #include <stdio.h>
 #include <iostream>
@@ -104,6 +105,11 @@ void FBOdrawbuffers::Initialize(void)
 	// Black
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
+    ninja.LoadFromSBM("../../../Src/Models/Ninja/ninja.sbm",
+        GLT_ATTRIBUTE_VERTEX,
+        GLT_ATTRIBUTE_NORMAL,
+        GLT_ATTRIBUTE_TEXTURE0);
+
 	gltMakeTorus(torusBatch, 0.4f, 0.15f, 35, 35);
 	gltMakeSphere(sphereBatch, 0.1f, 26, 13);
 
@@ -134,6 +140,10 @@ void FBOdrawbuffers::Initialize(void)
 	glBindTexture(GL_TEXTURE_2D, textures[0]);
 	LoadBMPTexture("marble.bmp", GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT);
 
+    glGenTextures(1, ninjaTex);
+	glBindTexture(GL_TEXTURE_2D, ninjaTex[0]);
+	LoadBMPTexture("../../../Src/Models/Ninja/NinjaComp.bmp", GL_LINEAR, GL_LINEAR, GL_CLAMP);
+
 	glGenFramebuffers(1,&fboName);
 
 	// Create depth renderbuffer
@@ -158,16 +168,15 @@ void FBOdrawbuffers::Initialize(void)
 	glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_RENDERBUFFER, renderBufferNames[2]);
 
 	// See bind frag location in Chapter 9
-	processProg =  gltLoadShaderPairWithAttributes("multibuffer.vs", "multibuffer_frag_location.fs", 3,
+    processProg =  gltLoadShaderPairWithAttributes("multibuffer.vs", "multibuffer_frag_location.fs", 3,
 								GLT_ATTRIBUTE_VERTEX, "vVertex", 
 								GLT_ATTRIBUTE_NORMAL, "vNormal", 
 								GLT_ATTRIBUTE_TEXTURE0, "texCoord0");
-
 	glBindFragDataLocation(processProg, 0, "oStraightColor");
 	glBindFragDataLocation(processProg, 1, "oGreyscale");
 	glBindFragDataLocation(processProg, 2, "oLumAdjColor"); 
 	glLinkProgram(processProg);
-	
+
 
 	// Create 3 new buffer objects
 	glGenBuffers(3,texBO);
@@ -235,6 +244,7 @@ void FBOdrawbuffers::Shutdown(void)
 	
 	glDeleteTextures(1, &texBOTexture);
 	glDeleteTextures(1, textures);
+    glDeleteTextures(1, ninjaTex);
 
 	// Cleanup RBOs
 	glDeleteRenderbuffers(3, renderBufferNames);
@@ -249,6 +259,8 @@ void FBOdrawbuffers::Shutdown(void)
 	// Cleanup Progams
 	glUseProgram(0);
 	glDeleteProgram(processProg);
+
+    ninja.Free();
 }
 
 
@@ -408,20 +420,21 @@ void FBOdrawbuffers::DrawWorld(GLfloat yRot)
 
 		modelViewMatrix.PushMatrix();
 			modelViewMatrix.Rotate(yRot, 0.0f, 1.0f, 0.0f);
+            modelViewMatrix.Translate(0.0,-0.60,0.0);
+            modelViewMatrix.Scale(0.02, 0.006, 0.02);
+            
+            glBindTexture(GL_TEXTURE_2D, ninjaTex[0]);
 
 			if(bUseFBO)
 			{
-				UseProcessProgram(vLightTransformed, vGreen, -1);
+				UseProcessProgram(vLightTransformed, vWhite, 0);
 			}
 			else
 			{
-				shaderManager.UseStockShader(GLT_SHADER_POINT_LIGHT_DIFF, 
-					modelViewMatrix.GetMatrix(), 
-					transformPipeline.GetProjectionMatrix(), 
-					vLightTransformed, vGreen, 0);
+                shaderManager.UseStockShader(GLT_SHADER_TEXTURE_REPLACE, transformPipeline.GetModelViewProjectionMatrix(), 0);
 			}
-			torusBatch.Draw();
-			modelViewMatrix.PopMatrix();
+            ninja.Render(0,0);
+        modelViewMatrix.PopMatrix();
 
 	modelViewMatrix.PopMatrix();
 }
@@ -443,8 +456,6 @@ void FBOdrawbuffers::Render(void)
 		
 		GLfloat vFloorColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
-		glBindTexture(GL_TEXTURE_2D, textures[0]); // Marble
-
 		if(bUseFBO)
 		{
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fboName);
@@ -464,6 +475,7 @@ void FBOdrawbuffers::Render(void)
 			shaderManager.UseStockShader(GLT_SHADER_TEXTURE_MODULATE, transformPipeline.GetModelViewProjectionMatrix(), vFloorColor, 0);
 		}
 
+        glBindTexture(GL_TEXTURE_2D, textures[0]); // Marble
 		floorBatch.Draw();
 		DrawWorld(yRot);
 

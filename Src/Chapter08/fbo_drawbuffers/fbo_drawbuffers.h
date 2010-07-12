@@ -11,6 +11,7 @@
 #include <GLMatrixStack.h>
 #include <GLGeometryTransform.h>
 #include <StopWatch.h>
+#include "sbm.h"
 
 class FBOdrawbuffers
 	{
@@ -62,6 +63,8 @@ class FBOdrawbuffers
         GLuint              depthBufferName; 
 		GLuint				renderBufferNames[3];
 
+        SBObject            ninja;
+        GLuint              ninjaTex[1];
 
 		void MoveCamera(void);
 		void DrawWorld(GLfloat yRot);
