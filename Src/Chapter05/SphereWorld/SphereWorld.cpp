@@ -9,7 +9,7 @@
 #include <GLBatch.h>
 #include <GLMatrixStack.h>
 #include <GLGeometryTransform.h>
-#include <Stopwatch.h>
+#include <StopWatch.h>
 
 #include <math.h>
 #include <stdio.h>
@@ -18,7 +18,7 @@
 #include <glut/glut.h>
 #else
 #define FREEGLUT_STATIC
-#include <gl/glut.h>
+#include <GL/glut.h>
 #endif
 
 #define NUM_SPHERES 50
