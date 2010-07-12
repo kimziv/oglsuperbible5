@@ -1,0 +1,34 @@
+// SpaceFlight Shader
+// Vertex Shader
+// Richard S. Wright Jr.
+// OpenGL SuperBible
+#version 330
+
+// Incoming per vertex... position and normal
+in vec4 vVertex;
+in vec4 vColor;
+
+uniform mat4   mvpMatrix;
+uniform float  timeStamp;
+
+out vec4 vStarColor;
+
+void main(void) 
+    {
+    vec4 vNewVertex = vVertex;
+    vStarColor = vColor;
+    
+    // Offset by running time, makes it move closer
+    vNewVertex.z += timeStamp;
+    
+    // If out of range, adjust
+    if(vNewVertex.z > -1.0)
+        vNewVertex.z -= 99.0;
+
+
+    gl_PointSize = 10.0;
+
+
+    // Don't forget to transform the geometry!
+    gl_Position = mvpMatrix * vNewVertex;
+    }
