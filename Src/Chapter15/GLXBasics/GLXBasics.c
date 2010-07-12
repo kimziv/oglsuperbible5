@@ -12,12 +12,6 @@
 #include <stdlib.h>
 
 #define PI 3.14159265
-///////////
-// TODO Remove these!!!!
-#define GLX_CONTEXT_MAJOR_VERSION_ARB 0x2091
-#define GLX_CONTEXT_MINOR_VERSION_ARB 0x2092
-typedef GLXContext ( * PFNGLXCREATECONTEXTATTRIBSARBPROC) (Display* dpy, GLXFBConfig config, GLXContext share_context, Bool direct, const int *attrib_list);
-PFNGLXCREATECONTEXTATTRIBSARBPROC glXCreateContextAttribsARB;
 
 // Store all system info in one place
 typedef struct RenderContextRec

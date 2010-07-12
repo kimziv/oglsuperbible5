@@ -39,6 +39,10 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 #include <stdio.h>
 #include <assert.h>
 #include <stdarg.h>
+
+#ifdef linux
+#include <cstdlib> 
+#endif
 #ifdef __APPLE__
 #include <unistd.h>
 #endif
@@ -948,13 +952,6 @@ GLbyte *gltReadTGABits(const char *szFileName, GLint *iWidth, GLint *iHeight, GL
             *eFormat = GL_BGR;
             *iComponents = GL_RGB;
             break;
-#endif
-
-#ifdef linux
-	case 3:     // Most likely case
-	    *eFormat = GL_BGR;
-	    *iComponents = GL_RGB;
-	    break;				
 #endif
         case 4:
             *eFormat = GL_BGRA;

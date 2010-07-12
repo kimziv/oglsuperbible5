@@ -15,25 +15,22 @@
 
 #include <math.h>
 
-///////////
-// TODO Remove these!!!!
-#define GLX_CONTEXT_MAJOR_VERSION_ARB 0x2091
-#define GLX_CONTEXT_MINOR_VERSION_ARB 0x2092
-typedef GLXContext ( * PFNGLXCREATECONTEXTATTRIBSARBPROC) (Display* dpy, GLXFBConfig config, GLXContext share_context, Bool direct, const int *attrib_list);
-PFNGLXCREATECONTEXTATTRIBSARBPROC glXCreateContextAttribsARB;
+#ifdef linux
+#include <cstdlib> 
+#endif
 
 /////////////////////////////////////////////////////////////////////////////////
 // An assortment of needed classes
 GLShaderManager		shaderManager;
 GLMatrixStack		modelViewMatrix;
 GLMatrixStack		projectionMatrix;
-GLFrame				cameraFrame;
-GLFrustum			viewFrustum;
-GLBatch				cubeBatch;
-GLBatch				floorBatch;
-GLBatch				topBlock;
-GLBatch				frontBlock;
-GLBatch				leftBlock;
+GLFrame			cameraFrame;
+GLFrustum		viewFrustum;
+GLBatch			cubeBatch;
+GLBatch			floorBatch;
+GLBatch			topBlock;
+GLBatch			frontBlock;
+GLBatch			leftBlock;
 
 GLGeometryTransform	transformPipeline;
 M3DMatrix44f		shadowMatrix;

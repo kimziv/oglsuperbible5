@@ -53,11 +53,7 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 #define glDeleteVertexArrays  glDeleteVertexArraysAPPLE
 #define glBindVertexArray	glBindVertexArrayAPPLE
 #endif
-#ifdef linux
-#define glGenVertexArrays glGenVertexArraysAPPLE
-#define glDeleteVertexArrays  glDeleteVertexArraysAPPLE
-#define glBindVertexArray	glBindVertexArrayAPPLE
-#endif
+
 
 ///////////////////////////////////////////////////////////
 // Constructor, does what constructors do... set everything to zero or NULL

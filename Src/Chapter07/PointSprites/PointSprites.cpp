@@ -5,7 +5,7 @@
 
 #include <GLTools.h>	// OpenGL toolkit
 #include <GLFrustum.h>
-#include <Stopwatch.h>
+#include <StopWatch.h>
 
 #include <math.h>
 #include <stdlib.h>

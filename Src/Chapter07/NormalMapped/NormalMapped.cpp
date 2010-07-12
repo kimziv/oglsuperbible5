@@ -8,7 +8,7 @@
 #include <GLFrame.h>
 #include <GLFrustum.h>
 #include <GLGeometryTransform.h>
-#include <Stopwatch.h>
+#include <StopWatch.h>
 #include <stdlib.h>
 
 #include <math.h>

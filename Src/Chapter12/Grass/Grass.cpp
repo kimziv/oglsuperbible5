@@ -8,7 +8,7 @@
 #include <GLFrame.h>
 #include <GLFrustum.h>
 #include <GLGeometryTransform.h>
-#include <Stopwatch.h>
+#include "StopWatch.h"
 
 #include <math.h>
 #ifdef __APPLE__
@@ -17,6 +17,11 @@
 #define FREEGLUT_STATIC
 #include <GL/glut.h>
 #include <GL/freeglut_ext.h>
+#endif
+
+#include <GL/freeglut_ext.h>
+#ifdef linux
+#include <cstdlib> 
 #endif
 
 

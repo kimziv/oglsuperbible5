@@ -4,7 +4,7 @@
 #ifndef __OrderIndependentTransparancy__
 #define __OrderIndependentTransparancy__
 
-#include <gltools.h>
+#include <GLTools.h>
 #include <GLShaderManager.h>
 #include <GLFrustum.h>
 #include <GLBatch.h>
