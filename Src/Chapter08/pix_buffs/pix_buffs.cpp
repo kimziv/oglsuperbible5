@@ -1,26 +1,105 @@
-#include "pix_buffs.h"
-#include <GL\glu.h>
 #include <stdio.h>
 #include <iostream>
+
+#include <GLTools.h>
+#include <GLShaderManager.h>
+#include <GLFrustum.h>
+#include <GLBatch.h>
+#include <GLMatrixStack.h>
+#include <GLGeometryTransform.h>
+#include <StopWatch.h>
+
+#include <GL\glu.h>
+
+#ifdef __APPLE__
+#include <glut/glut.h>
+#else
+#define FREEGLUT_STATIC
+#include <gl/glut.h>
+#endif
 
 static GLfloat vGreen[] = { 0.0f, 1.0f, 0.0f, 1.0f };
 static GLfloat vWhite[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 static GLfloat vLightPos[] = { 0.0f, 3.0f, 0.0f, 1.0f };
 
+GLsizei	 screenWidth;			// Desired window or desktop width
+GLsizei  screenHeight;			// Desired window or desktop height
 
-////////////////////////////////////////////////////////////////////////////
-// Do not put any OpenGL code here. General guidence on constructors in 
-// general is to not put anything that can fail here either (opening files,
-// allocating memory, etc.)
-PixBuffs::PixBuffs(void) : screenWidth(800), screenHeight(600), bFullScreen(false), 
-				bAnimated(true), bUsePBOPath(false), blurProg(0), speedFactor(1.0f)
+GLboolean bFullScreen;			// Request to run full screen
+GLboolean bAnimated;			// Request for continual updates
+
+
+GLShaderManager		shaderManager;			// Shader Manager
+GLMatrixStack		modelViewMatrix;		// Modelview Matrix
+GLMatrixStack		projectionMatrix;		// Projection Matrix
+M3DMatrix44f        orthoMatrix;     
+GLFrustum			viewFrustum;			// View Frustum
+GLGeometryTransform	transformPipeline;		// Geometry Transform Pipeline
+GLFrame				cameraFrame;			// Camera frame
+
+GLTriangleBatch		torusBatch;
+GLBatch				floorBatch;
+GLBatch             screenQuad;
+
+GLuint				textures[1];
+GLuint				blurTextures[6];
+GLuint				pixBuffObjs[1];
+GLuint				curBlurTarget;
+bool				bUsePBOPath;
+GLfloat				speedFactor;
+GLuint				blurProg;
+void				*pixelData;
+GLuint				pixelDataSize;
+
+void MoveCamera(void);
+void DrawWorld(GLfloat yRot, GLfloat xPos);
+bool LoadBMPTexture(const char *szFileName, GLenum minFilter, GLenum magFilter, GLenum wrapMode);
+
+void SetupBlurProg(void);
+
+// returns 1 - 6 for blur texture units
+// curPixBuf is always between 0 and 5
+void AdvanceBlurTaget() { curBlurTarget = ((curBlurTarget+ 1) %6); }
+GLuint GetBlurTarget0(){ return (1 + ((curBlurTarget + 5) %6)); }
+GLuint GetBlurTarget1(){ return (1 + ((curBlurTarget + 4) %6)); }
+GLuint GetBlurTarget2(){ return (1 + ((curBlurTarget + 3) %6)); }
+GLuint GetBlurTarget3(){ return (1 + ((curBlurTarget + 2) %6)); }
+GLuint GetBlurTarget4(){ return (1 + ((curBlurTarget + 1) %6)); }
+GLuint GetBlurTarget5(){ return (1 + ((curBlurTarget) %6)); }
+
+void UpdateFrameCount()
 {
+	static int iFrames = 0;           // Frame count
+	static CStopWatch frameTimer;     // Render time
+ 
+    // Reset the stopwatch on first time
+    if(iFrames == 0)
+    {
+        frameTimer.Reset();
+        iFrames++;
+    }
+    // Increment the frame count
+    iFrames++;
 
+    // Do periodic frame rate calculation
+    if (iFrames == 101)
+    {
+        float fps;
+
+        fps = 100.0f / frameTimer.GetElapsedSeconds();
+		if (bUsePBOPath)
+			printf("Pix_buffs - Using PBOs  %.1f fps\n", fps);
+		else
+			printf("Pix_buffs - Using Client mem copies %.1f fps\n", fps);
+
+        frameTimer.Reset();
+        iFrames = 1;
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 // Load in a BMP file as a texture. Allows specification of the filters and the wrap mode
-bool PixBuffs::LoadBMPTexture(const char *szFileName, GLenum minFilter, GLenum magFilter, GLenum wrapMode)	
+bool LoadBMPTexture(const char *szFileName, GLenum minFilter, GLenum magFilter, GLenum wrapMode)	
 {
 	BYTE *pBits;
 	GLint iWidth, iHeight;
@@ -47,7 +126,7 @@ bool PixBuffs::LoadBMPTexture(const char *szFileName, GLenum minFilter, GLenum m
 
 ///////////////////////////////////////////////////////////////////////////////
 // OpenGL related startup code is safe to put here. Load textures, etc.
-void PixBuffs::Initialize(void)
+void SetupRC(void)
 {
     GLenum err = glewInit();
 	if (GLEW_OK != err)
@@ -101,7 +180,7 @@ void PixBuffs::Initialize(void)
 
     // XXX I don't think this is necessary. Should set texture data to NULL
 	// Allocate a pixel buffer to initialize textures and PBOs
-	pixelDataSize = GetWidth()*GetHeight()*3*sizeof(unsigned int); // XXX This should be unsigned byte
+	pixelDataSize = screenWidth*screenHeight*3*sizeof(unsigned int); // XXX This should be unsigned byte
 	void* data = (void*)malloc(pixelDataSize);
 	memset(data, 0x00, pixelDataSize);
 
@@ -115,7 +194,7 @@ void PixBuffs::Initialize(void)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, GetWidth(), GetHeight(), 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, screenWidth, screenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 	}
 
 	// Alloc space for copying pixels so we dont call malloc on every draw
@@ -125,7 +204,7 @@ void PixBuffs::Initialize(void)
 	glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
 
 	// Create geometry and a matrix for screen aligned drawing
-	gltGenerateOrtho2DMat(GetWidth(), GetHeight(), orthoMatrix, screenQuad);
+	gltGenerateOrtho2DMat(screenWidth, screenHeight, orthoMatrix, screenQuad);
 
 	// Make sure all went well
 	gltCheckErrors();
@@ -134,7 +213,7 @@ void PixBuffs::Initialize(void)
 
 ///////////////////////////////////////////////////////////////////////////////
 // Do your cleanup here. Free textures, display lists, buffer objects, etc.
-void PixBuffs::Shutdown(void)
+void ShutdownRC(void)
 {
 	// Make sure default FBO is bound
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
@@ -160,7 +239,7 @@ void PixBuffs::Shutdown(void)
 // This is called at least once and before any rendering occurs. If the screen
 // is a resizeable window, then this will also get called whenever the window
 // is resized.
-void PixBuffs::Resize(GLsizei nWidth, GLsizei nHeight)
+void ChangeSize(int nWidth, int nHeight)
 {
 	glViewport(0, 0, nWidth, nHeight);
 	transformPipeline.SetMatrixStacks(modelViewMatrix, projectionMatrix);
@@ -173,10 +252,10 @@ void PixBuffs::Resize(GLsizei nWidth, GLsizei nHeight)
 	screenHeight = nHeight;
 
 	// reset screen aligned quad
-	gltGenerateOrtho2DMat(GetWidth(), GetHeight(), orthoMatrix, screenQuad);
+	gltGenerateOrtho2DMat(screenWidth, screenHeight, orthoMatrix, screenQuad);
 
 	free(pixelData);
-	pixelDataSize = GetWidth()*GetHeight()*3*sizeof(unsigned int);
+	pixelDataSize = screenWidth*screenHeight*3*sizeof(unsigned int);
 	pixelData = (void*)malloc(pixelDataSize);
 
 	//  Resize PBOs
@@ -191,7 +270,7 @@ void PixBuffs::Resize(GLsizei nWidth, GLsizei nHeight)
 ///////////////////////////////////////////////////////////////////////////////
 // Update the camera based on user input, toggle display modes
 // 
-void PixBuffs::MoveCamera(void)
+void MoveCamera(void)
 { 
 	static CStopWatch cameraTimer;
 	float fTime = cameraTimer.GetElapsedSeconds();
@@ -233,7 +312,7 @@ void PixBuffs::MoveCamera(void)
 // Load and setup program for blur effect
 // 
 
-void PixBuffs::SetupBlurProg(void)
+void SetupBlurProg(void)
 {
 	// Set the blur program as the current one
 	glUseProgram(blurProg);
@@ -254,7 +333,7 @@ void PixBuffs::SetupBlurProg(void)
 ///////////////////////////////////////////////////////////////////////////////
 // Draw the scene 
 // 
-void PixBuffs::DrawWorld(GLfloat yRot, GLfloat xPos)
+void DrawWorld(GLfloat yRot, GLfloat xPos)
 {
 	M3DMatrix44f mCamera;
 	modelViewMatrix.GetMatrix(mCamera);
@@ -281,7 +360,7 @@ void PixBuffs::DrawWorld(GLfloat yRot, GLfloat xPos)
 ///////////////////////////////////////////////////////////////////////////////
 // Render a frame. The owning framework is responsible for buffer swaps,
 // flushes, etc.
-void PixBuffs::Render(void)
+void RenderScene(void)
 {
 	static CStopWatch animationTimer;
 	static float totalTime = 6; // To go back and forth
@@ -322,7 +401,7 @@ void PixBuffs::Render(void)
 	{
 		// First bind the PBO as the pack buffer, then read the pixels directly to the PBO
 		glBindBuffer(GL_PIXEL_PACK_BUFFER, pixBuffObjs[0]);
-		glReadPixels(0, 0, GetWidth(), GetHeight(), GL_RGB, GL_UNSIGNED_BYTE, NULL);
+		glReadPixels(0, 0, screenWidth, screenHeight, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 		glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
 
 		// Next bind the PBO as the unpack buffer, then push the pixels straight into the texture
@@ -330,18 +409,18 @@ void PixBuffs::Render(void)
         
         // Setup texture unit for new blur, this gets imcremented every frame 
 		glActiveTexture(GL_TEXTURE0+GetBlurTarget0() ); 
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, GetWidth(), GetHeight(), 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, screenWidth, screenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 	}
 	else
 	{
 		// Grab the screen pixels and copy into local memory
-		glReadPixels(0, 0, GetWidth(), GetHeight(), GL_RGB, GL_UNSIGNED_BYTE, pixelData);
+		glReadPixels(0, 0, screenWidth, screenHeight, GL_RGB, GL_UNSIGNED_BYTE, pixelData);
 		
 		// Push pixels from client memory into texture
         // Setup texture unit for new blur, this gets imcremented every frame
 		glActiveTexture(GL_TEXTURE0+GetBlurTarget0() );
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, GetWidth(), GetHeight(), 0, GL_RGB, GL_UNSIGNED_BYTE, pixelData);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, screenWidth, screenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, pixelData);
 	}
 
 	// Draw full screen quad with blur shader and all blur textures
@@ -359,4 +438,40 @@ void PixBuffs::Render(void)
 
 	// Move to the next blur texture for the next frame
 	AdvanceBlurTaget();
+    
+    // Do the buffer Swap
+    glutSwapBuffers();
+        
+    // Do it again
+    glutPostRedisplay();
+
+    UpdateFrameCount();
+}
+
+
+int main(int argc, char* argv[])
+{
+    screenWidth  = 800;
+    screenHeight = 600;
+    bFullScreen = false; 
+    bAnimated   = true;
+    bUsePBOPath = false;
+    blurProg    = 0;
+    speedFactor = 1.0f;
+
+	gltSetWorkingDirectory(argv[0]);
+		
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+    glutInitWindowSize(screenWidth,screenHeight);
+  
+    glutCreateWindow("Pix Buffs");
+ 
+    glutReshapeFunc(ChangeSize);
+    glutDisplayFunc(RenderScene);
+
+    SetupRC();
+    glutMainLoop();    
+    ShutdownRC();
+    return 0;
 }

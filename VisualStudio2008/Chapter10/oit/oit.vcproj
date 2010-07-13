@@ -65,7 +65,7 @@
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\GLTools\Release;..\..\OpenEXR\lib"
 				GenerateDebugInformation="true"
-				SubSystem="2"
+				SubSystem="1"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -175,41 +175,17 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\..\Src\Chapter10\oit\GLMain.cpp"
+				RelativePath="..\..\..\freeglut-2.6.0\VisualStudio2008Static\Release\freeglut_static.lib"
+				>
+			</File>
+			<File
+				RelativePath="..\..\GLTools\Release\gltools.lib"
 				>
 			</File>
 			<File
 				RelativePath="..\..\..\Src\Chapter10\oit\oit.cpp"
 				>
 			</File>
-			<Filter
-				Name="GLTools"
-				>
-				<File
-					RelativePath="..\..\..\Src\GLTools\src\GLBatch.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\..\Src\GLTools\src\glew.c"
-					>
-				</File>
-				<File
-					RelativePath="..\..\..\Src\GLTools\src\GLShaderManager.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\..\Src\GLTools\src\GLTools.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\..\Src\GLTools\src\GLTriangleBatch.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\..\Src\GLTools\src\math3d.cpp"
-					>
-				</File>
-			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"

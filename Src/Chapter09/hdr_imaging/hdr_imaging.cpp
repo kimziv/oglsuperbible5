@@ -1,9 +1,24 @@
-#include "hdr_imaging.h"
-#include <GL\glu.h>
 #include <stdio.h>
 #include <iostream>
 #include <ImfRgbaFile.h>            // OpenEXR headers
 #include <ImfArray.h>
+
+#include <GLTools.h>
+#include <GLShaderManager.h>
+#include <GLFrustum.h>
+#include <GLBatch.h>
+#include <GLMatrixStack.h>
+#include <GLGeometryTransform.h>
+#include <StopWatch.h>
+
+#include <GL\glu.h>
+
+#ifdef __APPLE__
+#include <glut/glut.h>
+#else
+#define FREEGLUT_STATIC
+#include <gl/glut.h>
+#endif
 
 #ifdef _WIN32
 #pragma comment (lib, "half.lib") 
@@ -16,23 +31,45 @@
 
 #pragma warning (disable : 4305)
 
-////////////////////////////////////////////////////////////////////////////
-// Do not put any OpenGL code here. General guidence on constructors in 
-// general is to not put anything that can fail here either (opening files,
-// allocating memory, etc.)
-HDRImaging::HDRImaging(void) : screenWidth(614), screenHeight(655), bFullScreen(false), 
-				bAnimated(true), mapTexProg(0), varExposureProg(0), adaptiveProg(0), curHDRTex(0),
-				fboName(0), curProg(0), exposure(0.1f)
-{
- 
-}  
+GLsizei	 screenWidth;			// Desired window or desktop width
+GLsizei  screenHeight;			// Desired window or desktop height
 
+GLboolean bFullScreen;			// Request to run full screen
+GLboolean bAnimated;			// Request for continual updates
+
+GLMatrixStack		modelViewMatrix;		// Modelview Matrix
+GLMatrixStack		projectionMatrix;		// Projection Matrix
+GLGeometryTransform	transformPipeline;		// Geometry Transform Pipeline
+GLBatch             screenQuad;
+GLBatch             fboQuad;
+M3DMatrix44f        orthoMatrix;  
+M3DMatrix44f        fboOrthoMatrix; 
+
+GLuint				hdrTextures[1];
+GLuint				lutTxtures[1];
+GLuint				fboTextures[1];
+GLuint				hdrTexturesWidth[1];
+GLuint				hdrTexturesHeight[1];
+GLuint				curHDRTex;
+GLuint				fboName;
+GLuint              mapTexProg;
+GLuint              varExposureProg;
+GLuint              adaptiveProg;
+GLuint              curProg;
+GLfloat				exposure;
+
+void UpdateMode(void);
+void GenerateOrtho2DMat(GLuint windowWidth, GLuint windowHeight, GLuint imageWidth, GLuint imageHeight);
+void GenerateFBOOrtho2DMat(GLuint imageWidth, GLuint imageHeight);
+void SetupHDRProg();
+void SetupStraightTexProg();
+bool LoadOpenEXRImage(char *fileName, GLint textureName, GLuint &texWidth, GLuint &texHeight);
 
 ////////////////////////////////////////////////////////////////////////////
 // Take a file name/location and load an OpenEXR
 // Load the image into the "texture" texture object and pass back the texture sizes
 // 
-bool HDRImaging::LoadOpenEXRImage(char *fileName, GLint textureName, GLuint &texWidth, GLuint &texHeight)
+bool LoadOpenEXRImage(char *fileName, GLint textureName, GLuint &texWidth, GLuint &texHeight)
 {
 	// The OpenEXR uses exception handling to report errors or failures
 	// Do all work in a try block to catch any thrown exceptions.
@@ -91,7 +128,7 @@ bool HDRImaging::LoadOpenEXRImage(char *fileName, GLint textureName, GLuint &tex
 
 ///////////////////////////////////////////////////////////////////////////////
 // OpenGL related startup code is safe to put here. Load textures, etc.
-void HDRImaging::Initialize(void)
+void SetupRC(void)
 {
 	GLfloat texCoordOffsets[4][5*5*2];
 	GLfloat exposureLUT[20]   = { 11.0, 6.0, 3.2, 2.8, 2.2, 1.90, 1.80, 1.80, 1.70, 1.70,  1.60, 1.60, 1.50, 1.50, 1.40, 1.40, 1.30, 1.20, 1.10, 1.00 };
@@ -133,7 +170,7 @@ void HDRImaging::Initialize(void)
     LoadOpenEXRImage("Tree.exr", hdrTextures[curHDRTex], hdrTexturesWidth[curHDRTex], hdrTexturesHeight[curHDRTex]);
 
 	// Create ortho matrix and screen-sized quad matching images aspect ratio
-    GenerateOrtho2DMat(GetWidth(), GetHeight(), hdrTexturesWidth[curHDRTex], hdrTexturesHeight[curHDRTex]);
+    GenerateOrtho2DMat(screenWidth, screenHeight, hdrTexturesWidth[curHDRTex], hdrTexturesHeight[curHDRTex]);
 	//GenerateFBOOrtho2DMat(hdrTexturesWidth[curHDRTex], hdrTexturesHeight[curHDRTex]);
     gltGenerateOrtho2DMat(hdrTexturesWidth[curHDRTex], hdrTexturesHeight[curHDRTex], fboOrthoMatrix, fboQuad);
 
@@ -196,7 +233,7 @@ void HDRImaging::Initialize(void)
 
 ///////////////////////////////////////////////////////////////////////////////
 // Do your cleanup here. Free textures, display lists, buffer objects, etc.
-void HDRImaging::Shutdown(void)
+void ShutdownRC(void)
 {
 	// Make sure default FBO is bound
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
@@ -221,7 +258,7 @@ void HDRImaging::Shutdown(void)
 // Create a matrix that maps geometry to the screen. 1 unit in the x direction equals one pixel 
 // of width, same with the y direction.
 // It also depends on the size of the texture being displayed
-void HDRImaging::GenerateOrtho2DMat(GLuint windowWidth, GLuint windowHeight, GLuint imageWidth, GLuint imageHeight)
+void GenerateOrtho2DMat(GLuint windowWidth, GLuint windowHeight, GLuint imageWidth, GLuint imageHeight)
 {
     float right = (float)windowWidth;
 	float quadWidth = right;
@@ -286,7 +323,7 @@ void HDRImaging::GenerateOrtho2DMat(GLuint windowWidth, GLuint windowHeight, GLu
 // This is called at least once and before any rendering occurs. If the screen
 // is a resizeable window, then this will also get called whenever the window
 // is resized.
-void HDRImaging::Resize(GLsizei nWidth, GLsizei nHeight)
+void ChangeSize(int nWidth, int nHeight)
 {
 	glViewport(0, 0, nWidth, nHeight);
 	transformPipeline.SetMatrixStacks(modelViewMatrix, projectionMatrix);
@@ -304,7 +341,7 @@ void HDRImaging::Resize(GLsizei nWidth, GLsizei nHeight)
 ///////////////////////////////////////////////////////////////////////////////
 // Update the camera based on user input, toggle display modes
 // 
-void HDRImaging::UpdateMode(void)
+void UpdateMode(void)
 { 
 	static CStopWatch timer;
 	float fTime = timer.GetElapsedSeconds();
@@ -335,7 +372,7 @@ void HDRImaging::UpdateMode(void)
 	}
 }
 
-void HDRImaging::SetupStraightTexProg()
+void SetupStraightTexProg()
 {
 	// Set the cur prog for tex replace
 	glUseProgram(mapTexProg);
@@ -344,7 +381,7 @@ void HDRImaging::SetupStraightTexProg()
 	glUniformMatrix4fv(glGetUniformLocation(mapTexProg, "mvpMatrix"), 1, GL_FALSE, transformPipeline.GetModelViewProjectionMatrix());
 }
 
-void HDRImaging::SetupHDRProg()
+void SetupHDRProg()
 {
     // Set the program to the cur
 	glUseProgram(curProg);
@@ -362,7 +399,7 @@ void HDRImaging::SetupHDRProg()
 ///////////////////////////////////////////////////////////////////////////////
 // Render a frame. The owning framework is responsible for buffer swaps,
 // flushes, etc.
-void HDRImaging::Render(void)
+void RenderScene(void)
 {
 	static CStopWatch animationTimer;
 	float yRot = animationTimer.GetElapsedSeconds() * 60.0f;
@@ -395,5 +432,39 @@ void HDRImaging::Render(void)
 	projectionMatrix.LoadMatrix(orthoMatrix);
 	SetupStraightTexProg();
 	screenQuad.Draw();
+                
+    // Do the buffer Swap
+    glutSwapBuffers();
+        
+    // Do it again
+    glutPostRedisplay();
+}
 
+int main(int argc, char* argv[])
+{
+    screenWidth = 614;
+    screenHeight = 655; 
+    mapTexProg = 0;
+    varExposureProg = 0;
+    adaptiveProg = 0;
+    curHDRTex = 0;
+	fboName = 0;
+    curProg = 0;
+    exposure = 0.1f;
+
+	gltSetWorkingDirectory(argv[0]);
+		
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+    glutInitWindowSize(screenWidth,screenHeight);
+  
+    glutCreateWindow("HDR Imaging");
+ 
+    glutReshapeFunc(ChangeSize);
+    glutDisplayFunc(RenderScene);
+
+    SetupRC();
+    glutMainLoop();    
+    ShutdownRC();
+    return 0;
 }

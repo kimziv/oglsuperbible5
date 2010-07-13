@@ -1,10 +1,23 @@
-#include "hdr_msaa.h"
-
-#include <GL\glu.h>
 #include <stdio.h>
 #include <iostream>
 #include <ImfRgbaFile.h>            // OpenEXR headers
 #include <ImfArray.h>
+
+#include <GLTools.h>
+#include <GLFrustum.h>
+#include <GLBatch.h>
+#include <GLMatrixStack.h>
+#include <GLGeometryTransform.h>
+#include <StopWatch.h>
+
+#include <GL\glu.h>
+
+#ifdef __APPLE__
+#include <glut/glut.h>
+#else
+#define FREEGLUT_STATIC
+#include <gl/glut.h>
+#endif
 
 #ifdef _WIN32
 #pragma comment (lib, "half.lib") 
@@ -26,22 +39,53 @@ static GLfloat vSkyBlue[] = { 0.260f, 0.476f, 0.925f, 1.0f};
 static const GLenum windowBuff[] = { GL_BACK_LEFT };
 static const GLenum fboBuffs[] = { GL_COLOR_ATTACHMENT0 };
 
+GLsizei	 screenWidth;			// Desired window or desktop width
+GLsizei  screenHeight;			// Desired window or desktop height
 
-////////////////////////////////////////////////////////////////////////////
-// Do not put any OpenGL code here. General guidence on constructors in 
-// general is to not put anything that can fail here either (opening files,
-// allocating memory, etc.)
-HDRMsaa::HDRMsaa(void) : screenWidth(800), screenHeight(600), bFullScreen(false), 
-                bAnimated(true), sampleCount(0), useWeightedResolve(1)
-{
-    cameraFrame.MoveUp(0.50);
+GLboolean bFullScreen;			// Request to run full screen
+GLboolean bAnimated;			// Request for continual updates
 
-}
+GLMatrixStack		modelViewMatrix;		// Modelview Matrix
+GLMatrixStack		projectionMatrix;		// Projection Matrix
+GLFrustum			viewFrustum;			// View Frustum
+GLGeometryTransform	transformPipeline;		// Geometry Transform Pipeline
+GLFrame				cameraFrame;			// Camera frame
+GLBatch             screenQuad;
+M3DMatrix44f        orthoMatrix;  
 
+GLBatch				floorBatch;
+GLBatch				windowBatch;
+GLBatch				windowBorderBatch;
+GLBatch				windowGridBatch;
+
+GLuint				flatColorProg;
+GLuint				texReplaceProg;
+GLuint				hdrResolve;
+GLuint				blurProg;
+
+GLuint              hdrFBO[1];
+GLuint              brightPassFBO[4];
+GLuint				textures[1];
+GLuint				hdrTextures[1];
+GLuint              texBOTexture;
+GLuint				windowTexture;
+GLfloat				exposure;
+GLint				sampleCount;
+GLint               lastSampleCount;
+GLuint				sampleWeightBuf;
+GLfloat				sampleWeights[8][8];
+GLuint              useWeightedResolve;
+
+void UpdateMode(void);
+void GenerateOrtho2DMat(GLuint imageWidth, GLuint imageHeight);
+bool LoadOpenEXRImage(char *fileName, GLint textureName, GLuint &texWidth, GLuint &texHeight);
+void SetupTexReplaceProg(GLfloat *vLightPos, GLfloat *vColor);
+void SetupFlatColorProg(GLfloat *vLightPos, GLfloat *vColor);
+void SetupHDRProg();
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 // Load in a BMP file as a texture. Allows specification of the filters and the wrap mode
-bool HDRMsaa::LoadBMPTexture(const char *szFileName, GLenum minFilter, GLenum magFilter, GLenum wrapMode)	
+bool LoadBMPTexture(const char *szFileName, GLenum minFilter, GLenum magFilter, GLenum wrapMode)	
 {
     BYTE *pBits;
     GLint iWidth, iHeight;
@@ -69,7 +113,7 @@ bool HDRMsaa::LoadBMPTexture(const char *szFileName, GLenum minFilter, GLenum ma
 
 ///////////////////////////////////////////////////////////////////////////////
 // OpenGL related startup code is safe to put here. Load textures, etc.
-void HDRMsaa::Initialize(void)
+void SetupRC(void)
 {
     GLenum err = glewInit();
     if (GLEW_OK != err)
@@ -233,8 +277,7 @@ void HDRMsaa::Initialize(void)
     glGenTextures(1, hdrTextures);
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, hdrTextures[0]);
     glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 8, GL_RGB16F, screenWidth, screenHeight, GL_FALSE);
-    hdrTexturesSize[0] = screenWidth;
-    hdrTexturesSize[1] = screenHeight;
+
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -360,7 +403,7 @@ void HDRMsaa::Initialize(void)
 // Take a file name/location and load an OpenEXR
 // Load the image into the "texture" texture object and pass back the texture sizes
 // 
-bool HDRMsaa::LoadOpenEXRImage(char *fileName, GLint textureName, GLuint &texWidth, GLuint &texHeight)
+bool LoadOpenEXRImage(char *fileName, GLint textureName, GLuint &texWidth, GLuint &texHeight)
 {
     // The OpenEXR uses exception handling to report errors or failures
     // Do all work in a try block to catch any thrown exceptions.
@@ -421,7 +464,7 @@ bool HDRMsaa::LoadOpenEXRImage(char *fileName, GLint textureName, GLuint &texWid
 
 ///////////////////////////////////////////////////////////////////////////////
 // Do your cleanup here. Free textures, display lists, buffer objects, etc.
-void HDRMsaa::Shutdown(void)
+void ShutdownRC(void)
 {
     // Make sure default FBO is bound
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
@@ -445,7 +488,7 @@ void HDRMsaa::Shutdown(void)
     // Cleanup FBOs
     glDeleteFramebuffers(1, hdrFBO);
 }
-void HDRMsaa::SetupFlatColorProg(GLfloat *vLightPos, GLfloat *vColor)
+void SetupFlatColorProg(GLfloat *vLightPos, GLfloat *vColor)
 {
     glUseProgram(flatColorProg);
 
@@ -466,7 +509,7 @@ void HDRMsaa::SetupFlatColorProg(GLfloat *vLightPos, GLfloat *vColor)
     gltCheckErrors(flatColorProg);
 }
 
-void HDRMsaa::SetupTexReplaceProg(GLfloat *vLightPos, GLfloat *vColor)
+void SetupTexReplaceProg(GLfloat *vLightPos, GLfloat *vColor)
 {
     glUseProgram(texReplaceProg);
 
@@ -491,7 +534,7 @@ void HDRMsaa::SetupTexReplaceProg(GLfloat *vLightPos, GLfloat *vColor)
 
 }
 
-void HDRMsaa::SetupHDRProg()
+void SetupHDRProg()
 {
     glUseProgram(hdrResolve);
 
@@ -536,7 +579,7 @@ void HDRMsaa::SetupHDRProg()
 // This is called at least once and before any rendering occurs. If the screen
 // is a resizeable window, then this will also get called whenever the window
 // is resized.
-void HDRMsaa::Resize(GLsizei nWidth, GLsizei nHeight)
+void ChangeSize(int nWidth, int nHeight)
 {
     glViewport(0, 0, nWidth, nHeight);
     transformPipeline.SetMatrixStacks(modelViewMatrix, projectionMatrix);
@@ -561,7 +604,7 @@ void HDRMsaa::Resize(GLsizei nWidth, GLsizei nHeight)
 // Create a matrix that maps geometry to the screen. 1 unit in the x directionequals one pixel 
 // of width, same with the y direction.
 //
-void HDRMsaa::GenerateOrtho2DMat(GLuint imageWidth, GLuint imageHeight)
+void GenerateOrtho2DMat(GLuint imageWidth, GLuint imageHeight)
 {
     float right = (float)imageWidth;
     float quadWidth = right;
@@ -615,7 +658,7 @@ void HDRMsaa::GenerateOrtho2DMat(GLuint imageWidth, GLuint imageHeight)
 ///////////////////////////////////////////////////////////////////////////////
 // Update the camera based on user input, toggle display modes
 // 
-void HDRMsaa::UpdateMode(void)
+void UpdateMode(void)
 { 
     static CStopWatch timer;
     float fTime = timer.GetElapsedSeconds();
@@ -667,7 +710,7 @@ void HDRMsaa::UpdateMode(void)
 ///////////////////////////////////////////////////////////////////////////////
 // Render a frame. The owning framework is responsible for buffer swaps,
 // flushes, etc.
-void HDRMsaa::Render(void)
+void RenderScene(void)
 {
     UpdateMode();
 
@@ -727,6 +770,34 @@ void HDRMsaa::Render(void)
     // Put the texture units back the way they were
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
-
     
+    // Do the buffer Swap
+    glutSwapBuffers();
+        
+    // Do it again
+    glutPostRedisplay();
+}
+
+int main(int argc, char* argv[])
+{
+    screenWidth = 800;
+    screenHeight = 600; 
+    sampleCount = 0;
+    useWeightedResolve = 1;
+
+	gltSetWorkingDirectory(argv[0]);
+		
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+    glutInitWindowSize(screenWidth,screenHeight);
+  
+    glutCreateWindow("HDR MSAA");
+ 
+    glutReshapeFunc(ChangeSize);
+    glutDisplayFunc(RenderScene);
+
+    SetupRC();
+    glutMainLoop();    
+    ShutdownRC();
+    return 0;
 }

@@ -1,7 +1,22 @@
-#include "fbo_textures.h"
-#include <GL\glu.h>
 #include <stdio.h>
 #include <iostream>
+
+#include <GLTools.h>
+#include <GLShaderManager.h>
+#include <GLFrustum.h>
+#include <GLBatch.h>
+#include <GLMatrixStack.h>
+#include <GLGeometryTransform.h>
+#include <StopWatch.h>
+
+#include <GL\glu.h>
+
+#ifdef __APPLE__
+#include <glut/glut.h>
+#else
+#define FREEGLUT_STATIC
+#include <gl/glut.h>
+#endif
 
 static GLfloat vGreen[] = { 0.0f, 1.0f, 0.0f, 1.0f };
 static GLfloat vBlue[] = { 0.0f, 0.0f, 1.0f, 1.0f };
@@ -14,19 +29,41 @@ static const GLenum fboBuffs[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, G
 static GLint mirrorTexWidth  = 800;
 static GLint mirrorTexHeight = 800;
 
-////////////////////////////////////////////////////////////////////////////
-// Do not put any OpenGL code here. General guidence on constructors in 
-// general is to not put anything that can fail here either (opening files,
-// allocating memory, etc.)
-FBOtextures::FBOtextures(void) : screenWidth(800), screenHeight(600), bFullScreen(false), 
-				bAnimated(true), fboName(0), depthBufferName(0)
-{
+GLsizei	 screenWidth;			// Desired window or desktop width
+GLsizei  screenHeight;			// Desired window or desktop height
 
-}
+GLboolean bFullScreen;			// Request to run full screen
+GLboolean bAnimated;			// Request for continual updates
+
+
+GLShaderManager		shaderManager;			// Shader Manager
+GLMatrixStack		modelViewMatrix;		// Modelview Matrix
+GLMatrixStack		projectionMatrix;		// Projection Matrix
+GLFrustum			viewFrustum;			// View Frustum
+GLGeometryTransform	transformPipeline;		// Geometry Transform Pipeline
+GLFrame				cameraFrame;			// Camera frame
+GLFrame				mirrorFrame;			// Mirror frame
+
+GLTriangleBatch		torusBatch;
+GLTriangleBatch		sphereBatch;
+GLTriangleBatch		cylinderBatch;
+GLBatch				floorBatch;
+GLBatch				mirrorBatch;
+GLBatch				mirrorBorderBatch;
+
+GLuint              fboName;
+GLuint				textures[1];
+GLuint				mirrorTexture;
+GLuint              depthBufferName; 
+
+void MoveCamera(void);
+void DrawWorld(GLfloat yRot);
+bool LoadBMPTexture(const char *szFileName, GLenum minFilter, GLenum magFilter, GLenum wrapMode);
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 // Load in a BMP file as a texture. Allows specification of the filters and the wrap mode
-bool FBOtextures::LoadBMPTexture(const char *szFileName, GLenum minFilter, GLenum magFilter, GLenum wrapMode)	
+bool LoadBMPTexture(const char *szFileName, GLenum minFilter, GLenum magFilter, GLenum wrapMode)	
 {
 	BYTE *pBits;
 	GLint iWidth, iHeight;
@@ -53,7 +90,7 @@ bool FBOtextures::LoadBMPTexture(const char *szFileName, GLenum minFilter, GLenu
 
 ///////////////////////////////////////////////////////////////////////////////
 // OpenGL related startup code is safe to put here. Load textures, etc.
-void FBOtextures::Initialize(void)
+void SetupRC()
 {
     GLenum err = glewInit();
 	if (GLEW_OK != err)
@@ -191,7 +228,7 @@ void FBOtextures::Initialize(void)
 
 ///////////////////////////////////////////////////////////////////////////////
 // Do your cleanup here. Free textures, display lists, buffer objects, etc.
-void FBOtextures::Shutdown(void)
+void ShutdownRC(void)
 {
 	// Make sure default FBO is bound
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
@@ -217,7 +254,7 @@ void FBOtextures::Shutdown(void)
 // This is called at least once and before any rendering occurs. If the screen
 // is a resizeable window, then this will also get called whenever the window
 // is resized.
-void FBOtextures::Resize(GLsizei nWidth, GLsizei nHeight)
+void ChangeSize(int nWidth, int nHeight)
 {
 	glViewport(0, 0, nWidth, nHeight);
 	transformPipeline.SetMatrixStacks(modelViewMatrix, projectionMatrix);
@@ -235,7 +272,7 @@ void FBOtextures::Resize(GLsizei nWidth, GLsizei nHeight)
 ///////////////////////////////////////////////////////////////////////////////
 // Update the camera based on user input, toggle display modes
 // 
-void FBOtextures::MoveCamera(void)
+void MoveCamera(void)
 { 
 	static CStopWatch cameraTimer;
 	float fTime = cameraTimer.GetElapsedSeconds();
@@ -262,7 +299,7 @@ void FBOtextures::MoveCamera(void)
 ///////////////////////////////////////////////////////////////////////////////
 // Draw the scene 
 // 
-void FBOtextures::DrawWorld(GLfloat yRot)
+void DrawWorld(GLfloat yRot)
 {
 	M3DMatrix44f mCamera;
 	modelViewMatrix.GetMatrix(mCamera);
@@ -295,7 +332,7 @@ void FBOtextures::DrawWorld(GLfloat yRot)
 ///////////////////////////////////////////////////////////////////////////////
 // Render a frame. The owning framework is responsible for buffer swaps,
 // flushes, etc.
-void FBOtextures::Render(void)
+void RenderScene(void)
 {
 	static CStopWatch animationTimer;
 	float yRot = animationTimer.GetElapsedSeconds() * 60.0f;
@@ -393,4 +430,36 @@ void FBOtextures::Render(void)
 		modelViewMatrix.PopMatrix();
 	modelViewMatrix.PopMatrix();
 	
+    // Do the buffer Swap
+    glutSwapBuffers();
+        
+    // Do it again
+    glutPostRedisplay();
+}
+
+
+int main(int argc, char* argv[])
+{
+    screenWidth = 800;
+    screenHeight = 600;
+    bFullScreen = false; 
+    bAnimated = true;
+    fboName = 0;
+    depthBufferName = 0;
+
+	gltSetWorkingDirectory(argv[0]);
+		
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+    glutInitWindowSize(screenWidth,screenHeight);
+  
+    glutCreateWindow("FBO Textures");
+ 
+    glutReshapeFunc(ChangeSize);
+    glutDisplayFunc(RenderScene);
+
+    SetupRC();
+    glutMainLoop();    
+    ShutdownRC();
+    return 0;
 }

@@ -1,7 +1,22 @@
-#include "oit.h"
-#include <GL\glu.h>
 #include <stdio.h>
 #include <iostream>
+
+#include <GLTools.h>
+#include <GLShaderManager.h>
+#include <GLFrustum.h>
+#include <GLBatch.h>
+#include <GLMatrixStack.h>
+#include <GLGeometryTransform.h>
+#include <StopWatch.h>
+
+#include <GL\glu.h>
+
+#ifdef __APPLE__
+#include <glut/glut.h>
+#else
+#define FREEGLUT_STATIC
+#include <gl/glut.h>
+#endif
 
 #pragma warning( disable : 4305 )
 
@@ -16,20 +31,52 @@ static GLfloat vGrey[]   = { 0.5f, 0.5f, 0.5f, 1.0f };
 #define USER_OIT   1 
 #define USER_BLEND 2
 
-////////////////////////////////////////////////////////////////////////////
-// Do not put any OpenGL code here. General guidence on constructors in 
-// general is to not put anything that can fail here either (opening files,
-// allocating memory, etc.)
-OrderIndependentTransparancy::OrderIndependentTransparancy(void) : screenWidth(800), screenHeight(600), bFullScreen(false), 
-                bAnimated(true), msFBO(0), depthTextureName(0), worldAngle(0), mode(1), blendMode(1)
-{
+GLsizei	 screenWidth;			// Desired window or desktop width
+GLsizei  screenHeight;			// Desired window or desktop height
 
-}
+GLboolean bFullScreen;			// Request to run full screen
+GLboolean bAnimated;			// Request for continual updates
+
+
+GLShaderManager		shaderManager;			// Shader Manager
+GLMatrixStack		modelViewMatrix;		// Modelview Matrix
+GLMatrixStack		projectionMatrix;		// Projection Matrix
+GLFrustum			viewFrustum;			// View Frustum
+GLGeometryTransform	transformPipeline;		// Geometry Transform Pipeline
+GLFrame				cameraFrame;			// Camera frame
+
+GLTriangleBatch		bckgrndCylBatch;
+GLTriangleBatch		diskBatch;
+GLBatch				glass1Batch;
+GLBatch				glass2Batch;
+GLBatch				glass3Batch;
+GLBatch				glass4Batch;
+GLBatch             screenQuad;
+M3DMatrix44f        orthoMatrix;  
+GLfloat             worldAngle;
+
+GLint               blendMode;
+GLint               mode;
+
+GLuint              msFBO;
+GLuint				textures[2];
+GLuint				msTexture[1];
+GLuint              depthTextureName; 
+GLuint              msResolve;
+GLuint              oitResolve;
+GLuint              flatBlendProg;
+
+void MoveCamera(void);
+void DrawWorld();
+bool LoadBMPTexture(const char *szFileName, GLenum minFilter, GLenum magFilter, GLenum wrapMode);
+void GenerateOrtho2DMat(GLuint imageWidth, GLuint imageHeight);
+void SetupResolveProg();
+void SetupOITResolveProg();
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 // Load in a BMP file as a texture. Allows specification of the filters and the wrap mode
-bool OrderIndependentTransparancy::LoadBMPTexture(const char *szFileName, GLenum minFilter, GLenum magFilter, GLenum wrapMode)	
+bool LoadBMPTexture(const char *szFileName, GLenum minFilter, GLenum magFilter, GLenum wrapMode)	
 {
     BYTE *pBits;
     GLint iWidth, iHeight;
@@ -56,7 +103,7 @@ bool OrderIndependentTransparancy::LoadBMPTexture(const char *szFileName, GLenum
 
 ///////////////////////////////////////////////////////////////////////////////
 // OpenGL related startup code is safe to put here. Load textures, etc.
-void OrderIndependentTransparancy::Initialize(void)
+void SetupRC(void)
 {
     GLenum err = glewInit();
     if (GLEW_OK != err)
@@ -159,7 +206,7 @@ void OrderIndependentTransparancy::Initialize(void)
 
 ///////////////////////////////////////////////////////////////////////////////
 // Do your cleanup here. Free textures, display lists, buffer objects, etc.
-void OrderIndependentTransparancy::Shutdown(void)
+void ShutdownRC(void)
 {
     // Make sure default FBO is bound
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
@@ -183,7 +230,7 @@ void OrderIndependentTransparancy::Shutdown(void)
 // This is called at least once and before any rendering occurs. If the screen
 // is a resizeable window, then this will also get called whenever the window
 // is resized.
-void OrderIndependentTransparancy::Resize(GLsizei nWidth, GLsizei nHeight)
+void ChangeSize(int nWidth, int nHeight)
 {
     glViewport(0, 0, nWidth, nHeight);
     transformPipeline.SetMatrixStacks(modelViewMatrix, projectionMatrix);
@@ -210,7 +257,7 @@ void OrderIndependentTransparancy::Resize(GLsizei nWidth, GLsizei nHeight)
 ///////////////////////////////////////////////////////////////////////////////
 // Update the camera based on user input, toggle display modes
 // 
-void OrderIndependentTransparancy::MoveCamera(void)
+void MoveCamera(void)
 { 
     static CStopWatch cameraTimer;
     float fTime = cameraTimer.GetElapsedSeconds();
@@ -259,7 +306,7 @@ void OrderIndependentTransparancy::MoveCamera(void)
 // Create a matrix that maps geometry to the screen. 1 unit in the x directionequals one pixel 
 // of width, same with the y direction.
 //
-void OrderIndependentTransparancy::GenerateOrtho2DMat(GLuint imageWidth, GLuint imageHeight)
+void GenerateOrtho2DMat(GLuint imageWidth, GLuint imageHeight)
 {
     float right = (float)imageWidth;
     float quadWidth = right;
@@ -311,7 +358,7 @@ void OrderIndependentTransparancy::GenerateOrtho2DMat(GLuint imageWidth, GLuint 
 }
 
 
-void OrderIndependentTransparancy::SetupResolveProg()
+void SetupResolveProg()
 {
     glUseProgram(msResolve);
 
@@ -335,7 +382,7 @@ void OrderIndependentTransparancy::SetupResolveProg()
 	gltCheckErrors(msResolve);
 } 
 
-void OrderIndependentTransparancy::SetupOITResolveProg()
+void SetupOITResolveProg()
 {
     glUseProgram(oitResolve);
 
@@ -365,7 +412,7 @@ void OrderIndependentTransparancy::SetupOITResolveProg()
 ///////////////////////////////////////////////////////////////////////////////
 // Draw the scene 
 // 
-void OrderIndependentTransparancy::DrawWorld()
+void DrawWorld()
 {
     modelViewMatrix.Translate(0.0f, 0.8f, 0.0f);
     modelViewMatrix.PushMatrix();
@@ -417,7 +464,7 @@ void OrderIndependentTransparancy::DrawWorld()
 ///////////////////////////////////////////////////////////////////////////////
 // Render a frame. The owning framework is responsible for buffer swaps,
 // flushes, etc.
-void OrderIndependentTransparancy::Render(void)
+void RenderScene(void)
 {
     MoveCamera();
     
@@ -536,4 +583,38 @@ void OrderIndependentTransparancy::Render(void)
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+               
+    // Do the buffer Swap
+    glutSwapBuffers();
+        
+    // Do it again
+    glutPostRedisplay();
+}
+
+int main(int argc, char* argv[])
+{
+    
+    screenWidth = 800;
+    screenHeight = 600; 
+    msFBO = 0;
+    depthTextureName = 0;
+    worldAngle = 0;
+    mode = 1;
+    blendMode = 1;
+
+	gltSetWorkingDirectory(argv[0]);
+		
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+    glutInitWindowSize(screenWidth,screenHeight);
+  
+    glutCreateWindow("HDR Imaging");
+ 
+    glutReshapeFunc(ChangeSize);
+    glutDisplayFunc(RenderScene);
+
+    SetupRC();
+    glutMainLoop();    
+    ShutdownRC();
+    return 0;
 }

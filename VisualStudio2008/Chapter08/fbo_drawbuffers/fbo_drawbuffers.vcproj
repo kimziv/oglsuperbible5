@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\Src\GLTools\include,..\..\..\Src\OpenEXR\include"
+				AdditionalIncludeDirectories="..\..\..\Src\Models\Ninja;..\..\..\Src\GLTools\include;..\..\..\Src\OpenEXR\include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -65,7 +65,7 @@
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\GLTools\Release;..\..\OpenEXR\lib"
 				GenerateDebugInformation="true"
-				SubSystem="2"
+				SubSystem="1"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -179,34 +179,22 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\Src\Chapter08\fbo_drawbuffers\GLMain.cpp"
+				RelativePath="..\..\..\freeglut-2.6.0\VisualStudio2008Static\Release\freeglut_static.lib"
+				>
+			</File>
+			<File
+				RelativePath="..\..\GLTools\Release\gltools.lib"
 				>
 			</File>
 			<Filter
-				Name="GLTools"
+				Name="Model"
 				>
 				<File
-					RelativePath="..\..\..\Src\GLTools\src\GLBatch.cpp"
+					RelativePath="..\..\..\Src\Models\Ninja\sbm.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\Src\GLTools\src\glew.c"
-					>
-				</File>
-				<File
-					RelativePath="..\..\..\Src\GLTools\src\GLShaderManager.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\..\Src\GLTools\src\GLTools.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\..\Src\GLTools\src\GLTriangleBatch.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\..\Src\GLTools\src\math3d.cpp"
+					RelativePath="..\..\..\Src\Models\Ninja\sbm.h"
 					>
 				</File>
 			</Filter>
@@ -216,10 +204,6 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
-			<File
-				RelativePath="..\..\..\Src\Chapter08\fbo_drawbuffers\fbo_drawbuffers.h"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"

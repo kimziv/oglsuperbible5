@@ -65,7 +65,7 @@
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\GLTools\Release;..\..\OpenEXR\lib"
 				GenerateDebugInformation="true"
-				SubSystem="2"
+				SubSystem="1"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -173,47 +173,23 @@
 			Name="Source Files"
 			>
 			<File
-				RelativePath="..\..\..\Src\Chapter09\hdr_bloom\GLMain.cpp"
+				RelativePath="..\..\..\freeglut-2.6.0\VisualStudio2008Static\Release\freeglut_static.lib"
+				>
+			</File>
+			<File
+				RelativePath="..\..\GLTools\Release\gltools.lib"
 				>
 			</File>
 			<File
 				RelativePath="..\..\..\Src\Chapter09\hdr_bloom\hdr_bloom.cpp"
 				>
 			</File>
-			<Filter
-				Name="GLTools"
-				>
-				<File
-					RelativePath="..\..\..\Src\GLTools\src\GLBatch.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\..\Src\GLTools\src\glew.c"
-					>
-				</File>
-				<File
-					RelativePath="..\..\..\Src\GLTools\src\GLTools.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\..\Src\GLTools\src\GLTriangleBatch.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\..\Src\GLTools\src\math3d.cpp"
-					>
-				</File>
-			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
-			<File
-				RelativePath="..\..\..\Src\Chapter09\hdr_bloom\hdr_bloom.h"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="shaders"

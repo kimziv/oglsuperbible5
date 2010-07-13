@@ -1,8 +1,23 @@
-#include "fbo_drawbuffers.h"
-
-#include <GL\glu.h>
 #include <stdio.h>
 #include <iostream>
+
+#include <GLTools.h>
+#include <GLShaderManager.h>
+#include <GLFrustum.h>
+#include <GLBatch.h>
+#include <GLMatrixStack.h>
+#include <GLGeometryTransform.h>
+#include <StopWatch.h>
+#include "sbm.h"
+
+#include <GL\glu.h>
+
+#ifdef __APPLE__
+#include <glut/glut.h>
+#else
+#define FREEGLUT_STATIC
+#include <gl/glut.h>
+#endif
 
 static GLfloat vGreen[] = { 0.0f, 1.0f, 0.0f, 1.0f };
 static GLfloat vWhite[] = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -10,6 +25,40 @@ static GLfloat vLightPos[] = { 0.0f, 3.0f, 0.0f, 1.0f };
 static const GLenum windowBuff[] = { GL_BACK_LEFT };
 static const GLenum fboBuffs[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
 
+GLsizei	 screenWidth;			// Desired window or desktop width
+GLsizei  screenHeight;			// Desired window or desktop height
+
+GLboolean bFullScreen;			// Request to run full screen
+GLboolean bAnimated;			// Request for continual updates
+
+
+GLShaderManager		shaderManager;			// Shader Manager
+GLMatrixStack		modelViewMatrix;		// Modelview Matrix
+GLMatrixStack		projectionMatrix;		// Projection Matrix
+GLFrustum			viewFrustum;			// View Frustum
+GLGeometryTransform	transformPipeline;		// Geometry Transform Pipeline
+GLFrame				cameraFrame;			// Camera frame
+
+GLTriangleBatch		torusBatch;
+GLTriangleBatch		sphereBatch;
+GLBatch				floorBatch;
+GLBatch             screenQuad;
+
+GLuint				textures[3];
+GLuint				processProg;
+GLuint				texBO[3];
+GLuint				texBOTexture;
+bool                bUseFBO;
+GLuint              fboName;
+GLuint              depthBufferName; 
+GLuint				renderBufferNames[3];
+
+SBObject            ninja;
+GLuint              ninjaTex[1];
+
+void MoveCamera(void);
+void DrawWorld(GLfloat yRot);
+bool LoadBMPTexture(const char *szFileName, GLenum minFilter, GLenum magFilter, GLenum wrapMode);
 
 static float* LoadFloatData(const char *szFile, int *count)
 {
@@ -48,20 +97,10 @@ static float* LoadFloatData(const char *szFile, int *count)
     return data;
 }
 
-////////////////////////////////////////////////////////////////////////////
-// Do not put any OpenGL code here. General guidence on constructors in 
-// general is to not put anything that can fail here either (opening files,
-// allocating memory, etc.)
-FBOdrawbuffers::FBOdrawbuffers(void) : screenWidth(800), screenHeight(600), bFullScreen(false), 
-				bAnimated(true), bUseFBO(true), fboName(0), depthBufferName(0)
-{
-
-}
-	
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 // Load in a BMP file as a texture. Allows specification of the filters and the wrap mode
-bool FBOdrawbuffers::LoadBMPTexture(const char *szFileName, GLenum minFilter, GLenum magFilter, GLenum wrapMode)	
+bool LoadBMPTexture(const char *szFileName, GLenum minFilter, GLenum magFilter, GLenum wrapMode)	
 {
 	BYTE *pBits;
 	GLint iWidth, iHeight;
@@ -88,7 +127,7 @@ bool FBOdrawbuffers::LoadBMPTexture(const char *szFileName, GLenum minFilter, GL
 
 ///////////////////////////////////////////////////////////////////////////////
 // OpenGL related startup code is safe to put here. Load textures, etc.
-void FBOdrawbuffers::Initialize(void)
+void SetupRC()
 {
     GLenum err = glewInit();
 	if (GLEW_OK != err)
@@ -226,10 +265,15 @@ void FBOdrawbuffers::Initialize(void)
 	gltCheckErrors();
 }
 
+// Respond to arrow keys by moving the camera frame of reference
+void SpecialKeys(int key, int x, int y)
+{
+    // Nothing to do!
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Do your cleanup here. Free textures, display lists, buffer objects, etc.
-void FBOdrawbuffers::Shutdown(void)
+void ShutdownRC(void)
 {
 	// Make sure default FBO is bound
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
@@ -268,7 +312,7 @@ void FBOdrawbuffers::Shutdown(void)
 // This is called at least once and before any rendering occurs. If the screen
 // is a resizeable window, then this will also get called whenever the window
 // is resized.
-void FBOdrawbuffers::Resize(GLsizei nWidth, GLsizei nHeight)
+void ChangeSize(int nWidth, int nHeight)
 {
 	glViewport(0, 0, nWidth, nHeight);
 	transformPipeline.SetMatrixStacks(modelViewMatrix, projectionMatrix);
@@ -282,7 +326,7 @@ void FBOdrawbuffers::Resize(GLsizei nWidth, GLsizei nHeight)
 	screenHeight = nHeight;
 
 	glBindRenderbuffer(GL_RENDERBUFFER, depthBufferName);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT32, GetWidth(), GetHeight());
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT32, screenWidth, screenHeight);
 	glBindRenderbuffer(GL_RENDERBUFFER, renderBufferNames[0]);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA8, screenWidth, screenHeight);
 	glBindRenderbuffer(GL_RENDERBUFFER, renderBufferNames[1]);
@@ -295,7 +339,7 @@ void FBOdrawbuffers::Resize(GLsizei nWidth, GLsizei nHeight)
 ///////////////////////////////////////////////////////////////////////////////
 // Update the camera based on user input, toggle display modes
 // 
-void FBOdrawbuffers::MoveCamera(void)
+void MoveCamera(void)
 { 
 	static CStopWatch cameraTimer;
 	float fTime = cameraTimer.GetElapsedSeconds();
@@ -357,7 +401,7 @@ void FBOdrawbuffers::MoveCamera(void)
 ///////////////////////////////////////////////////////////////////////////////
 // Enable and setup the GLSL program used for 
 // flushes, etc.
-void FBOdrawbuffers::UseProcessProgram(M3DVector4f vLightPos, M3DVector4f vColor, int textureUnit)
+void UseProcessProgram(M3DVector4f vLightPos, M3DVector4f vColor, int textureUnit)
 {
 	glUseProgram(processProg);
 
@@ -393,7 +437,7 @@ void FBOdrawbuffers::UseProcessProgram(M3DVector4f vLightPos, M3DVector4f vColor
 ///////////////////////////////////////////////////////////////////////////////
 // Draw the scene 
 // 
-void FBOdrawbuffers::DrawWorld(GLfloat yRot)
+void DrawWorld(GLfloat yRot)
 {
 	M3DMatrix44f mCamera;
 	modelViewMatrix.GetMatrix(mCamera);
@@ -420,8 +464,8 @@ void FBOdrawbuffers::DrawWorld(GLfloat yRot)
 
 		modelViewMatrix.PushMatrix();
 			modelViewMatrix.Rotate(yRot, 0.0f, 1.0f, 0.0f);
-            modelViewMatrix.Translate(0.0,-0.60,0.0);
-            modelViewMatrix.Scale(0.02, 0.006, 0.02);
+            modelViewMatrix.Translate(0.0, (GLfloat)-0.60, 0.0);
+            modelViewMatrix.Scale((GLfloat)0.02, (GLfloat)0.006, (GLfloat)0.02);
             
             glBindTexture(GL_TEXTURE_2D, ninjaTex[0]);
 
@@ -443,7 +487,7 @@ void FBOdrawbuffers::DrawWorld(GLfloat yRot)
 ///////////////////////////////////////////////////////////////////////////////
 // Render a frame. The owning framework is responsible for buffer swaps,
 // flushes, etc.
-void FBOdrawbuffers::Render(void)
+void RenderScene(void)
 {
 	static CStopWatch animationTimer;
 	float yRot = animationTimer.GetElapsedSeconds() * 60.0f;
@@ -486,30 +530,64 @@ void FBOdrawbuffers::Render(void)
 		// Direct drawing to the window
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 		glDrawBuffers(1, windowBuff);
-		glViewport(0, 0, GetWidth(), GetHeight());
+		glViewport(0, 0, screenWidth, screenHeight);
 
 		// Source buffer reads from the framebuffer object
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, fboName);
 
 		// Copy greyscale output to the left half of the screen
 		glReadBuffer(GL_COLOR_ATTACHMENT1);
-		glBlitFramebuffer(0, 0, GetWidth()/2, GetHeight(),
-						  0, 0, GetWidth()/2, GetHeight(),
+		glBlitFramebuffer(0, 0, screenWidth/2, screenHeight,
+						  0, 0, screenWidth/2, screenHeight,
 						  GL_COLOR_BUFFER_BIT, GL_NEAREST );
 	
 		// Copy the luminance adjusted color to the right half of the screen
 		glReadBuffer(GL_COLOR_ATTACHMENT2);	
-		glBlitFramebuffer(GetWidth()/2, 0, GetWidth(), GetHeight(),
-						  GetWidth()/2, 0, GetWidth(), GetHeight(),
+		glBlitFramebuffer(screenWidth/2, 0, screenWidth, screenHeight,
+						  screenWidth/2, 0, screenWidth, screenHeight,
 						  GL_COLOR_BUFFER_BIT, GL_NEAREST );
 
 		// Scale the unaltered image to the upper right of the screen
 		glReadBuffer(GL_COLOR_ATTACHMENT0);
-		glBlitFramebuffer(0, 0, GetWidth(), GetHeight(),
-						  (int)(GetWidth() *(0.8)), (int)(GetHeight()*(0.8)), 
-						  GetWidth(), GetHeight(),
+		glBlitFramebuffer(0, 0, screenWidth, screenHeight,
+						  (int)(screenWidth *(0.8)), (int)(screenHeight*(0.8)), 
+						  screenWidth, screenHeight,
 						  GL_COLOR_BUFFER_BIT, GL_LINEAR );
 
 		glBindTexture(GL_TEXTURE_2D, 0);
 	} 
+
+    // Do the buffer Swap
+    glutSwapBuffers();
+        
+    // Do it again
+    glutPostRedisplay();
+}
+
+int main(int argc, char* argv[])
+{
+    screenWidth = 800;
+    screenHeight = 600;
+    bFullScreen = false; 
+    bAnimated = true;
+    bUseFBO = true;
+    fboName = 0;
+    depthBufferName = 0;
+
+	gltSetWorkingDirectory(argv[0]);
+		
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+    glutInitWindowSize(screenWidth,screenHeight);
+  
+    glutCreateWindow("FBO Drawbuffers");
+ 
+    glutReshapeFunc(ChangeSize);
+    glutDisplayFunc(RenderScene);
+    glutSpecialFunc(SpecialKeys);
+
+    SetupRC();
+    glutMainLoop();    
+    ShutdownRC();
+    return 0;
 }
