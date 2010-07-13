@@ -17,7 +17,7 @@
 #include <glut/glut.h>
 #else
 #define FREEGLUT_STATIC
-#include <gl/glut.h>
+#include <GL/glut.h>
 #endif
 
 #ifdef _WIN32
@@ -58,7 +58,6 @@ GLuint              adaptiveProg;
 GLuint              curProg;
 GLfloat				exposure;
 
-void UpdateMode(void);
 void GenerateOrtho2DMat(GLuint windowWidth, GLuint windowHeight, GLuint imageWidth, GLuint imageHeight);
 void GenerateFBOOrtho2DMat(GLuint imageWidth, GLuint imageHeight);
 void SetupHDRProg();
@@ -341,32 +340,36 @@ void ChangeSize(int nWidth, int nHeight)
 ///////////////////////////////////////////////////////////////////////////////
 // Update the camera based on user input, toggle display modes
 // 
-void UpdateMode(void)
+void SpecialKeys(int key, int x, int y)
 { 
 	static CStopWatch timer;
 	float fTime = timer.GetElapsedSeconds();
 	float linear = fTime / 100;
-
-	if(GetAsyncKeyState(VK_UP))
+	// Increase the scene exposure
+	if(key == GLUT_KEY_UP)
 	{
-		if((exposure + linear) < 25.0f)
+		if((exposure + linear) < 20.0f)
 			exposure += linear;
 	}
-	if(GetAsyncKeyState(VK_DOWN))
+	// Decrease the scene exposure
+	if(key == GLUT_KEY_DOWN)
 	{
 		if((exposure - linear) > 0.01f)
 			exposure -= linear;
 	}
+}
 
-	if(GetAsyncKeyState('1'))
+void ProcessKeys(unsigned char key, int x, int y)
+{
+	if(key == '1')
 	{
 		curProg = mapTexProg;
 	}
-	if(GetAsyncKeyState('2'))
+	if(key == '2')
 	{
 		curProg = varExposureProg;
 	}
-	if(GetAsyncKeyState('3'))
+	if(key == '3')
 	{
 		curProg = adaptiveProg;
 	}
@@ -403,7 +406,6 @@ void RenderScene(void)
 {
 	static CStopWatch animationTimer;
 	float yRot = animationTimer.GetElapsedSeconds() * 60.0f;
-	UpdateMode();
 
 	// first, draw to FBO at full FBO resolution
 
@@ -462,6 +464,8 @@ int main(int argc, char* argv[])
  
     glutReshapeFunc(ChangeSize);
     glutDisplayFunc(RenderScene);
+    glutSpecialFunc(SpecialKeys);
+    glutKeyboardFunc(ProcessKeys);
 
     SetupRC();
     glutMainLoop();    

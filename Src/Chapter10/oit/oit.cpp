@@ -15,7 +15,7 @@
 #include <glut/glut.h>
 #else
 #define FREEGLUT_STATIC
-#include <gl/glut.h>
+#include <GL/glut.h>
 #endif
 
 #pragma warning( disable : 4305 )
@@ -66,7 +66,6 @@ GLuint              msResolve;
 GLuint              oitResolve;
 GLuint              flatBlendProg;
 
-void MoveCamera(void);
 void DrawWorld();
 bool LoadBMPTexture(const char *szFileName, GLenum minFilter, GLenum magFilter, GLenum wrapMode);
 void GenerateOrtho2DMat(GLuint imageWidth, GLuint imageHeight);
@@ -257,7 +256,7 @@ void ChangeSize(int nWidth, int nHeight)
 ///////////////////////////////////////////////////////////////////////////////
 // Update the camera based on user input, toggle display modes
 // 
-void MoveCamera(void)
+void SpecialKeys(int key, int x, int y)
 { 
     static CStopWatch cameraTimer;
     float fTime = cameraTimer.GetElapsedSeconds();
@@ -266,37 +265,40 @@ void MoveCamera(void)
     float linear = fTime * 3.0f;
     float angular = fTime * float(m3dDegToRad(60.0f));
 
-    if(GetAsyncKeyState(VK_LEFT))
+    if(key == GLUT_KEY_LEFT)
     {
         worldAngle += angular*50;
         if(worldAngle > 360)
             worldAngle -= 360;
     }
 
-    if(GetAsyncKeyState(VK_RIGHT))
+    if(key == GLUT_KEY_RIGHT)
     {
         worldAngle -= angular*50;
         if(worldAngle < 360)
             worldAngle += 360;
     }
-    if(GetAsyncKeyState('o') || GetAsyncKeyState('O'))
+}
+void ProcessKeys(unsigned char key, int x, int y)
+{
+    if(key == 'o' || key == 'O')
         mode = USER_OIT;
-    if(GetAsyncKeyState('b') || GetAsyncKeyState('B'))
+    if(key == 'b' || key == 'B')
     	mode = USER_BLEND;
 
-    if(GetAsyncKeyState('1'))
+    if(key == '1')
     	blendMode = 1;
-    if(GetAsyncKeyState('2'))
+    if(key == '2')
     	blendMode = 2;
-    if(GetAsyncKeyState('3'))
+    if(key == '3')
     	blendMode = 3;
-    if(GetAsyncKeyState('4'))
+    if(key == '4')
     	blendMode = 4;
-    if(GetAsyncKeyState('5'))
+    if(key == '5')
     	blendMode = 5;
-    if(GetAsyncKeyState('6'))
+    if(key == '6')
     	blendMode = 6;
-    if(GetAsyncKeyState('7'))
+    if(key == '7')
     	blendMode = 7;
 }
 
@@ -466,8 +468,6 @@ void DrawWorld()
 // flushes, etc.
 void RenderScene(void)
 {
-    MoveCamera();
-    
     // Bind the FBO with multisample buffers
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, msFBO);
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -612,6 +612,8 @@ int main(int argc, char* argv[])
  
     glutReshapeFunc(ChangeSize);
     glutDisplayFunc(RenderScene);
+    glutSpecialFunc(SpecialKeys);
+    glutKeyboardFunc(ProcessKeys);
 
     SetupRC();
     glutMainLoop();    

@@ -15,7 +15,7 @@
 #include <glut/glut.h>
 #else
 #define FREEGLUT_STATIC
-#include <gl/glut.h>
+#include <GL/glut.h>
 #endif
 
 static GLfloat vGreen[] = { 0.0f, 1.0f, 0.0f, 1.0f };
@@ -56,7 +56,6 @@ GLuint				textures[1];
 GLuint				mirrorTexture;
 GLuint              depthBufferName; 
 
-void MoveCamera(void);
 void DrawWorld(GLfloat yRot);
 bool LoadBMPTexture(const char *szFileName, GLenum minFilter, GLenum magFilter, GLenum wrapMode);
 
@@ -272,25 +271,25 @@ void ChangeSize(int nWidth, int nHeight)
 ///////////////////////////////////////////////////////////////////////////////
 // Update the camera based on user input, toggle display modes
 // 
-void MoveCamera(void)
+void SpecialKeys(int key, int x, int y)
 { 
 	static CStopWatch cameraTimer;
 	float fTime = cameraTimer.GetElapsedSeconds();
 	cameraTimer.Reset(); 
 
-	float linear = fTime * 3.0f;
+	float linear = fTime * 0.60f;
 	float angular = fTime * float(m3dDegToRad(60.0f));
 
-	if(GetAsyncKeyState(VK_UP))
+	if(key == GLUT_KEY_UP)
 		cameraFrame.MoveForward(linear);
 
-	if(GetAsyncKeyState(VK_DOWN))
+	if(key == GLUT_KEY_DOWN)
 		cameraFrame.MoveForward(-linear);
 
-	if(GetAsyncKeyState(VK_LEFT))
+	if(key == GLUT_KEY_LEFT)
 		cameraFrame.RotateWorld(angular, 0.0f, 1.0f, 0.0f);
 
-	if(GetAsyncKeyState(VK_RIGHT))
+	if(key == GLUT_KEY_RIGHT)
 		cameraFrame.RotateWorld(-angular, 0.0f, 1.0f, 0.0f);
 }
 
@@ -336,7 +335,6 @@ void RenderScene(void)
 {
 	static CStopWatch animationTimer;
 	float yRot = animationTimer.GetElapsedSeconds() * 60.0f;
-	MoveCamera();
 
 	M3DVector3f vCameraPos;
 	M3DVector3f vCameraForward;
@@ -457,6 +455,7 @@ int main(int argc, char* argv[])
  
     glutReshapeFunc(ChangeSize);
     glutDisplayFunc(RenderScene);
+    glutSpecialFunc(SpecialKeys);
 
     SetupRC();
     glutMainLoop();    

@@ -16,7 +16,7 @@
 #include <glut/glut.h>
 #else
 #define FREEGLUT_STATIC
-#include <gl/glut.h>
+#include <GL/glut.h>
 #endif
 
 #ifdef _WIN32
@@ -76,7 +76,6 @@ GLuint				sampleWeightBuf;
 GLfloat				sampleWeights[8][8];
 GLuint              useWeightedResolve;
 
-void UpdateMode(void);
 void GenerateOrtho2DMat(GLuint imageWidth, GLuint imageHeight);
 bool LoadOpenEXRImage(char *fileName, GLint textureName, GLuint &texWidth, GLuint &texHeight);
 void SetupTexReplaceProg(GLfloat *vLightPos, GLfloat *vColor);
@@ -658,7 +657,7 @@ void GenerateOrtho2DMat(GLuint imageWidth, GLuint imageHeight)
 ///////////////////////////////////////////////////////////////////////////////
 // Update the camera based on user input, toggle display modes
 // 
-void UpdateMode(void)
+void SpecialKeys(int key, int x, int y)
 { 
     static CStopWatch timer;
     float fTime = timer.GetElapsedSeconds();
@@ -666,43 +665,47 @@ void UpdateMode(void)
     float smallLinear = fTime / 1000;
 
     // Increase the scene exposure
-    if(GetAsyncKeyState(VK_UP))
+    if(key == GLUT_KEY_UP)
     {
         if((exposure + smallLinear) < 20.0f)
             exposure += smallLinear;
     }
     // Decrease the scene exposure
-    if(GetAsyncKeyState(VK_DOWN))
+    if(key == GLUT_KEY_DOWN)
     {
         if((exposure - smallLinear) > 0.01f)
             exposure -= smallLinear;
     }
-    if(GetAsyncKeyState('q') || GetAsyncKeyState('Q'))
+}
+
+
+void ProcessKeys(unsigned char key, int x, int y)
+{
+    if (key == 'q' || key ==  'Q')
     {
         useWeightedResolve = 0;
     }
-    if(GetAsyncKeyState('w') || GetAsyncKeyState('W'))
+    if (key == 'w' || key == 'W')
     {
         useWeightedResolve = 1;
     }
 
-    if(GetAsyncKeyState('1'))
+    if (key == '1')
         sampleCount = 0;
-    else if(GetAsyncKeyState('2'))
+    else if (key == '2')
         sampleCount = 1;
-    else if(GetAsyncKeyState('3'))
+    else if (key == '3')
         sampleCount = 2;
-    else if(GetAsyncKeyState('4'))
+    else if (key == '4')
         sampleCount = 3;
-    else if(GetAsyncKeyState('5'))
+    else if (key == '5')
         sampleCount = 4;
-    else if(GetAsyncKeyState('6'))
+    else if (key == '6')
         sampleCount = 5;
-    else if(GetAsyncKeyState('7'))
+    else if (key == '7')
         sampleCount = 6;
-    else if(GetAsyncKeyState('8'))
+    else if (key == '8')
         sampleCount = 7;
-
 }
 
 
@@ -712,8 +715,6 @@ void UpdateMode(void)
 // flushes, etc.
 void RenderScene(void)
 {
-    UpdateMode();
-
     // first render the scene in HDR to fbo
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, hdrFBO[0]);
     glDrawBuffers(1, &fboBuffs[0]);
@@ -795,6 +796,8 @@ int main(int argc, char* argv[])
  
     glutReshapeFunc(ChangeSize);
     glutDisplayFunc(RenderScene);
+    glutSpecialFunc(SpecialKeys);
+    glutKeyboardFunc(ProcessKeys);
 
     SetupRC();
     glutMainLoop();    

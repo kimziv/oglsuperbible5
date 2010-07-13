@@ -15,7 +15,7 @@
 #include <glut/glut.h>
 #else
 #define FREEGLUT_STATIC
-#include <gl/glut.h>
+#include <GL/glut.h>
 #endif
 
 static GLfloat vGreen[] = { 0.0f, 1.0f, 0.0f, 1.0f };
@@ -270,7 +270,7 @@ void ChangeSize(int nWidth, int nHeight)
 ///////////////////////////////////////////////////////////////////////////////
 // Update the camera based on user input, toggle display modes
 // 
-void MoveCamera(void)
+void ProccessKeys(unsigned char key, int x, int y)
 { 
 	static CStopWatch cameraTimer;
 	float fTime = cameraTimer.GetElapsedSeconds();
@@ -278,21 +278,11 @@ void MoveCamera(void)
 	cameraTimer.Reset(); 
 
 	// Alternate between PBOs and local memory when 'P' is pressed
-	static bool bLastKeyP = false;
-	if(GetAsyncKeyState('P') || GetAsyncKeyState('p'))
-	{
-		if(bLastKeyP == false)
-			bUsePBOPath = (bUsePBOPath)? GL_FALSE : GL_TRUE;
-
-		bLastKeyP = true;
-	}
-	else
-	{
-		bLastKeyP = false;
-	}
+	if(key == 'P' || key == 'p') 
+		bUsePBOPath = (bUsePBOPath)? GL_FALSE : GL_TRUE;
 
 	// Speed up movement
-	if(GetAsyncKeyState(VK_ADD))
+	if(key == '+')
 	{
 		speedFactor += linear/2;
 		if(speedFactor > 6)
@@ -300,13 +290,14 @@ void MoveCamera(void)
 	}
 
 	// Slow down moement
-	if(GetAsyncKeyState(VK_SUBTRACT))
+	if(key == '-')
 	{
 		speedFactor -= linear/2;
 		if(speedFactor < 0.5)
 			speedFactor = 0.5;
 	}
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // Load and setup program for blur effect
@@ -379,8 +370,6 @@ void RenderScene(void)
 		xPos = seconds -halfTotalTime*0.5f;
 	else
 		xPos = totalTime - seconds -halfTotalTime*0.5f;
-
-	MoveCamera();
 
 	// First draw world to screen
 	modelViewMatrix.PushMatrix();	
@@ -469,6 +458,7 @@ int main(int argc, char* argv[])
  
     glutReshapeFunc(ChangeSize);
     glutDisplayFunc(RenderScene);
+    glutKeyboardFunc(ProccessKeys);
 
     SetupRC();
     glutMainLoop();    

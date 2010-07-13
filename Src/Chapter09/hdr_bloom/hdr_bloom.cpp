@@ -17,7 +17,7 @@
 #include <glut/glut.h>
 #else
 #define FREEGLUT_STATIC
-#include <gl/glut.h>
+#include <GL/glut.h>
 #endif
 
 #ifdef _WIN32
@@ -692,7 +692,7 @@ void GenerateOrtho2DMat(GLuint imageWidth, GLuint imageHeight)
 ///////////////////////////////////////////////////////////////////////////////
 // Update the camera based on user input, toggle display modes
 // 
-void UpdateMode(void)
+void SpecialKeys(int key, int x, int y)
 { 
 	static CStopWatch timer;
 	float fTime = timer.GetElapsedSeconds();
@@ -700,33 +700,32 @@ void UpdateMode(void)
 	float smallLinear = fTime / 1000;
 
 	// Increase the scene exposure
-	if(GetAsyncKeyState(VK_UP))
+	if(key == GLUT_KEY_UP)
 	{
 		if((exposure + linear) < 20.0f)
 			exposure += linear;
 	}
 	// Decrease the scene exposure
-	if(GetAsyncKeyState(VK_DOWN))
+	if(key == GLUT_KEY_DOWN)
 	{
 		if((exposure - linear) > 0.01f)
 			exposure -= linear;
 	}
 	
 	// Decrease amount of bloom effect
-	if(GetAsyncKeyState(VK_LEFT))
+	if(key == GLUT_KEY_LEFT)
 	{
 		if((bloomLevel - smallLinear) > 0.00f)
 			bloomLevel -= smallLinear;
 		
 	}
 	// Increase amount of bloom effect
-	if(GetAsyncKeyState(VK_RIGHT))
+	if(key == GLUT_KEY_RIGHT)
 	{
 		if((bloomLevel + smallLinear) < 1.5f)
 			bloomLevel += smallLinear;
 	}
 }
-
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -735,7 +734,6 @@ void UpdateMode(void)
 void RenderScene(void)
 {
 	int i =0;
-	UpdateMode();
 
 	// first render the scene in HDR to fbo
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, hdrFBO[0]);
@@ -841,6 +839,7 @@ int main(int argc, char* argv[])
  
     glutReshapeFunc(ChangeSize);
     glutDisplayFunc(RenderScene);
+    glutSpecialFunc(SpecialKeys);
 
     SetupRC();
     glutMainLoop();    
