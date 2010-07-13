@@ -10,13 +10,13 @@
 #include <StopWatch.h>
 #include "sbm.h"
 
-#include <GL\glu.h>
+#include <GL/glu.h>
 
 #ifdef __APPLE__
 #include <glut/glut.h>
 #else
 #define FREEGLUT_STATIC
-#include <gl/glut.h>
+#include <GL/glut.h>
 #endif
 
 static GLfloat vGreen[] = { 0.0f, 1.0f, 0.0f, 1.0f };
@@ -102,7 +102,7 @@ static float* LoadFloatData(const char *szFile, int *count)
 // Load in a BMP file as a texture. Allows specification of the filters and the wrap mode
 bool LoadBMPTexture(const char *szFileName, GLenum minFilter, GLenum magFilter, GLenum wrapMode)	
 {
-	BYTE *pBits;
+	GLbyte *pBits;
 	GLint iWidth, iHeight;
 
 	pBits = gltReadBMPBits(szFileName, &iWidth, &iHeight);
@@ -265,10 +265,68 @@ void SetupRC()
 	gltCheckErrors();
 }
 
-// Respond to arrow keys by moving the camera frame of reference
+///////////////////////////////////////////////////////////////////////////////
+// Update the camera based on user input, toggle display modes
+// 
 void SpecialKeys(int key, int x, int y)
 {
-    // Nothing to do!
+	static CStopWatch cameraTimer;
+	float fTime = cameraTimer.GetElapsedSeconds();
+	cameraTimer.Reset(); 
+
+	float linear = fTime * 3.0f;
+	float angular = fTime * float(m3dDegToRad(60.0f));
+
+	if(key == GLUT_KEY_UP)
+		cameraFrame.MoveForward(linear);
+
+	if(key == GLUT_KEY_DOWN)
+		cameraFrame.MoveForward(-linear);
+
+	if(key == GLUT_KEY_LEFT)
+		cameraFrame.RotateWorld(angular, 0.0f, 1.0f, 0.0f);
+
+	if(key == GLUT_KEY_RIGHT)
+		cameraFrame.RotateWorld(-angular, 0.0f, 1.0f, 0.0f);
+
+	static bool bF2IsDown = false;
+	if(key == GLUT_KEY_F2)
+	{
+		if(bF2IsDown == false)
+		{
+			bF2IsDown = true;
+			bUseFBO = !bUseFBO;
+		}
+	}
+	else
+	{
+		bF2IsDown = false; 
+	}
+
+	if(key == GLUT_KEY_F3)
+	{
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_BUFFER_ARB, texBOTexture);
+		glTexBufferARB(GL_TEXTURE_BUFFER_ARB, GL_R32F, texBO[0]); // FIX THIS IN GLEE
+		glActiveTexture(GL_TEXTURE0);
+	}
+	else if(key == GLUT_KEY_F4)
+	{
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_BUFFER_ARB, texBOTexture);
+		glTexBufferARB(GL_TEXTURE_BUFFER_ARB, GL_R32F, texBO[1]); // FIX THIS IN GLEE
+		glActiveTexture(GL_TEXTURE0);
+	}
+	else if(key == GLUT_KEY_F5)
+	{
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_BUFFER_ARB, texBOTexture);
+		glTexBufferARB(GL_TEXTURE_BUFFER_ARB, GL_R32F, texBO[2]); // FIX THIS IN GLEE
+		glActiveTexture(GL_TEXTURE0);
+	}
+                        
+	 // Refresh the Window
+	 glutPostRedisplay();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -335,67 +393,6 @@ void ChangeSize(int nWidth, int nHeight)
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA8, screenWidth, screenHeight);
 }
 
-
-///////////////////////////////////////////////////////////////////////////////
-// Update the camera based on user input, toggle display modes
-// 
-void MoveCamera(void)
-{ 
-	static CStopWatch cameraTimer;
-	float fTime = cameraTimer.GetElapsedSeconds();
-	cameraTimer.Reset(); 
-
-	float linear = fTime * 3.0f;
-	float angular = fTime * float(m3dDegToRad(60.0f));
-
-	if(GetAsyncKeyState(VK_UP))
-		cameraFrame.MoveForward(linear);
-
-	if(GetAsyncKeyState(VK_DOWN))
-		cameraFrame.MoveForward(-linear);
-
-	if(GetAsyncKeyState(VK_LEFT))
-		cameraFrame.RotateWorld(angular, 0.0f, 1.0f, 0.0f);
-
-	if(GetAsyncKeyState(VK_RIGHT))
-		cameraFrame.RotateWorld(-angular, 0.0f, 1.0f, 0.0f);
-
-	static bool bF2IsDown = false;
-	if(GetAsyncKeyState(VK_F2))
-	{
-		if(bF2IsDown == false)
-		{
-			bF2IsDown = true;
-			bUseFBO = !bUseFBO;
-		}
-	}
-	else
-	{
-		bF2IsDown = false; 
-	}
-
-	if(GetAsyncKeyState(VK_F3))
-	{
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_BUFFER_ARB, texBOTexture);
-		glTexBufferARB(GL_TEXTURE_BUFFER_ARB, GL_R32F, texBO[0]); // FIX THIS IN GLEE
-		glActiveTexture(GL_TEXTURE0);
-	}
-	else if(GetAsyncKeyState(VK_F4))
-	{
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_BUFFER_ARB, texBOTexture);
-		glTexBufferARB(GL_TEXTURE_BUFFER_ARB, GL_R32F, texBO[1]); // FIX THIS IN GLEE
-		glActiveTexture(GL_TEXTURE0);
-	}
-	else if(GetAsyncKeyState(VK_F5))
-	{
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_BUFFER_ARB, texBOTexture);
-		glTexBufferARB(GL_TEXTURE_BUFFER_ARB, GL_R32F, texBO[2]); // FIX THIS IN GLEE
-		glActiveTexture(GL_TEXTURE0);
-	}
-}
 
 
 ///////////////////////////////////////////////////////////////////////////////
