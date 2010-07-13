@@ -9,7 +9,7 @@
 #include <GLGeometryTransform.h>
 #include <StopWatch.h>
 
-#include <GL\glu.h>
+#include <GL/glu.h>
 
 #ifdef __APPLE__
 #include <glut/glut.h>
@@ -64,7 +64,7 @@ bool LoadBMPTexture(const char *szFileName, GLenum minFilter, GLenum magFilter, 
 // Load in a BMP file as a texture. Allows specification of the filters and the wrap mode
 bool LoadBMPTexture(const char *szFileName, GLenum minFilter, GLenum magFilter, GLenum wrapMode)	
 {
-	BYTE *pBits;
+	GLbyte *pBits;
 	GLint iWidth, iHeight;
 
 	pBits = gltReadBMPBits(szFileName, &iWidth, &iHeight);
