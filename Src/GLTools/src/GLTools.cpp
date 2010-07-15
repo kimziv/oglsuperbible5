@@ -898,7 +898,7 @@ GLbyte *gltReadTGABits(const char *szFileName, GLint *iWidth, GLint *iHeight, GL
     *eFormat = GL_RGB;
     *iComponents = GL_RGB;
     
-    // Attempt to open the fil
+    // Attempt to open the file
     pFile = fopen(szFileName, "rb");
     if(pFile == NULL)
         return NULL;
@@ -986,102 +986,121 @@ GLbyte *gltReadTGABits(const char *szFileName, GLint *iWidth, GLint *iHeight, GL
     return pBits;
 	}
 
-#ifdef _WIN32
 ///////////////////////////////////////////////////////////////////////////////
 // This function opens the "bitmap" file given (szFileName), verifies that it is
 // a 24bit .BMP file and loads the bitmap bits needed so that it can be used
 // as a texture. The width and height of the bitmap are returned in nWidth and
 // nHeight. The memory block allocated and returned must be deleted with free();
 // The returned array is an 888 BGR texture
-BYTE* gltReadBMPBits(const char *szFileName, int *nWidth, int *nHeight)
+// These structures match the layout of the equivalent Windows specific structs 
+// used by Win32
+#pragma pack(1)
+struct RGB { 
+  GLbyte blue;
+  GLbyte green;
+  GLbyte red;
+  GLbyte alpha;
+};
+
+struct BMPInfoHeader {
+  GLuint	size;
+  GLuint	width;
+  GLuint	height;
+  GLushort  planes;
+  GLushort  bits;
+  GLuint	compression;
+  GLuint	imageSize;
+  GLuint	xScale;
+  GLuint	yScale;
+  GLuint	colors;
+  GLuint	importantColors;
+};
+
+struct BMPHeader {
+  GLushort	type; 
+  GLuint	size; 
+  GLushort	unused; 
+  GLushort	unused2; 
+  GLuint	offset; 
+}; 
+
+struct BMPInfo {
+  BMPInfoHeader		header;
+  RGB				colors[1];
+};
+#pragma pack(8)
+
+
+GLbyte* gltReadBMPBits(const char *szFileName, int *nWidth, int *nHeight)
 	{
-	HANDLE hFileHandle;
-	BITMAPINFO *pBitmapInfo = NULL;
+	FILE*	pFile;
+	BMPInfo *pBitmapInfo = NULL;
 	unsigned long lInfoSize = 0;
 	unsigned long lBitSize = 0;
-	BYTE *pBits = NULL;					// Bitmaps bits
-	BITMAPFILEHEADER	bitmapHeader;
-	DWORD dwBytes;
+	GLbyte *pBits = NULL;					// Bitmaps bits
+	BMPHeader	bitmapHeader;
 
-	// Open the Bitmap file
-	hFileHandle = CreateFile(szFileName,GENERIC_READ,FILE_SHARE_READ,
-		NULL,OPEN_EXISTING,FILE_FLAG_SEQUENTIAL_SCAN,NULL);
-
-	// Check for open failure (most likely file does not exist).
-	if(hFileHandle == INVALID_HANDLE_VALUE)
-		return NULL;
+    // Attempt to open the file
+    pFile = fopen(szFileName, "rb");
+    if(pFile == NULL)
+        return NULL;
 
 	// File is Open. Read in bitmap header information
-	ReadFile(hFileHandle,&bitmapHeader,sizeof(BITMAPFILEHEADER),	
-		&dwBytes,NULL);
-
-	// Check for a couple of simple errors	
-	if(dwBytes != sizeof(BITMAPFILEHEADER))
-		return FALSE;
-
-	// Check format of bitmap file
-	if(bitmapHeader.bfType != 'MB')
-		return FALSE;
+    fread(&bitmapHeader, sizeof(BMPHeader), 1, pFile);
 
 	// Read in bitmap information structure
-	lInfoSize = bitmapHeader.bfOffBits - sizeof(BITMAPFILEHEADER);
-	pBitmapInfo = (BITMAPINFO *) malloc(sizeof(BYTE)*lInfoSize);
-	ReadFile(hFileHandle,pBitmapInfo,lInfoSize,&dwBytes,NULL);
-
-	if(dwBytes != lInfoSize)
+	lInfoSize = bitmapHeader.offset - sizeof(BMPHeader);
+	pBitmapInfo = (BMPInfo *) malloc(sizeof(GLbyte)*lInfoSize);
+	if(fread(pBitmapInfo, lInfoSize, 1, pFile) != 1)
 		{
 		free(pBitmapInfo);
-		CloseHandle(hFileHandle);
-		return FALSE;
+		fclose(pFile);
+		return false;
 		}
 
 	// Save the size and dimensions of the bitmap
-	*nWidth = pBitmapInfo->bmiHeader.biWidth;
-	*nHeight = pBitmapInfo->bmiHeader.biHeight;
-	lBitSize = pBitmapInfo->bmiHeader.biSizeImage;
+	*nWidth = pBitmapInfo->header.width;
+	*nHeight = pBitmapInfo->header.height;
+	lBitSize = pBitmapInfo->header.imageSize;
 
 	// If the size isn't specified, calculate it anyway	
-	if(pBitmapInfo->bmiHeader.biBitCount != 24)
+	if(pBitmapInfo->header.bits != 24)
 		{
 		free(pBitmapInfo);
-		return FALSE;
+		return false;
 		}
 
 	if(lBitSize == 0)
 		lBitSize = (*nWidth *
-           pBitmapInfo->bmiHeader.biBitCount + 7) / 8 *
+           pBitmapInfo->header.bits + 7) / 8 *
   		  abs(*nHeight);
 
 	// Allocate space for the actual bitmap
 	free(pBitmapInfo);
-	pBits = (BYTE*)malloc(sizeof(BYTE)*lBitSize);
+	pBits = (GLbyte*)malloc(sizeof(GLbyte)*lBitSize);
 
 	// Read in the bitmap bits, check for corruption
-	if(!ReadFile(hFileHandle,pBits,lBitSize,&dwBytes,NULL) ||
-			dwBytes != (sizeof(BYTE)*lBitSize))
+	if(fread(pBits, lBitSize, 1, pFile) != 1)
+		{
+		free(pBits);
 		pBits = NULL;
+		}
 
 	// Close the bitmap file now that we have all the data we need
-	CloseHandle(hFileHandle);
+	fclose(pFile);
 
 	return pBits;
 	}
 
-#endif    // _WIN32
 
-
-// Does not work on the iPhone OpenGL ES 1.2
-// Mac OS X
-/*#ifdef __APPLE__
-#include <TargetConditionals.h>
-#if !(TARGET_OS_IPHONE | TARGET_IPHONE_SIMULATOR)
-*/
 // Rather than malloc/free a block everytime a shader must be loaded,
 // I will dedicate a single 4k page for reading in shaders. Thanks to
 // modern OS design, this page will be swapped out to disk later if never
 // used again after program initialization. Where-as mallocing different size
 // shader blocks could lead to heap fragmentation, which would actually be worse.
 //#define MAX_SHADER_LENGTH   8192  -> This is defined in gltools.h
+// BTW... this does make this function unsafe to use in two threads simultaneously
+// BTW BTW... personally.... I do this also to my own texture loading code - RSW
 static GLubyte shaderText[MAX_SHADER_LENGTH];
 
 //////////////////////////////////////////////////////////////////////////

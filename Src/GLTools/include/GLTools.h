@@ -51,6 +51,8 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 
 // Mac OS X
 #ifdef __APPLE__
+#include <stdlib.h>
+
 #include <TargetConditionals.h>
 #if TARGET_OS_IPHONE | TARGET_IPHONE_SIMULATOR
 #include <OpenGLES/ES2/gl.h>
@@ -148,10 +150,7 @@ int gltIsExtSupported(const char *szExtension);
 void gltSetWorkingDirectory(const char *szArgv);
 
 ///////////////////////////////////////////////////////////////////////////////
-// Win32 Only
-#ifdef WIN32
-BYTE* gltReadBMPBits(const char *szFileName, int *nWidth, int *nHeight);
-#endif
+GLbyte* gltReadBMPBits(const char *szFileName, int *nWidth, int *nHeight);
 
 /////////////////////////////////////////////////////////////////////////////////////
 // Load a .TGA file

@@ -2,7 +2,7 @@
 // Implementation of the GLFrame Class
 // Richard S. Wright Jr.
 // Code by Richard S. Wright Jr.
-/* Copyright (c) 2005-2009, Richard S. Wright Jr.
+/* Copyright (c) 2005-2010, Richard S. Wright Jr.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, 
