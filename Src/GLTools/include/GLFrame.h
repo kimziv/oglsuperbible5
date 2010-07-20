@@ -2,7 +2,7 @@
 // Implementation of the GLFrame Class
 // Richard S. Wright Jr.
 // Code by Richard S. Wright Jr.
-/* Copyright (c) 2005-2010, Richard S. Wright Jr.
+/* Copyright (c) 2005-2009, Richard S. Wright Jr.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, 
@@ -336,7 +336,7 @@ class GLFrame
 			M3DVector3f vLocalVect;
 			m3dLoadVector3(vLocalVect, x, y, z);
 
-            LocalToWorld(vLocalVect, vWorldVect);
+            LocalToWorld(vLocalVect, vWorldVect, true);
             RotateWorld(fAngle, vWorldVect[0], vWorldVect[1], vWorldVect[2]);
             }
     
@@ -346,7 +346,7 @@ class GLFrame
         // and position on the point
 		// Is it better to stick to the convention that the destination always comes
 		// first, or use the conventions that "sounds" like the function...
-        void LocalToWorld(const M3DVector3f vLocal, M3DVector3f vWorld)
+        void LocalToWorld(const M3DVector3f vLocal, M3DVector3f vWorld, bool bRotOnly = false)
             {
              // Create the rotation matrix based on the vectors
 			M3DMatrix44f rotMat;
@@ -359,9 +359,11 @@ class GLFrame
 			vWorld[2] = rotMat[2] * vLocal[0] + rotMat[6] * vLocal[1] + rotMat[10] * vLocal[2];	
 
             // Translate the point
-            vWorld[0] += vOrigin[0];
-            vWorld[1] += vOrigin[1];
-            vWorld[2] += vOrigin[2];
+            if(!bRotOnly) {
+                vWorld[0] += vOrigin[0];
+                vWorld[1] += vOrigin[1];
+                vWorld[2] += vOrigin[2];
+                }
             }
 
 		// Change world coordinates into "local" coordinates
