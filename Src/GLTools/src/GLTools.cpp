@@ -884,7 +884,9 @@ GLint gltGrabScreenTGA(const char *szFileName)
 // Call free() on buffer when finished!
 // This only works on pretty vanilla targas... 8, 24, or 32 bit color
 // only, no palettes, no RLE encoding.
-GLbyte *gltReadTGABits(const char *szFileName, GLint *iWidth, GLint *iHeight, GLint *iComponents, GLenum *eFormat)
+// This function also takes an optional final parameter to preallocated 
+// storage for loading in the image data.
+GLbyte *gltReadTGABits(const char *szFileName, GLint *iWidth, GLint *iHeight, GLint *iComponents, GLenum *eFormat, GLbyte *pData)
 	{
     FILE *pFile;			// File pointer
     TGAHEADER tgaHeader;		// TGA file header
@@ -931,10 +933,11 @@ GLbyte *gltReadTGABits(const char *szFileName, GLint *iWidth, GLint *iHeight, GL
     lImageSize = tgaHeader.width * tgaHeader.height * sDepth;
     
     // Allocate memory and check for success
-    pBits = (GLbyte*)malloc(lImageSize * sizeof(GLbyte));
-    if(pBits == NULL)
-        return NULL;
-    
+    if(pData == NULL) 
+        pBits = (GLbyte*)malloc(lImageSize * sizeof(GLbyte));
+    else 
+        pBits = pData; 
+
     // Read in the bits
     // Check for read error. This should catch RLE or other 
     // weird formats that I don't want to recognize
@@ -977,8 +980,6 @@ GLbyte *gltReadTGABits(const char *szFileName, GLint *iWidth, GLint *iHeight, GL
         break;
 		}
 	
-    
-    
     // Done with File
     fclose(pFile);
 	

@@ -264,7 +264,7 @@ void GLTriangleBatch::Draw(void)
     
     #ifndef OPENGL_ES
     // Unbind to anybody
-	glBindVertexArray(vertexArrayBufferObject);
+	glBindVertexArray(0);
     #else
     glDisableVertexAttribArray(GLT_ATTRIBUTE_VERTEX);
     glDisableVertexAttribArray(GLT_ATTRIBUTE_NORMAL);
