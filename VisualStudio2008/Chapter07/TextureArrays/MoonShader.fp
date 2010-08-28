@@ -4,6 +4,10 @@
 // OpenGL SuperBible
 #version 130
 
+// Another NVidia Driver non-conformance bug
+// You should not have to put this here for a 3.3 driver.
+#extension GL_EXT_gpu_shader4: enable
+
 out vec4 vFragColor;
 
 uniform sampler2DArray moonImage;

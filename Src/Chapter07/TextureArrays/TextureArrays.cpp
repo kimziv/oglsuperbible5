@@ -146,6 +146,14 @@ void SetupRC()
         
     shaderManager.InitializeStockShaders();
         
+	// A number of shipping drivers are not conformant to the current OpenGL
+	// spec and require this. NVidia... in particular. The OpenGL specification
+	// states that this is always "on", in fact you can't enable or disable it
+	// anymore. Adding this lines "fixes" this on non-conformant drivers, but
+	// be aware, if you have a pure core (and working correctly) GL context, 
+	//you should not do this
+	glEnable(GL_POINT_SPRITE);
+
     // Populate star list
     smallStarBatch.Begin(GL_POINTS, SMALL_STARS);
     for(i = 0; i < SMALL_STARS; i++)

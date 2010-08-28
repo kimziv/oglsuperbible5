@@ -71,7 +71,13 @@ void SetupRC(void)
 	// Background
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f );
 
-	//glEnable(GL_POINT_SPRITE);
+	// A number of shipping drivers are not conformant to the current OpenGL
+	// spec and require this. NVidia... in particular. The OpenGL specification
+	// states that this is always "on", in fact you can't enable or disable it
+	// anymore. Adding this lines "fixes" this on non-conformant drivers, but
+	// be aware, if you have a pure core (and working correctly) GL context, 
+	//you should not do this
+	glEnable(GL_POINT_SPRITE);
 
 	GLfloat fColors[4][4] = {{ 1.0f, 1.0f, 1.0f, 1.0f}, // White
                              { 0.67f, 0.68f, 0.82f, 1.0f}, // Blue Stars
