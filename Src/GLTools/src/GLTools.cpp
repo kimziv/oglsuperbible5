@@ -943,7 +943,8 @@ GLbyte *gltReadTGABits(const char *szFileName, GLint *iWidth, GLint *iHeight, GL
     // weird formats that I don't want to recognize
     if(fread(pBits, lImageSize, 1, pFile) != 1)
 		{
-        free(pBits);
+        if(pBits != NULL)
+            free(pBits);
         return NULL;
 		}
     
