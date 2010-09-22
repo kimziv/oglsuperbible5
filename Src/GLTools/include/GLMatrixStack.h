@@ -111,7 +111,7 @@ class GLMatrixStack
 			m3dCopyMatrix44(mTemp, pStack[stackPointer]);
 			m3dMatrixMultiply44(pStack[stackPointer], mTemp, mScale);			
 			}
-			
+            			
 		void Rotate(GLfloat angle, GLfloat x, GLfloat y, GLfloat z) {
 			M3DMatrix44f mTemp, mRotate;
 			m3dRotationMatrix44(mRotate, float(m3dDegToRad(angle)), x, y, z);
@@ -128,15 +128,14 @@ class GLMatrixStack
 			m3dMatrixMultiply44(pStack[stackPointer], mTemp, mScale);
 			}
 			
-			
-		void Translatev(const M3DVector3f vTranslate) {
+        void Translatev(const M3DVector3f vTranslate) {
 			M3DMatrix44f mTemp, mTranslate;
 			m3dLoadIdentity44(mTranslate);
-			m3dSetMatrixColumn44(mTranslate, vTranslate, 3);
+            memcpy(&mTranslate[12], vTranslate, sizeof(M3DVector3f));
 			m3dCopyMatrix44(mTemp, pStack[stackPointer]);
 			m3dMatrixMultiply44(pStack[stackPointer], mTemp, mTranslate);
-			}
-			
+            }
+        
 			
 		void Rotatev(GLfloat angle, M3DVector3f vAxis) {
 			M3DMatrix44f mTemp, mRotation;
