@@ -614,15 +614,17 @@ void ChangeSize(int nWidth, int nHeight)
 
 	glBindTexture(GL_TEXTURE_2D, hdrTextures[0]);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, screenWidth, screenHeight, 0, GL_RGBA, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	
 	glBindTexture(GL_TEXTURE_2D, brightBlurTextures[0]);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, screenWidth, screenHeight, 0, GL_RGBA, GL_FLOAT, NULL);
 
 	for(int i=1; i<5; i++)
-	{	
+		{		
 		glBindTexture(GL_TEXTURE_2D, brightBlurTextures[i]);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, screenWidth/(i*3.0), screenHeight/(i*3.0), 0, GL_RGBA, GL_FLOAT, NULL);
-	}
+		}
 
 	// Setup tex coords to be used for fetching HDR kernel data
 	glUseProgram(blurProg);
@@ -835,7 +837,7 @@ int main(int argc, char* argv[])
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
     glutInitWindowSize(screenWidth,screenHeight);
   
-    glutCreateWindow("FBO Drawbuffers");
+    glutCreateWindow("HDR Bloom");
  
     glutReshapeFunc(ChangeSize);
     glutDisplayFunc(RenderScene);

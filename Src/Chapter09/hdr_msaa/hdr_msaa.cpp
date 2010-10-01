@@ -86,7 +86,7 @@ void SetupHDRProg();
 // Load in a BMP file as a texture. Allows specification of the filters and the wrap mode
 bool LoadBMPTexture(const char *szFileName, GLenum minFilter, GLenum magFilter, GLenum wrapMode)	
 {
-    BYTE *pBits;
+    GLbyte *pBits;
     GLint iWidth, iHeight;
 
     pBits = gltReadBMPBits(szFileName, &iWidth, &iHeight);
