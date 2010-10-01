@@ -349,7 +349,7 @@ void SetupRC()
 	free(pBytes);
 
 	// Another block face
-	pBytes = gltReadTGABits("block5.tga", &nWidth, &nHeight, &nComponents, &format);
+	pBytes = gltReadTGABits("Block5.tga", &nWidth, &nHeight, &nComponents, &format);
         glBindTexture(GL_TEXTURE_2D, textures[2]);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -360,7 +360,7 @@ void SetupRC()
 	free(pBytes);
 
 	// Yet another block face
-	pBytes = gltReadTGABits("block6.tga", &nWidth, &nHeight, &nComponents, &format);
+	pBytes = gltReadTGABits("Block6.tga", &nWidth, &nHeight, &nComponents, &format);
         glBindTexture(GL_TEXTURE_2D, textures[3]);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
