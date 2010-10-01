@@ -35,7 +35,7 @@ void main(void)
 	float kernelLuminance = dot(kernelcolor.rgb, vec3(0.3, 0.59, 0.11));
 
 	// look up the corresponding exposure
-	float exposure = texture1D(textureUnit1, kernelLuminance/2.0).r;
+	float exposure = texture(textureUnit1, kernelLuminance/2.0).r;
 	exposure = clamp(exposure, 0.02f, 20.0f);
 	
 	// Apply the exposure to this texel
