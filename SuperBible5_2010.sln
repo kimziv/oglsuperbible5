@@ -1,0 +1,59 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual C++ Express 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GLTools", "VisualStudio2010\GLTools\GLTools\GLTools.vcxproj", "{5EBFD51D-5B0C-4450-8797-2DC4B18B585C}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GSCulling", "VisualStudio2010\Chatper11\GSCulling\GSCulling.vcxproj", "{B8957827-E4EE-4FF0-B44A-B3219B43816F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{5EBFD51D-5B0C-4450-8797-2DC4B18B585C} = {5EBFD51D-5B0C-4450-8797-2DC4B18B585C}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GSExplode", "VisualStudio2010\Chatper11\GSExplode\GSExplode.vcxproj", "{2C950BC9-87E0-42F7-B191-F388738B2959}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GSNormals", "VisualStudio2010\Chatper11\GSNormals\GSNormals.vcxproj", "{0598ACC6-650C-4B44-98DA-CAF9254AB678}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GSTessellate", "VisualStudio2010\Chatper11\GSTessellate\GSTessellate.vcxproj", "{AEA5DC6C-5C3E-422F-AE3D-F598097ADE8B}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Julia", "VisualStudio2010\Chatper11\Julia\Julia.vcxproj", "{BF3F5672-0EA2-44CD-82D5-86DA326C420A}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Perspective", "VisualStudio2010\Chatper11\Perspective\Perspective.vcxproj", "{A6DEFBBE-2DDB-4F46-8449-C97EE49F004C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5EBFD51D-5B0C-4450-8797-2DC4B18B585C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{5EBFD51D-5B0C-4450-8797-2DC4B18B585C}.Debug|Win32.Build.0 = Debug|Win32
+		{5EBFD51D-5B0C-4450-8797-2DC4B18B585C}.Release|Win32.ActiveCfg = Release|Win32
+		{5EBFD51D-5B0C-4450-8797-2DC4B18B585C}.Release|Win32.Build.0 = Release|Win32
+		{B8957827-E4EE-4FF0-B44A-B3219B43816F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B8957827-E4EE-4FF0-B44A-B3219B43816F}.Debug|Win32.Build.0 = Debug|Win32
+		{B8957827-E4EE-4FF0-B44A-B3219B43816F}.Release|Win32.ActiveCfg = Release|Win32
+		{B8957827-E4EE-4FF0-B44A-B3219B43816F}.Release|Win32.Build.0 = Release|Win32
+		{2C950BC9-87E0-42F7-B191-F388738B2959}.Debug|Win32.ActiveCfg = Debug|Win32
+		{2C950BC9-87E0-42F7-B191-F388738B2959}.Debug|Win32.Build.0 = Debug|Win32
+		{2C950BC9-87E0-42F7-B191-F388738B2959}.Release|Win32.ActiveCfg = Release|Win32
+		{2C950BC9-87E0-42F7-B191-F388738B2959}.Release|Win32.Build.0 = Release|Win32
+		{0598ACC6-650C-4B44-98DA-CAF9254AB678}.Debug|Win32.ActiveCfg = Debug|Win32
+		{0598ACC6-650C-4B44-98DA-CAF9254AB678}.Debug|Win32.Build.0 = Debug|Win32
+		{0598ACC6-650C-4B44-98DA-CAF9254AB678}.Release|Win32.ActiveCfg = Release|Win32
+		{0598ACC6-650C-4B44-98DA-CAF9254AB678}.Release|Win32.Build.0 = Release|Win32
+		{AEA5DC6C-5C3E-422F-AE3D-F598097ADE8B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{AEA5DC6C-5C3E-422F-AE3D-F598097ADE8B}.Debug|Win32.Build.0 = Debug|Win32
+		{AEA5DC6C-5C3E-422F-AE3D-F598097ADE8B}.Release|Win32.ActiveCfg = Release|Win32
+		{AEA5DC6C-5C3E-422F-AE3D-F598097ADE8B}.Release|Win32.Build.0 = Release|Win32
+		{BF3F5672-0EA2-44CD-82D5-86DA326C420A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{BF3F5672-0EA2-44CD-82D5-86DA326C420A}.Debug|Win32.Build.0 = Debug|Win32
+		{BF3F5672-0EA2-44CD-82D5-86DA326C420A}.Release|Win32.ActiveCfg = Release|Win32
+		{BF3F5672-0EA2-44CD-82D5-86DA326C420A}.Release|Win32.Build.0 = Release|Win32
+		{A6DEFBBE-2DDB-4F46-8449-C97EE49F004C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A6DEFBBE-2DDB-4F46-8449-C97EE49F004C}.Debug|Win32.Build.0 = Debug|Win32
+		{A6DEFBBE-2DDB-4F46-8449-C97EE49F004C}.Release|Win32.ActiveCfg = Release|Win32
+		{A6DEFBBE-2DDB-4F46-8449-C97EE49F004C}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
