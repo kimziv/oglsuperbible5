@@ -1,4 +1,4 @@
-// perspectiveShader.cpp
+// Perspective.cpp
 // OpenGL SuperBible
 // Demonstrates the effect of the 'noperspective' interpolation qualifier
 // Program by Graham Sellers
@@ -19,26 +19,28 @@
 #include <GL/freeglut_ext.h>
 #endif
 
+#ifdef _MSC_VER
+#pragma comment (lib, "GLTools.lib")
+#endif /* _MSC_VER */
 
-GLFrame             viewFrame;
-GLFrustum           viewFrustum;
-GLMatrixStack       modelViewMatrix;
-GLMatrixStack       projectionMatrix;
-GLGeometryTransform transformPipeline;
+static GLFrame              viewFrame;
+static GLFrustum            viewFrustum;
+static GLMatrixStack        modelViewMatrix;
+static GLMatrixStack        projectionMatrix;
+static GLGeometryTransform  transformPipeline;
 
-GLuint  perspectiveShader;      // The perspective demonstration shader
-GLint   locMVP;                 // The location of the ModelViewProjection matrix uniform
-GLint   locUsePerspective;      // Use perspective correction
+static GLuint               perspectiveShader;      // The perspective demonstration shader
+static GLint                locMVP;                 // The location of the ModelViewProjection matrix uniform
+static GLint                locUsePerspective;      // Use perspective correction
 
-GLuint  texture;                // The checkerboard texture
+static GLuint               texture;                // The checkerboard texture
 
-GLuint  vao;                    // The VAO
-GLuint  vertexBuffer;           // Geometry VBO
+static GLuint               vao;                    // The VAO
+static GLuint               vertexBuffer;           // Geometry VBO
 
-GLint   usePerspective = 1;     // Perspective correction toggle
+static GLint                usePerspective = 1;     // Perspective correction toggle
 
-// This function does any needed initialization on the rendering
-// context. 
+// This function does any needed initialization on the rendering context.
 void SetupRC(void)
 {
     // Background
@@ -48,7 +50,8 @@ void SetupRC(void)
 
     viewFrame.MoveForward(5.0f);
 
-    perspectiveShader = gltLoadShaderPairWithAttributes("Perspective.vs", "Perspective.fs",
+    perspectiveShader = gltLoadShaderPairWithAttributes("../../Data/Shaders/Chapter11/Perspective.vs",
+                                                        "../../Data/Shaders/Chapter11/Perspective.fs",
                                                         2,
                                                         GLT_ATTRIBUTE_VERTEX, "vVertex",
                                                         GLT_ATTRIBUTE_TEXTURE0, "vTexCoord");
@@ -170,7 +173,8 @@ void Keyboard(unsigned char key, int x, int y)
     switch (key)
     {
         // Space toggles perspective correction
-        case ' ':   usePerspective ^= 1;
+        case ' ':
+            usePerspective ^= 1;
             if (usePerspective)
                 glutSetWindowTitle("Perspective Correction (Perspective Correct) - SPACE Toggles");
             else
@@ -189,7 +193,6 @@ int main(int argc, char* argv[])
 
     glutInit(&argc, argv);
     glutInitContextVersion(3, 2);
-      // glutInitContextProfile(GLUT_CORE_PROFILE);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH | GLUT_STENCIL);
     glutInitWindowSize(800, 600);
     glutCreateWindow("Perspective Correction (Perspective Correct) - SPACE Toggles");
