@@ -196,10 +196,6 @@
 			</File>
 		</Filter>
 		<File
-			RelativePath="..\..\..\Src\Chapter12\instancing\GLMain.cpp"
-			>
-		</File>
-		<File
 			RelativePath="..\..\..\Src\Chapter12\instancing\instancing.cpp"
 			>
 		</File>

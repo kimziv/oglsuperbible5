@@ -196,15 +196,15 @@
 			</File>
 		</Filter>
 		<File
-			RelativePath="..\..\..\Src\Chapter11\gsexplode\explode.cpp"
+			RelativePath="..\..\..\Src\Chapter11\Convolution\explode.cpp"
 			>
 		</File>
 		<File
-			RelativePath="..\..\..\Src\Chapter11\gsexplode\explode.h"
+			RelativePath="..\..\..\Src\Chapter11\Convolution\explode.h"
 			>
 		</File>
 		<File
-			RelativePath="..\..\..\Src\Chapter11\gsexplode\GLMain.cpp"
+			RelativePath="..\..\..\Src\Chapter11\Convolution\GLMain.cpp"
 			>
 		</File>
 	</Files>
