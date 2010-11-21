@@ -1174,6 +1174,7 @@ GLuint gltLoadShaderTripletWithAttributes(const char *szVertexShader,
     GLuint hFragmentShader = 0;
     GLuint hReturn = 0;
     GLint testVal;
+	int iArgCount;
 
     // Create shader objects
     hVertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -1230,7 +1231,7 @@ GLuint gltLoadShaderTripletWithAttributes(const char *szVertexShader,
 
     // Iterate over this argument list
     char *szNextArg;
-    int iArgCount = va_arg(attributeList, int);	// Number of attributes
+    iArgCount = va_arg(attributeList, int);	// Number of attributes
     for(int i = 0; i < iArgCount; i++)
     {
         int index = va_arg(attributeList, int);
