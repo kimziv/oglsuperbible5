@@ -10,8 +10,6 @@
 #include <StopWatch.h>
 #include "sbm.h"
 
-#include <GL/glu.h>
-
 #ifdef __APPLE__
 #include <glut/glut.h>
 #else
@@ -144,11 +142,17 @@ void SetupRC()
 	// Black
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
+#ifdef __APPLE__
+    ninja.LoadFromSBM("ninja.sbm",
+                      GLT_ATTRIBUTE_VERTEX,
+                      GLT_ATTRIBUTE_NORMAL,
+                      GLT_ATTRIBUTE_TEXTURE0);    
+#else
     ninja.LoadFromSBM("../../../Src/Models/Ninja/ninja.sbm",
         GLT_ATTRIBUTE_VERTEX,
         GLT_ATTRIBUTE_NORMAL,
         GLT_ATTRIBUTE_TEXTURE0);
-
+#endif
 	gltMakeTorus(torusBatch, 0.4f, 0.15f, 35, 35);
 	gltMakeSphere(sphereBatch, 0.1f, 26, 13);
 
@@ -181,7 +185,11 @@ void SetupRC()
 
     glGenTextures(1, ninjaTex);
 	glBindTexture(GL_TEXTURE_2D, ninjaTex[0]);
+#ifdef __APPLE__
+	LoadBMPTexture("NinjaComp.bmp", GL_LINEAR, GL_LINEAR, GL_CLAMP);
+#else
 	LoadBMPTexture("../../../Src/Models/Ninja/NinjaComp.bmp", GL_LINEAR, GL_LINEAR, GL_CLAMP);
+#endif
 
 	glGenFramebuffers(1,&fboName);
 
@@ -488,7 +496,7 @@ void RenderScene(void)
 {
 	static CStopWatch animationTimer;
 	float yRot = animationTimer.GetElapsedSeconds() * 60.0f;
-	MoveCamera();
+//	MoveCamera();
 
 	modelViewMatrix.PushMatrix();	
 		M3DMatrix44f mCamera;

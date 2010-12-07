@@ -16,5 +16,5 @@ smooth in vec3 vMoonCoords;
 
 void main(void)
    { 
-   vFragColor = texture2DArray(moonImage, vMoonCoords);
+   vFragColor = texture2DArray(moonImage, vMoonCoords.stp);
    }

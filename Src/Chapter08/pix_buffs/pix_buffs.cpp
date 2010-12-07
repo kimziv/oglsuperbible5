@@ -9,8 +9,6 @@
 #include <GLGeometryTransform.h>
 #include <StopWatch.h>
 
-#include <GL/glu.h>
-
 #ifdef __APPLE__
 #include <glut/glut.h>
 #else

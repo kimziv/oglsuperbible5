@@ -143,6 +143,8 @@ void SetupRC()
     {
     M3DVector3f vVerts[SMALL_STARS];       // SMALL_STARS is the largest batch we are going to need
     int i;
+    
+    glEnable(GL_POINT_SPRITE);
         
     shaderManager.InitializeStockShaders();
         

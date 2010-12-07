@@ -9,7 +9,7 @@
 #include <GLGeometryTransform.h>
 #include <StopWatch.h>
 
-#include <GL/glu.h>
+//#include <GL/glu.h>
 
 #ifdef __APPLE__
 #include <glut/glut.h>
@@ -275,12 +275,8 @@ void ChangeSize(int nWidth, int nHeight)
 // 
 void SpecialKeys(int key, int x, int y)
 { 
-	static CStopWatch cameraTimer;
-	float fTime = cameraTimer.GetElapsedSeconds();
-	cameraTimer.Reset(); 
-
-	float linear = fTime * 0.60f;
-	float angular = fTime * float(m3dDegToRad(60.0f));
+	float linear = 0.40f;
+	float angular = float(m3dDegToRad(2.5f));
 
 	if(key == GLUT_KEY_UP)
 		cameraFrame.MoveForward(linear);

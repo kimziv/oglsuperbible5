@@ -24,6 +24,8 @@ bool SBObject::LoadFromSBM(const char * filename, int vertexIndex, int normalInd
     FILE * f = NULL;
 
     f = fopen(filename, "rb");
+    if(f == NULL)
+        return false;
 
     fseek(f, 0, SEEK_END);
     size_t filesize = ftell(f);

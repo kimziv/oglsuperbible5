@@ -84,7 +84,7 @@ void SetupRC()
 	triangleBatch.CopyTexCoordData2f(vTexCoords, 0);
 	triangleBatch.End();
 
-	myIdentityShader = gltLoadShaderPairWithAttributes("TexturedIdentity.vp", "TexturedIdentity.fp", 2, 
+	myTexturedIdentityShader = gltLoadShaderPairWithAttributes("TexturedIdentity.vp", "TexturedIdentity.fp", 2, 
 		                            GLT_ATTRIBUTE_VERTEX, "vVertex", GLT_ATTRIBUTE_TEXTURE0, "vTexCoords");
 
 	glGenTextures(1, &textureID);
