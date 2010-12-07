@@ -82,7 +82,7 @@ class GLMatrixStack
             }
             				
 		inline void PushMatrix(void) {
-			if(stackPointer < stackDepth) {
+			if(stackPointer < (stackDepth-1)) {
 				stackPointer++;
 				m3dCopyMatrix44(pStack[stackPointer], pStack[stackPointer-1]);
 				}
