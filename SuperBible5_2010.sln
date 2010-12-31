@@ -18,6 +18,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Julia", "VisualStudio2010\C
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Perspective", "VisualStudio2010\Chatper11\Perspective\Perspective.vcxproj", "{A6DEFBBE-2DDB-4F46-8449-C97EE49F004C}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "instancing", "VisualStudio2010\Chapter12\instancing\instancing.vcxproj", "{CC13B0E4-980F-46E1-9DA2-C7C4545CE202}"
+	ProjectSection(ProjectDependencies) = postProject
+		{5EBFD51D-5B0C-4450-8797-2DC4B18B585C} = {5EBFD51D-5B0C-4450-8797-2DC4B18B585C}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -52,6 +57,10 @@ Global
 		{A6DEFBBE-2DDB-4F46-8449-C97EE49F004C}.Debug|Win32.Build.0 = Debug|Win32
 		{A6DEFBBE-2DDB-4F46-8449-C97EE49F004C}.Release|Win32.ActiveCfg = Release|Win32
 		{A6DEFBBE-2DDB-4F46-8449-C97EE49F004C}.Release|Win32.Build.0 = Release|Win32
+		{CC13B0E4-980F-46E1-9DA2-C7C4545CE202}.Debug|Win32.ActiveCfg = Debug|Win32
+		{CC13B0E4-980F-46E1-9DA2-C7C4545CE202}.Debug|Win32.Build.0 = Debug|Win32
+		{CC13B0E4-980F-46E1-9DA2-C7C4545CE202}.Release|Win32.ActiveCfg = Release|Win32
+		{CC13B0E4-980F-46E1-9DA2-C7C4545CE202}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

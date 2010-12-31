@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{A6DEFBBE-2DDB-4F46-8449-C97EE49F004C}</ProjectGuid>
+    <ProjectGuid>{CC13B0E4-980F-46E1-9DA2-C7C4545CE202}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>Instancing</RootNamespace>
   </PropertyGroup>
@@ -81,7 +81,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\Src\Chapter11\Instancing\Instancing.cpp" />
+    <ClCompile Include="..\..\..\Src\Chapter12\Instancing\Instancing.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
