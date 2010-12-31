@@ -23,6 +23,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "instancing", "VisualStudio2
 		{5EBFD51D-5B0C-4450-8797-2DC4B18B585C} = {5EBFD51D-5B0C-4450-8797-2DC4B18B585C}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "flocking", "VisualStudio2010\Chapter12\flocking\flocking.vcxproj", "{CC13B0E4-980F-46E1-9DA2-C7C4545CE203}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -61,6 +63,10 @@ Global
 		{CC13B0E4-980F-46E1-9DA2-C7C4545CE202}.Debug|Win32.Build.0 = Debug|Win32
 		{CC13B0E4-980F-46E1-9DA2-C7C4545CE202}.Release|Win32.ActiveCfg = Release|Win32
 		{CC13B0E4-980F-46E1-9DA2-C7C4545CE202}.Release|Win32.Build.0 = Release|Win32
+		{CC13B0E4-980F-46E1-9DA2-C7C4545CE203}.Debug|Win32.ActiveCfg = Debug|Win32
+		{CC13B0E4-980F-46E1-9DA2-C7C4545CE203}.Debug|Win32.Build.0 = Debug|Win32
+		{CC13B0E4-980F-46E1-9DA2-C7C4545CE203}.Release|Win32.ActiveCfg = Release|Win32
+		{CC13B0E4-980F-46E1-9DA2-C7C4545CE203}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

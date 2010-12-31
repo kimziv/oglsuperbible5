@@ -1,7 +1,7 @@
 // GSCulling.cpp
 // OpenGL SuperBible
 // Demonstrates discarding primtives in a Geometry Shader
-// Program by Graham Selles.
+// Program by Graham Sellers.
 
 // OpenGL toolkit
 #include <GLTools.h>
