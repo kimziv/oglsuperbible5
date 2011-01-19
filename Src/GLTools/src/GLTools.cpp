@@ -1081,7 +1081,7 @@ GLbyte* gltReadBMPBits(const char *szFileName, int *nWidth, int *nHeight)
 	free(pBitmapInfo);
 	pBits = (GLbyte*)malloc(sizeof(GLbyte)*lBitSize);
 
-	// Read in the bitmap bits, check for corruption
+	// Read in the pixmap bits, check for corruption
 	if(fread(pBits, lBitSize, 1, pFile) != 1)
 		{
 		free(pBits);
