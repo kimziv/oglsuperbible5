@@ -128,13 +128,13 @@ class GLMatrixStack
 			m3dMatrixMultiply44(pStack[stackPointer], mTemp, mScale);
 			}
 			
-        void Translatev(const M3DVector3f vTranslate) {
+		void Translatev(const M3DVector3f vTranslate) {
 			M3DMatrix44f mTemp, mTranslate;
 			m3dLoadIdentity44(mTranslate);
-            memcpy(&mTranslate[12], vTranslate, sizeof(M3DVector3f));
+            memcpy(&mTranslate[12], vTranslate, sizeof(GLfloat) * 3);
 			m3dCopyMatrix44(mTemp, pStack[stackPointer]);
 			m3dMatrixMultiply44(pStack[stackPointer], mTemp, mTranslate);
-            }
+        }
         
 			
 		void Rotatev(GLfloat angle, M3DVector3f vAxis) {
