@@ -1175,6 +1175,9 @@ GLuint gltLoadShaderTripletWithAttributes(const char *szVertexShader,
     GLuint hReturn = 0;
     GLint testVal;
 	int iArgCount;
+    va_list attributeList;
+    char *szNextArg = NULL;
+    char infoLog[1024];
 
     // Create shader objects
     hVertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -1183,7 +1186,6 @@ GLuint gltLoadShaderTripletWithAttributes(const char *szVertexShader,
     glCompileShader(hVertexShader);
     glGetShaderiv(hVertexShader, GL_COMPILE_STATUS, &testVal);
     if  (testVal == GL_FALSE) {
-        char infoLog[1024];
         glGetShaderInfoLog(hVertexShader, 1024, NULL, infoLog);
         goto failed;
     }
@@ -1196,7 +1198,6 @@ GLuint gltLoadShaderTripletWithAttributes(const char *szVertexShader,
         glCompileShader(hGeometryShader);
         glGetShaderiv(hGeometryShader, GL_COMPILE_STATUS, &testVal);
         if  (testVal == GL_FALSE) {
-            char infoLog[1024];
             glGetShaderInfoLog(hGeometryShader, 1024, NULL, infoLog);
             goto failed;
         }
@@ -1210,7 +1211,6 @@ GLuint gltLoadShaderTripletWithAttributes(const char *szVertexShader,
         glCompileShader(hFragmentShader);
         glGetShaderiv(hFragmentShader, GL_COMPILE_STATUS, &testVal);
         if  (testVal == GL_FALSE) {
-            char infoLog[1024];
             glGetShaderInfoLog(hFragmentShader, 1024, NULL, infoLog);
             goto failed;
         }
@@ -1226,11 +1226,9 @@ GLuint gltLoadShaderTripletWithAttributes(const char *szVertexShader,
 
     // Now, we need to bind the attribute names to their specific locations
     // List of attributes
-    va_list attributeList;
     va_start(attributeList, szFragmentShader);
 
     // Iterate over this argument list
-    char *szNextArg;
     iArgCount = va_arg(attributeList, int);	// Number of attributes
     for(int i = 0; i < iArgCount; i++)
     {

@@ -144,7 +144,7 @@ void m3dMatrixMultiply44(M3DMatrix44f product, const M3DMatrix44f a, const M3DMa
 }
 
 // Ditto above, but for doubles
-void m3dMatrixMultiply(M3DMatrix44d product, const M3DMatrix44d a, const M3DMatrix44d b )
+void m3dMatrixMultiply44(M3DMatrix44d product, const M3DMatrix44d a, const M3DMatrix44d b )
 {
 	for (int i = 0; i < 4; i++) {
 		double ai0=A(i,0),  ai1=A(i,1),  ai2=A(i,2),  ai3=A(i,3);
@@ -176,7 +176,7 @@ void m3dMatrixMultiply33(M3DMatrix33f product, const M3DMatrix33f a, const M3DMa
 }
 
 // Ditto above, but for doubles
-void m3dMatrixMultiply44(M3DMatrix33d product, const M3DMatrix33d a, const M3DMatrix33d b )
+void m3dMatrixMultiply33(M3DMatrix33d product, const M3DMatrix33d a, const M3DMatrix33d b )
 {
 	for (int i = 0; i < 3; i++) {
 		double ai0=A33(i,0),  ai1=A33(i,1),  ai2=A33(i,2);
