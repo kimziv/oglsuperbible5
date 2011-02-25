@@ -105,7 +105,7 @@ void SetupRC(void)
 	locDissolveFactor = glGetUniformLocation(ADSDissloveShader, "dissolveFactor");
 
 	glGenTextures(1, &cloudTexture);
-	glBindTexture(GL_TEXTURE_1D, cloudTexture);
+	glBindTexture(GL_TEXTURE_2D, cloudTexture);
 	LoadTGATexture("Clouds.tga", GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	}
 
