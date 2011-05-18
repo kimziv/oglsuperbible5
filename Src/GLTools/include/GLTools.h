@@ -176,9 +176,16 @@ bool	gltLoadShaderFile(const char *szFile, GLuint shader);
 
 GLuint	gltLoadShaderPair(const char *szVertexProg, const char *szFragmentProg);
 GLuint   gltLoadShaderPairWithAttributes(const char *szVertexProg, const char *szFragmentProg, ...);
+
+#ifndef OPENGL_ES
+GLuint gltLoadShaderTripletSrc(const char *szVertexSrc,
+                               const char *szGeometrySrc,
+                               const char *szFragmentSrc);
+
 GLuint gltLoadShaderTripletWithAttributes(const char *szVertexShader,
                                           const char *szGeometryShader,
                                           const char *szFragmentShader, ...);
+#endif
 
 GLuint gltLoadShaderPairSrc(const char *szVertexSrc, const char *szFragmentSrc);
 GLuint gltLoadShaderPairSrcWithAttributes(const char *szVertexProg, const char *szFragmentProg, ...);
